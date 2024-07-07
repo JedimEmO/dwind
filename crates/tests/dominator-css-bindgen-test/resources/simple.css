@@ -1,0 +1,12 @@
+.foo {
+    width: 100%;
+}
+
+.multiline_class {
+    color: red;
+
+    font-family: "Abyssinica SIL", serif;
+    background: #121212;
+}
+
+#test,.indeedtest {}

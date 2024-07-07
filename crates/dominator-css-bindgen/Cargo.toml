@@ -1,0 +1,9 @@
+[package]
+name = "dominator-css-bindgen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cssparser.workspace = true
+nom.workspace = true
+thiserror.workspace = true
