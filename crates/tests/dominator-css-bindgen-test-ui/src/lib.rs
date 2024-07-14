@@ -5,10 +5,10 @@ extern crate dominator;
 extern crate dwind;
 
 use dominator::Dom;
-use wasm_bindgen::prelude::wasm_bindgen;
 use dominator_css_bindgen_test::*;
 use dwind::base::*;
-use dwind_macros::{dwclass, dwgenerate};
+use dwind_macros::dwclass;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 macro_rules! padding_generator {
     ($padding:tt) => {
@@ -26,10 +26,7 @@ macro_rules! margin_left_generator {
 async fn main() {
     wasm_log::init(Default::default());
 
-    dominator::append_dom(
-        &dominator::body(),
-        main_view(),
-    );
+    dominator::append_dom(&dominator::body(), main_view());
 }
 
 mod my_custom_theme {
@@ -41,19 +38,20 @@ mod my_custom_theme {
 
 fn main_view() -> Dom {
     use my_custom_theme::*;
+    use dwind::color::*;
+    use dwind::color::BG_COLOR_HOVER_BLUE_500;
 
     html!("div", {
-        .dwclass!("page-body")
-        .dwclass!("bg-slate-900 text-slate-500")
-        .child(html!("div", {
-            .dwclass!("sticky top-0 height-[60px]")
-        }))
-        .children((0..1000).map(|_| {
-            html!("div", {
-               .text("hi there")
-               .dwclass!("nth-2-padding hover-margin")
-            })
-        }))
-   })
+         .dwclass!("page-body")
+         .dwclass!("bg-slate-900 text-slate-500")
+         .child(html!("div", {
+             .dwclass!("sticky top-0 height-[60px]")
+         }))
+         .children((0..1000).map(|_| {
+             html!("div", {
+                .text("hi there")
+                .dwclass!("nth-2-padding hover-margin bg-color-hover-blue-500")
+             })
+         }))
+    })
 }
-

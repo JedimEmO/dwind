@@ -54,8 +54,18 @@ fn css_identifier(input: &str) -> IResult<&str, &str> {
     parser(input)
 }
 
+fn color(input: &str) -> IResult<&str, &str> {
+    let parser = take_while1(is_extended_alphanumeric(vec!['#']));
+
+    parser(input)
+}
+
+fn generator_parameter_value(input: &str) -> IResult<&str, &str> {
+    nom::branch::alt((css_identifier, color))(input)
+}
+
 fn generator_parameters(input: &str) -> IResult<&str, Vec<&str>> {
-    let inner_parser = separated_list1(tag(","), css_identifier);
+    let inner_parser = separated_list1(tag(","), generator_parameter_value);
     let mut parser = delimited(tag("["), inner_parser, tag("]"));
 
     parser(input)

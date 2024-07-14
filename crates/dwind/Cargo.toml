@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+const_format.workspace = true
 dominator.workspace = true
 dominator-css-bindgen = { path = "../dominator-css-bindgen" }
+dwind-macros = { path = "../dwind-macros" }
 once_cell.workspace = true
 
 [build-dependencies]

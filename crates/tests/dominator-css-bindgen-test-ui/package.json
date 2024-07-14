@@ -2,7 +2,7 @@
   "name": "summer-2024",
   "version": "0.1.0",
   "scripts": {
-    "build": "rimraf public/js && && rollup --bundleConfigAsCjs --config",
+    "build": "rimraf public/js && rollup --bundleConfigAsCjs --config",
     "start": "rimraf public/js && rollup --bundleConfigAsCjs --config --watch"
   },
   "devDependencies": {

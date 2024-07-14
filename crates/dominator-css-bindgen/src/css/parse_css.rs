@@ -1,5 +1,5 @@
-use cssparser::{CowRcStr, ParseError, Parser, Token};
 use crate::DCssResult;
+use cssparser::{CowRcStr, ParseError, Parser, Token};
 
 pub enum ParsedSelector<'a> {
     /// Single class selectors are a special case, which we can represent
@@ -24,7 +24,9 @@ pub struct ParsedCssFile<'a> {
     pub blocks: Vec<ParsedCssBlock<'a>>,
 }
 
-pub fn take_next_block<'a, 'b, 'aa>(parser: &'b mut Parser<'a, 'aa>) -> DCssResult<Option<ParsedCssBlock<'a>>> {
+pub fn take_next_block<'a, 'b, 'aa>(
+    parser: &'b mut Parser<'a, 'aa>,
+) -> DCssResult<Option<ParsedCssBlock<'a>>> {
     let selector_groups = take_until_block(parser)?;
 
     if selector_groups.len() == 0 {
@@ -32,17 +34,24 @@ pub fn take_next_block<'a, 'b, 'aa>(parser: &'b mut Parser<'a, 'aa>) -> DCssResu
     }
 
     let selectors = get_selectors(selector_groups)
-        .into_iter().map(parse_selector)
+        .into_iter()
+        .map(parse_selector)
         .collect::<Vec<_>>();
 
     let block = parser.parse_nested_block(take_block_flattened)?;
 
-    Ok(Some(ParsedCssBlock { selector: selectors, data: block }))
+    Ok(Some(ParsedCssBlock {
+        selector: selectors,
+        data: block,
+    }))
 }
 
 fn parse_selector(mut input: Vec<Token>) -> ParsedSelector {
     if let Some(class_name) = try_take_class(&mut input) {
-        ParsedSelector::SingleClass { class_name, pseudo_classes: input }
+        ParsedSelector::SingleClass {
+            class_name,
+            pseudo_classes: input,
+        }
     } else {
         ParsedSelector::Complex(input)
     }
@@ -57,9 +66,12 @@ fn try_take_class<'a>(input: &mut Vec<Token<'a>>) -> Option<CowRcStr<'a>> {
         a + match b {
             Token::Delim('.') => 1,
             Token::Delim('#') => 1,
-            _ => 0
+            _ => 0,
         }
-    }) > 1 { return None }
+    }) > 1
+    {
+        return None;
+    }
 
     let ret = if let [Token::Delim('.'), Token::Ident(ident)] = &input[0..2] {
         Some(ident.clone())
@@ -77,9 +89,11 @@ fn try_take_class<'a>(input: &mut Vec<Token<'a>>) -> Option<CowRcStr<'a>> {
 
 /// converts the token vec into a vec of selectors from the group of selectors
 fn get_selectors(tokens: Vec<Token>) -> Vec<Vec<Token>> {
-    let out = tokens.split(|token| {
-        *token == Token::Delim(',')
-    }).map(|v| v.to_vec()).filter(|v| v.len() > 0).collect();
+    let out = tokens
+        .split(|token| *token == Token::Delim(','))
+        .map(|v| v.to_vec())
+        .filter(|v| v.len() > 0)
+        .collect();
     out
 }
 
@@ -95,12 +109,12 @@ fn take_until_block<'a, 'b, 'aa>(parser: &'b mut Parser<'a, 'aa>) -> DCssResult<
         out.push(token.clone());
 
         match token {
-            Token::ParenthesisBlock =>  {
+            Token::ParenthesisBlock => {
                 let mut paren_block = parser.parse_nested_block(take_block_flattened)?;
                 out.append(&mut paren_block);
                 out.push(Token::CloseParenthesis);
             }
-            Token::Function(_) =>  {
+            Token::Function(_) => {
                 let mut paren_block = parser.parse_nested_block(take_block_flattened)?;
                 out.append(&mut paren_block);
                 out.push(Token::CloseParenthesis);
@@ -120,7 +134,9 @@ fn take<'a, 'b, 'aa>(parser: &'b mut Parser<'a, 'aa>) -> DCssResult<Option<Token
     Ok(Some(parser.next()?.clone()))
 }
 
-pub fn take_block_flattened<'a, 'aa>(parser: &mut Parser<'a, 'aa>) -> Result<Vec<Token<'a>>, ParseError<'a, ()>> {
+pub fn take_block_flattened<'a, 'aa>(
+    parser: &mut Parser<'a, 'aa>,
+) -> Result<Vec<Token<'a>>, ParseError<'a, ()>> {
     let mut out = vec![];
 
     while !parser.is_exhausted() {
@@ -128,11 +144,23 @@ pub fn take_block_flattened<'a, 'aa>(parser: &mut Parser<'a, 'aa>) -> Result<Vec
         out.push(next.clone());
 
         if let Some(mut block) = match next {
-            Token::CurlyBracketBlock => Some((parser.parse_nested_block(take_block_flattened)?, Token::CloseCurlyBracket)),
-            Token::ParenthesisBlock => Some((parser.parse_nested_block(take_block_flattened)?, Token::CloseParenthesis)),
-            Token::Function(name) => Some((parser.parse_nested_block(take_block_flattened)?, Token::CloseParenthesis)),
-            Token::SquareBracketBlock => Some((parser.parse_nested_block(take_block_flattened)?, Token::CloseSquareBracket)),
-            _ => None
+            Token::CurlyBracketBlock => Some((
+                parser.parse_nested_block(take_block_flattened)?,
+                Token::CloseCurlyBracket,
+            )),
+            Token::ParenthesisBlock => Some((
+                parser.parse_nested_block(take_block_flattened)?,
+                Token::CloseParenthesis,
+            )),
+            Token::Function(_name) => Some((
+                parser.parse_nested_block(take_block_flattened)?,
+                Token::CloseParenthesis,
+            )),
+            Token::SquareBracketBlock => Some((
+                parser.parse_nested_block(take_block_flattened)?,
+                Token::CloseSquareBracket,
+            )),
+            _ => None,
         } {
             out.append(&mut block.0);
             out.push(block.1);
