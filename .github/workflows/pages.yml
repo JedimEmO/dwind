@@ -55,7 +55,7 @@ jobs:
           node-version: 20
       - name: Install and Build 🔧
         working-directory: crates/tests/dominator-css-bindgen-test-ui
-        run: npm ci && npm run build
+        run: npm ci && npm run build:release
       - name: Docs
         run: cargo doc --no-deps
       - name: Populate docs
