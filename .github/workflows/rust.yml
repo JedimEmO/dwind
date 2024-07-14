@@ -2,7 +2,7 @@ name: Code checking and unit testing
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, "initial-code"]
 
 env:
   CARGO_TERM_COLOR: always
