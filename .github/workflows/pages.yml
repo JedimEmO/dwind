@@ -1,24 +1,44 @@
-name: Build and Deploy
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+
 on:
+  # Runs on pushes targeting the default branch
   push:
-    tags:
-      - pages.*
+    branches: [ "main", "initial-code" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
-    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v2
-
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
       - name: wasm-bindgen-action
         # You may pin to the exact commit or the version.
         # uses: jetli/wasm-bindgen-action@370ddd977537b33f15fd1241476a90a1254dfdae
         uses: jetli/wasm-bindgen-action@v0.1.0
         with:
           # Optional version of wasm-bindgen to install (eg. "0.2.68", "latest")
-          version: 0.2.79
+          version: 0.2.92
       - name: rust-toolchain
         # You may pin to the exact commit or the version.
         # uses: actions-rs/toolchain@b2417cde72dcf67f306c0ae8e0828a81bf0b189f
@@ -32,7 +52,7 @@ jobs:
         # uses: jetli/trunk-action@a221e99602a4172f93fc08b44071e3f112e7df13
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
       - name: Install and Build 🔧
         working-directory: crates/tests/dominator-css-bindgen-test-ui
         run: npm ci && npm run build
@@ -40,8 +60,11 @@ jobs:
         run: cargo doc --no-deps
       - name: Populate docs
         run: mkdir pages && cp -r target/doc pages && cp -r crates/tests/dominator-css-bindgen-test-ui/public pages/examples
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.2.3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: pages # The folder the action should deploy.
+          # Upload entire repository
+          path: 'pages'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
