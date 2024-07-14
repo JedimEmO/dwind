@@ -1,6 +1,5 @@
-use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream};
-use syn::{braced, Ident, LitStr, parenthesized, Token};
+use syn::{Ident, LitStr, parenthesized, Token};
 use syn::punctuated::Punctuated;
 
 pub struct DwindInput {

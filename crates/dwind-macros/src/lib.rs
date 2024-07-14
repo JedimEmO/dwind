@@ -6,7 +6,6 @@ use crate::codegen::{render_classes, render_generate_dwind_class};
 use crate::grammar::{parse_class_string, parse_selector};
 use macro_inputs::{DwGenerateInput, DwGenerateMapInput, DwindInput};
 use proc_macro::TokenStream;
-use quote::__private::ext::RepToTokensExt;
 use quote::quote;
 
 /// Use dwind-macros macros on your DOMINATOR component

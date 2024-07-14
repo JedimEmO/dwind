@@ -18,6 +18,8 @@ export default {
         rust({
             serverPath: "js/",
             debug: true,
+            cargoArgs: ["--config", "profile.dev.debug=true"],
+            wasmBindgenArgs: ["--debug", "--keep-debug"]
         }),
         is_watch && serve({
             contentBase: "public",

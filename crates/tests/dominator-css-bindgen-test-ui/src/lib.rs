@@ -1,26 +1,11 @@
 #[macro_use]
 extern crate dominator;
 
-#[macro_use]
-extern crate dwind;
-
 use dominator::Dom;
 use dominator_css_bindgen_test::*;
 use dwind::base::*;
 use dwind_macros::dwclass;
 use wasm_bindgen::prelude::wasm_bindgen;
-
-macro_rules! padding_generator {
-    ($padding:tt) => {
-        const_format::formatcp!("padding: {};", $padding)
-    };
-}
-
-macro_rules! margin_left_generator {
-    ($margin_left:tt) => {
-        const_format::formatcp!("margin-left: {};", $margin_left)
-    };
-}
 
 #[wasm_bindgen(start)]
 async fn main() {
@@ -31,6 +16,8 @@ async fn main() {
 
 mod my_custom_theme {
     use dwind_macros::dwgenerate;
+    use crate::margin_left_generator;
+    use crate::padding_generator;
 
     dwgenerate!("nth-2-padding", "nth-child(2):hover:padding-[20px]");
     dwgenerate!("hover-margin", "hover:margin-left-[20px]");
@@ -39,19 +26,42 @@ mod my_custom_theme {
 fn main_view() -> Dom {
     use my_custom_theme::*;
     use dwind::color::*;
-    use dwind::color::BG_COLOR_HOVER_BLUE_500;
+    use dwind::interactivity::*;
 
     html!("div", {
          .dwclass!("page-body")
-         .dwclass!("bg-slate-900 text-slate-500")
+         .dwclass!("bg-bermuda-gray-950 text-bermuda-gray-50")
          .child(html!("div", {
              .dwclass!("sticky top-0 height-[60px]")
          }))
          .children((0..1000).map(|_| {
              html!("div", {
                 .text("hi there")
-                .dwclass!("nth-2-padding hover-margin bg-color-hover-blue-500")
+                .dwclass!("cursor-pointer bg-bermuda-gray-300")
              })
          }))
     })
+}
+
+mod generators {
+    #[macro_export]
+    macro_rules! padding_generator {
+        ($padding:tt) => {
+            const_format::formatcp!("padding: {};", $padding)
+        };
+    }
+
+    #[macro_export]
+    macro_rules! margin_left_generator {
+        ($margin_left:tt) => {
+            const_format::formatcp!("margin-left: {};", $margin_left)
+        };
+    }
+
+    #[macro_export]
+    macro_rules! height_generator {
+        ($height:tt) => {
+             const_format::formatcp!("height: {};", $height)
+        };
+    }
 }
