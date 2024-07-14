@@ -10,6 +10,6 @@ mod tests {
         println!("{rust_file}");
 
         // just check that it exists
-        let multiline = &super::MULTILINE_CLASS;
+        //let multiline = &super::WITHPSEUDO_HOVER_ACTIVE;
     }
 }

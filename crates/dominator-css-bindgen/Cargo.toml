@@ -6,4 +6,6 @@ edition = "2021"
 [dependencies]
 cssparser.workspace = true
 nom.workspace = true
+proc-macro2.workspace = true
+quote.workspace = true
 thiserror.workspace = true

@@ -1,9 +1,9 @@
-use std::error::Error;
 use std::io;
 use cssparser::{BasicParseError, ParseError};
 use thiserror::Error;
 
 pub mod css;
+pub(crate) mod codegen;
 
 #[derive(Error, Debug)]
 pub enum DCssError {

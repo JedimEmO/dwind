@@ -1,0 +1,21 @@
+[package]
+name = "dwind-macros"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+dominator.workspace = true
+nom.workspace = true
+proc-macro2.workspace = true
+quote.workspace = true
+syn = { workspace = true, features = ["parsing", "proc-macro"] }
+
+
+[dev-dependencies]
+dominator.workspace = true
+dominator-css-bindgen-test = { path = "../tests/dominator-css-bindgen-test"}
+once_cell.workspace = true
+wasm-bindgen-test.workspace = true

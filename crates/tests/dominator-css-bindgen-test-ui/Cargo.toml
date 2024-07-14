@@ -1,0 +1,27 @@
+[package]
+name = "dominator-css-bindgen-ui"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+const_format = "0.2.32"
+dominator-css-bindgen-test = { path = "../dominator-css-bindgen-test" }
+dwind-macros = { path = "../../dwind-macros" }
+dwind = { path = "../../dwind" }
+dominator.workspace = true
+futures.workspace = true
+futures-signals.workspace = true
+once_cell.workspace = true
+wasm-bindgen.workspace = true
+wasm-bindgen-futures.workspace = true
+wasm-log.workspace = true
+web-sys.workspace = true
+log = "0.4.22"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.38"
