@@ -7,6 +7,7 @@ use dwind::base::*;
 use dwind_macros::dwclass;
 use wasm_bindgen::prelude::wasm_bindgen;
 
+#[cfg(not(test))]
 #[wasm_bindgen(start)]
 async fn main() {
     wasm_log::init(Default::default());
