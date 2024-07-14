@@ -1,7 +1,9 @@
 use dominator::html;
-
+use wasm_bindgen_test::wasm_bindgen_test_configure;
 use dominator_css_bindgen_test::*;
 use dwind_macros::dwclass;
+
+wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test::wasm_bindgen_test]
 fn basic_dwind_macro_test() {
