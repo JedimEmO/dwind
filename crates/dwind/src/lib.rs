@@ -7,7 +7,7 @@ pub mod interactivity {
 }
 
 pub mod color {
-    use dwind_macros::dwgenerate_map;
+    use dwind_macros::{dwgenerate, dwgenerate_map};
 
     macro_rules! bg_color_generator {
        ($color:tt) => {
@@ -22,6 +22,9 @@ pub mod color {
     }
 
     // Apple
+
+    dwgenerate!("apple-10", "bg-color-[#f2fcf1]");
+
     dwgenerate_map!("bg", "bg-color-", [
         ("apple-50", "#f2fcf1"),
         ("apple-100", "#dff9df"),

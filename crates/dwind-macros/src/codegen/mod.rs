@@ -1,5 +1,6 @@
 pub mod string_rendering;
 
+use dominator::traits::AsStr;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use crate::codegen::string_rendering::{class_name_to_raw_identifier, class_name_to_struct_identifier, sanitize_class_prefix};
@@ -13,9 +14,22 @@ pub fn render_classes(classes: Vec<DwindClassSelector>) -> Vec<proc_macro2::Toke
 
 pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector) -> TokenStream {
     let ident = Ident::new(class_name_to_struct_identifier(&class_name).as_str(), Span::call_site());
+    let raw_ident = Ident::new(class_name_to_raw_identifier(&class_name).as_str(), Span::call_site());
+    let raw_inner_ident = Ident::new(class_name_to_raw_identifier(&class.class_name).as_str(), Span::call_site());
+
+    let raw = if class.is_generator() {
+        let generator_call = render_generator_call(&class);
+
+        quote! { #generator_call }
+    } else {
+        quote! { #raw_inner_ident }
+    };
+
     let rendered_class = render_dwind_class(class);
 
     quote! {
+        #[doc(hidden)]
+        pub static #raw_ident: &str = #raw;
         pub static #ident: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {
             #rendered_class
         });
@@ -54,29 +68,37 @@ pub fn render_generator(class: DwindClassSelector) -> proc_macro2::TokenStream {
 
     let generator_name = format!("{}generator", class.class_name).to_lowercase();
     let generator_classname = format!("{}{}", class.class_name, class.generator_params.join(""));
-    let generator_params = class.generator_params;
+    let generator_call = render_generator_call(&class);
 
     if class.pseudo_classes.is_empty() {
-        let class_ident = Ident::new(&generator_name, Span::call_site());
         let class_prefix = sanitize_class_prefix(&generator_name);
 
         quote! { dominator::class! {
             # ! [prefix=#class_prefix]
-            .raw(#class_ident! ( #(#generator_params),*))
+            .raw(#generator_call)
         }}
     } else {
         let pseudo_selector = format!(":{}", class.pseudo_classes.join(":"));
-        let class_ident = Ident::new(&generator_name, Span::call_site());
         let class_prefix = sanitize_class_prefix(&generator_classname);
 
         quote! {
             dominator::class! {
                 # ! [prefix=#class_prefix]
                 .dominator::pseudo!(#pseudo_selector, {
-                    .raw( #class_ident!( #(#generator_params),*))
+                    .raw( #generator_call )
                 })
             }
         }
     }
 }
 
+fn render_generator_call(class: &DwindClassSelector) -> TokenStream {
+    let generator_name = format!("{}generator", class.class_name).to_lowercase();
+    let generator_params = class.generator_params.clone();
+
+    let class_ident = Ident::new(&generator_name, Span::call_site());
+
+    quote! {
+        #class_ident!( #(#generator_params),*)
+    }
+}

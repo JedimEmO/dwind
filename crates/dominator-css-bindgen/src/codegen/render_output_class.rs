@@ -12,10 +12,20 @@ pub fn render_output_class(output_class: OutputClass) -> TokenStream {
     let body = render_token_body(output_class.main_class_body);
     let body = body.to_string();
 
+    let doc_comment = format!(r#"
+    Generated from css file. Class content:
+    `{}`
+
+    # Example usage
+
+    `html!("div", {{ .dwclass!("{}") }});`
+    "#, body.replace(";", ";\n"), name.to_lowercase());
     let pseudo_classes = output_class.pseudo_classes.into_iter().map(render_pseudo_class);
 
     quote! {
+        #[doc(hidden)]
         pub static #ident_raw: &str = #body;
+        #[doc = #doc_comment ]
         pub static #ident: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {
             dominator::class! {
                 # ! [prefix=#name_lower]

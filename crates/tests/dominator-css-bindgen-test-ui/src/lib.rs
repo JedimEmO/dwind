@@ -16,12 +16,16 @@ async fn main() {
 }
 
 mod my_custom_theme {
+    use dwind::interactivity::*;
+    use dwind::color::*;
     use dwind_macros::dwgenerate;
     use crate::margin_left_generator;
     use crate::padding_generator;
 
     dwgenerate!("nth-2-padding", "nth-child(2):hover:padding-[20px]");
     dwgenerate!("hover-margin", "hover:margin-left-[20px]");
+    dwgenerate!("hover-bg-apple", "hover:bg-apple-50");
+    dwgenerate!("hover-text-apple", "hover:text-apple-950");
 }
 
 fn main_view() -> Dom {
@@ -38,7 +42,7 @@ fn main_view() -> Dom {
          .children((0..1000).map(|_| {
              html!("div", {
                 .text("hi there")
-                .dwclass!("cursor-pointer bg-bermuda-gray-300")
+                .dwclass!("cursor-pointer hover-bg-apple hover-text-apple bg-bermuda-gray-800")
              })
          }))
     })
