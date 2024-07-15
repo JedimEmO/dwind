@@ -5,21 +5,11 @@ fn main() {
     let files = vec![
         "resources/css/base.css",
         "resources/css/interactivity.css",
+        "resources/css/flexbox_and_grid.css",
+        "resources/css/sizing.css",
+        "resources/css/spacing.css",
     ];
 
-
-    /*
-    let out = dominator_css_bindgen::css::generate_rust_bindings_from_file("resources/css/base.css")
-        .expect("failed to generate rust bindings");
-
-    let out_dir = env::var_os("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join("base.rs");
-
-    fs::write(
-        &dest_path,
-        out,
-    ).unwrap();
-*/
     for file in files {
         println!("cargo:rerun-if-changed={}", file);
 

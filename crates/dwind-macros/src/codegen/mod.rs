@@ -63,7 +63,7 @@ pub fn render_dwind_class(class: DwindClassSelector) -> TokenStream {
     }
 }
 
-pub fn render_generator(class: DwindClassSelector) -> proc_macro2::TokenStream {
+pub fn render_generator(class: DwindClassSelector) -> TokenStream {
     assert!(class.is_generator(), "class {class:?} must be a generator");
 
     let generator_name = format!("{}generator", class.class_name).to_lowercase();
@@ -96,9 +96,9 @@ fn render_generator_call(class: &DwindClassSelector) -> TokenStream {
     let generator_name = format!("{}generator", class.class_name).to_lowercase();
     let generator_params = class.generator_params.clone();
 
-    let class_ident = Ident::new(&generator_name, Span::call_site());
+    let generator_ident = Ident::new(&generator_name, Span::call_site());
 
     quote! {
-        #class_ident!( #(#generator_params),*)
+        #generator_ident!( #(#generator_params),*)
     }
 }

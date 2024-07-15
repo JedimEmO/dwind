@@ -45,7 +45,9 @@ pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
 }
 
 fn is_extended_alphanumeric(chars: Vec<char>) -> impl Fn(char) -> bool {
-    move |c| is_alphanumeric(c as u8) || chars.contains(&c)
+    move |c| {
+        is_alphanumeric(c as u8) || chars.contains(&c)
+    }
 }
 
 fn css_identifier(input: &str) -> IResult<&str, &str> {
@@ -55,13 +57,13 @@ fn css_identifier(input: &str) -> IResult<&str, &str> {
 }
 
 fn color(input: &str) -> IResult<&str, &str> {
-    let parser = take_while1(is_extended_alphanumeric(vec!['#']));
+    let parser = take_while1(is_extended_alphanumeric(vec!['#', '%', '_', '-']));
 
     parser(input)
 }
 
 fn generator_parameter_value(input: &str) -> IResult<&str, &str> {
-    nom::branch::alt((css_identifier, color))(input)
+    color(input)
 }
 
 fn generator_parameters(input: &str) -> IResult<&str, Vec<&str>> {
@@ -98,7 +100,7 @@ mod test {
     #[test]
     fn verify_generator_parser() {
         assert_eq!(generator_parameters("[foobar-test]").unwrap().1, vec!["foobar-test".to_string()]);
-        assert_eq!(generator_parameters("[a,5px,c]").unwrap().1, vec!["a", "5px", "c"]);
+        assert_eq!(generator_parameters("[a%,5px,42]").unwrap().1, vec!["a%", "5px", "42"]);
     }
 
     #[test]

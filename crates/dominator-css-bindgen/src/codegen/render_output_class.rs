@@ -12,14 +12,15 @@ pub fn render_output_class(output_class: OutputClass) -> TokenStream {
     let body = render_token_body(output_class.main_class_body);
     let body = body.to_string();
 
-    let doc_comment = format!(r#"
-    Generated from css file. Class content:
-    `{}`
+    let example = format!("html!(\"div\", {{ .dwclass!(\"{}\") }});", name.to_lowercase());
 
-    # Example usage
-
-    `html!("div", {{ .dwclass!("{}") }});`
-    "#, body.replace(";", ";\n"), name.to_lowercase());
+    let doc_comment = format!(r#"Generated from css file. Class content:
+`{}`
+# Example
+```rust,ignore
+{}
+```
+"#, body.replace(";", ";\n"), example);
     let pseudo_classes = output_class.pseudo_classes.into_iter().map(render_pseudo_class);
 
     quote! {
