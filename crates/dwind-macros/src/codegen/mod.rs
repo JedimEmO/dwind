@@ -1,21 +1,32 @@
 pub mod string_rendering;
 
-use dominator::traits::AsStr;
+use crate::codegen::string_rendering::{
+    class_name_to_raw_identifier, class_name_to_struct_identifier, sanitize_class_prefix,
+};
+use crate::grammar::DwindClassSelector;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use crate::codegen::string_rendering::{class_name_to_raw_identifier, class_name_to_struct_identifier, sanitize_class_prefix};
-use crate::grammar::DwindClassSelector;
 
-pub fn render_classes(classes: Vec<DwindClassSelector>) -> Vec<proc_macro2::TokenStream> {
-    classes.into_iter().map(|class| {
-        render_dwind_class(class)
-    }).collect::<Vec<proc_macro2::TokenStream>>()
+pub fn render_classes(classes: Vec<DwindClassSelector>) -> Vec<TokenStream> {
+    classes
+        .into_iter()
+        .map(|class| render_dwind_class(class))
+        .collect::<Vec<TokenStream>>()
 }
 
 pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector) -> TokenStream {
-    let ident = Ident::new(class_name_to_struct_identifier(&class_name).as_str(), Span::call_site());
-    let raw_ident = Ident::new(class_name_to_raw_identifier(&class_name).as_str(), Span::call_site());
-    let raw_inner_ident = Ident::new(class_name_to_raw_identifier(&class.class_name).as_str(), Span::call_site());
+    let ident = Ident::new(
+        class_name_to_struct_identifier(&class_name).as_str(),
+        Span::call_site(),
+    );
+    let raw_ident = Ident::new(
+        class_name_to_raw_identifier(&class_name).as_str(),
+        Span::call_site(),
+    );
+    let raw_inner_ident = Ident::new(
+        class_name_to_raw_identifier(&class.class_name).as_str(),
+        Span::call_site(),
+    );
 
     let raw = if class.is_generator() {
         let generator_call = render_generator_call(&class);
@@ -25,11 +36,14 @@ pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector
         quote! { #raw_inner_ident }
     };
 
+    let doc_str = format!("generator call: `{}`", raw.to_string());
+
     let rendered_class = render_dwind_class(class);
 
     quote! {
         #[doc(hidden)]
         pub static #raw_ident: &str = #raw;
+        #[doc = #doc_str]
         pub static #ident: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {
             #rendered_class
         });
@@ -47,7 +61,10 @@ pub fn render_dwind_class(class: DwindClassSelector) -> TokenStream {
         quote! { &* #class_ident }
     } else {
         let pseudo_selector = format!(":{}", class.pseudo_classes.join(":"));
-        let class_raw_ident = Ident::new(&class_name_to_raw_identifier(&class.class_name), Span::call_site());
+        let class_raw_ident = Ident::new(
+            &class_name_to_raw_identifier(&class.class_name),
+            Span::call_site(),
+        );
         let class_name = class.class_name;
         let class_prefix = sanitize_class_prefix(&class_name);
 

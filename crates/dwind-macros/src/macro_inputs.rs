@@ -1,6 +1,6 @@
 use syn::parse::{Parse, ParseStream};
-use syn::{Ident, LitStr, parenthesized, Token};
 use syn::punctuated::Punctuated;
+use syn::{parenthesized, Ident, LitStr, Token};
 
 pub struct DwindInput {
     pub self_ident: Ident,
@@ -56,7 +56,6 @@ impl Parse for StrLitPair {
         Ok(Self { first, second })
     }
 }
-
 
 #[derive(Debug)]
 pub struct ArrayOfTuples {

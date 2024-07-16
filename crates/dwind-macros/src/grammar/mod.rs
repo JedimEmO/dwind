@@ -1,8 +1,8 @@
 use nom::bytes::complete::{tag, take_while1};
-use nom::IResult;
-use nom::character::{is_alphanumeric};
+use nom::character::is_alphanumeric;
 use nom::multi::{many0, separated_list1};
 use nom::sequence::{delimited, terminated};
+use nom::IResult;
 
 #[derive(Eq, PartialEq, Debug, Default)]
 pub struct DwindClassSelector {
@@ -20,9 +20,9 @@ impl DwindClassSelector {
 pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
     let classes_parts = input.split(" ");
 
-    let classes: Result<_, _> = classes_parts.map(|class_part| {
-        parse_selector(class_part).map(|v| v.1)
-    }).collect();
+    let classes: Result<_, _> = classes_parts
+        .map(|class_part| parse_selector(class_part).map(|v| v.1))
+        .collect();
 
     Ok(classes.unwrap())
 }
@@ -32,22 +32,29 @@ pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
     let (input, identifier) = css_identifier(input)?;
 
     let generator_params = if let Ok((_input, generator_params)) = generator_parameters(input) {
-        generator_params.into_iter().map(|v| v.to_string()).collect()
+        generator_params
+            .into_iter()
+            .map(|v| v.to_string())
+            .collect()
     } else {
         vec![]
     };
 
-    Ok((input, DwindClassSelector {
-        class_name: identifier.to_string().replace("-", "_"),
-        pseudo_classes: pseudo_classes.into_iter().map(|v| v.to_string()).collect(),
-        generator_params: generator_params.into_iter().map(|v| v.to_string()).collect(),
-    }))
+    Ok((
+        input,
+        DwindClassSelector {
+            class_name: identifier.to_string().replace("-", "_"),
+            pseudo_classes: pseudo_classes.into_iter().map(|v| v.to_string()).collect(),
+            generator_params: generator_params
+                .into_iter()
+                .map(|v| v.to_string())
+                .collect(),
+        },
+    ))
 }
 
 fn is_extended_alphanumeric(chars: Vec<char>) -> impl Fn(char) -> bool {
-    move |c| {
-        is_alphanumeric(c as u8) || chars.contains(&c)
-    }
+    move |c| is_alphanumeric(c as u8) || chars.contains(&c)
 }
 
 fn css_identifier(input: &str) -> IResult<&str, &str> {
@@ -82,31 +89,41 @@ fn pseudo_selector(input: &str) -> IResult<&str, &str> {
 
 #[cfg(test)]
 mod test {
-    use crate::grammar::{css_identifier, DwindClassSelector, generator_parameters, parse_class_string, pseudo_selector};
+    use crate::grammar::{
+        css_identifier, generator_parameters, parse_class_string, pseudo_selector,
+        DwindClassSelector,
+    };
 
     #[test]
     fn verify_parser() {
         assert_eq!(
             parse_class_string("padding-[5px]").unwrap(),
-            vec![
-                DwindClassSelector {
-                    class_name: "padding_".to_string(),
-                    pseudo_classes: vec![],
-                    generator_params: vec!["5px".to_string()],
-                }
-            ]
+            vec![DwindClassSelector {
+                class_name: "padding_".to_string(),
+                pseudo_classes: vec![],
+                generator_params: vec!["5px".to_string()],
+            }]
         );
     }
     #[test]
     fn verify_generator_parser() {
-        assert_eq!(generator_parameters("[foobar-test]").unwrap().1, vec!["foobar-test".to_string()]);
-        assert_eq!(generator_parameters("[a%,5px,42]").unwrap().1, vec!["a%", "5px", "42"]);
+        assert_eq!(
+            generator_parameters("[foobar-test]").unwrap().1,
+            vec!["foobar-test".to_string()]
+        );
+        assert_eq!(
+            generator_parameters("[a%,5px,42]").unwrap().1,
+            vec!["a%", "5px", "42"]
+        );
     }
 
     #[test]
     fn verify_class_list_parser() {
         let classes = parse_class_string("hover:foo bar nth-child(1):baz").unwrap();
-        let class_names = classes.into_iter().map(|v| v.class_name).collect::<Vec<_>>();
+        let class_names = classes
+            .into_iter()
+            .map(|v| v.class_name)
+            .collect::<Vec<_>>();
 
         assert_eq!(class_names, ["foo", "bar", "baz"])
     }

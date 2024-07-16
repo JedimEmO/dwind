@@ -1,13 +1,15 @@
-use std::{env, fs};
 use std::path::Path;
+use std::{env, fs};
 
 fn main() {
     let files = vec![
         "resources/css/base.css",
+        "resources/css/borders.css",
         "resources/css/interactivity.css",
         "resources/css/flexbox_and_grid.css",
         "resources/css/sizing.css",
         "resources/css/spacing.css",
+        "resources/css/typography.css",
     ];
 
     for file in files {
@@ -21,10 +23,7 @@ fn main() {
 
         let dest_path = Path::new(&out_dir).join(out_file);
 
-        fs::write(
-            &dest_path,
-            out,
-        ).unwrap();
+        fs::write(&dest_path, out).unwrap();
     }
 
     println!("cargo::rerun-if-changed=build.rs");

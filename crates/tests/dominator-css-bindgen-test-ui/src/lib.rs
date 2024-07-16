@@ -4,14 +4,16 @@ extern crate dominator;
 use dominator::Dom;
 use dominator_css_bindgen_test::*;
 use dwind::base::*;
-use dwind_macros::dwclass;
-use wasm_bindgen::prelude::wasm_bindgen;
-use my_custom_theme::*;
-use dwind::color::*;
+use dwind::borders::*;
+use dwind::colors::*;
 use dwind::flexbox_and_grid::*;
+use dwind::interactivity::*;
 use dwind::sizing::*;
 use dwind::spacing::*;
-use dwind::interactivity::*;
+use dwind::typography::*;
+use dwind_macros::dwclass;
+use my_custom_theme::*;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
@@ -22,11 +24,11 @@ async fn main() {
 }
 
 mod my_custom_theme {
-    use dwind::interactivity::*;
-    use dwind::color::*;
-    use dwind_macros::dwgenerate;
     use crate::margin_left_generator;
     use crate::padding_generator;
+    use dwind::colors::*;
+    use dwind::interactivity::*;
+    use dwind_macros::dwgenerate;
 
     dwgenerate!("nth-2-padding", "nth-child(2):hover:padding-[20px]");
     dwgenerate!("hover-margin", "hover:margin-left-[20px]");
@@ -36,31 +38,43 @@ mod my_custom_theme {
 
 fn main_view() -> Dom {
     html!("div", {
-         .dwclass!("page-body")
-         .dwclass!("bg-manatee-950 text-manatee-50")
-         .child(header())
-         .children((0..1000).map(|_| {
-             html!("div", {
-                .text("hi there")
-                .dwclass!("cursor-pointer hover-bg-apple hover-text-apple bg-bermuda-gray-800")
-             })
-         }))
+        .dwclass!("page-body font-sans")
+        .dwclass!("bg-manatee-950 text-manatee-50")
+        .child(header())
+        .child(html!("div", {
+            .dwclass!("m-x-auto max-w-lg flex")
+            .style("margin-top", "4px")
+            .child(html!("div", {
+                .dwclass!("w-32 m-l-0 border-r border-color-manatee-800 border-solid")
+                .text("hi")
+            }))
+            .child(html!("div", {
+                .dwclass!("m-l-4 m-r-0 w-full")
+                .children((0..20).map(|_| {
+                    html!("div", {
+                       .text("hi there")
+                       .dwclass!("cursor-pointer hover-bg-apple hover-text-apple")
+                    })
+                }))
+            }))
+        }))
     })
 }
 
 fn header() -> Dom {
     html!("div", {
         .child(html!("div", {
-            .dwclass!("sticky m-x-8 w-p-95 flex justify-stretch align-items-center top-0 height-[60px]")
+            .dwclass!("border-b border-color-manatee-800 border-solid")
+            .dwclass!("sticky m-x-auto max-w-lg flex justify-stretch align-items-center top-0 height-[60px]")
             .child(html!("div", {
                 .child(html!("h3", { .text("dwind") }))
             }))
             .child(html!("div", {
                 .dwclass!("m-l-auto m-r-0 flex justify-stretch")
                 .children([
-                    html!("h3", { .text("examples") }),
-                    html!("h3", { .text("docs") }),
-                    html!("h3", { .text("github") }),
+                    html!("h3", { .text("examples").dwclass!("m-x-2") }),
+                    html!("h3", { .text("docs").dwclass!("m-x-2") }),
+                    html!("h3", { .text("github").dwclass!("m-x-2") }),
                 ])
             }))
          }))
@@ -84,7 +98,7 @@ mod generators {
     #[macro_export]
     macro_rules! height_generator {
         ($height:tt) => {
-             const_format::formatcp!("height: {};", $height)
+            const_format::formatcp!("height: {};", $height)
         };
     }
 }

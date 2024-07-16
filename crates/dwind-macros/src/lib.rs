@@ -122,22 +122,34 @@ pub fn dwgenerate(input: TokenStream) -> TokenStream {
 pub fn dwgenerate_map(input: TokenStream) -> TokenStream {
     let input: DwGenerateMapInput = syn::parse(input).unwrap();
 
-    let DwGenerateMapInput { base_output_ident, dwind_class_lit, args } = input;
+    let DwGenerateMapInput {
+        base_output_ident,
+        dwind_class_lit,
+        args,
+    } = input;
 
     let output = args.tuples.into_iter().map(|input_tuple| {
-        let ident_name = class_name_to_struct_identifier(&format!("{}-{}", base_output_ident.value(), input_tuple.first.value()));
+        let ident_name = class_name_to_struct_identifier(&format!(
+            "{}-{}",
+            base_output_ident.value(),
+            input_tuple.first.value()
+        ));
 
-        let class_literal = format!("{}[{}]", dwind_class_lit.value(), input_tuple.second.value());
+        let class_literal = format!(
+            "{}[{}]",
+            dwind_class_lit.value(),
+            input_tuple.second.value()
+        );
 
         let class = parse_selector(class_literal.as_str()).unwrap().1;
 
         render_generate_dwind_class(ident_name, class)
     });
 
-
     let out = quote! {
         #(#output)*
-    }.into();
+    }
+    .into();
 
     out
 }

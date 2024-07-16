@@ -1,9 +1,9 @@
-use std::io;
 use cssparser::{BasicParseError, ParseError};
+use std::io;
 use thiserror::Error;
 
-pub mod css;
 pub(crate) mod codegen;
+pub mod css;
 
 #[derive(Error, Debug)]
 pub enum DCssError {
@@ -18,7 +18,6 @@ impl<'a> From<BasicParseError<'a>> for DCssError {
         Self::CssParse(format!("{value:?}"))
     }
 }
-
 
 impl<'a, E> From<ParseError<'a, E>> for DCssError {
     fn from(value: ParseError<'a, E>) -> Self {

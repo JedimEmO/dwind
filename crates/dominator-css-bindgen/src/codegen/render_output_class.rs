@@ -1,27 +1,41 @@
-use cssparser::{ToCss, Token};
-use quote::__private::TokenStream;
-use quote::{quote};
-use proc_macro2::{Ident, Span};
 use crate::codegen::output_model::{OutputClass, OutputPseudoClass};
+use cssparser::{ToCss, Token};
+use proc_macro2::{Ident, Span};
+use quote::__private::TokenStream;
+use quote::quote;
 
 pub fn render_output_class(output_class: OutputClass) -> TokenStream {
-    let name = output_class.identity.to_string().replace("-", "_").to_uppercase();
+    let name = output_class
+        .identity
+        .to_string()
+        .replace("-", "_")
+        .to_uppercase();
     let name_lower = name.to_lowercase();
     let ident = Ident::new(name.as_str(), Span::call_site());
     let ident_raw = Ident::new(format!("{name}_RAW").as_str(), Span::call_site());
     let body = render_token_body(output_class.main_class_body);
     let body = body.to_string();
 
-    let example = format!("html!(\"div\", {{ .dwclass!(\"{}\") }});", name.to_lowercase());
+    let example = format!(
+        "html!(\"div\", {{ .dwclass!(\"{}\") }});",
+        name.to_lowercase()
+    );
 
-    let doc_comment = format!(r#"Generated from css file. Class content:
+    let doc_comment = format!(
+        r#"Generated from css file. Class content:
 `{}`
 # Example
 ```rust,ignore
 {}
 ```
-"#, body.replace(";", ";\n"), example);
-    let pseudo_classes = output_class.pseudo_classes.into_iter().map(render_pseudo_class);
+"#,
+        body.replace(";", ";\n"),
+        example
+    );
+    let pseudo_classes = output_class
+        .pseudo_classes
+        .into_iter()
+        .map(render_pseudo_class);
 
     quote! {
         #[doc(hidden)]
@@ -38,7 +52,12 @@ pub fn render_output_class(output_class: OutputClass) -> TokenStream {
 }
 
 fn render_pseudo_class(pseudo_class: OutputPseudoClass) -> TokenStream {
-    let pseudo_selector = pseudo_class.selector.into_iter().map(|v| v.to_css_string()).collect::<Vec<_>>().join("");
+    let pseudo_selector = pseudo_class
+        .selector
+        .into_iter()
+        .map(|v| v.to_css_string())
+        .collect::<Vec<_>>()
+        .join("");
     let body = render_token_body(pseudo_class.body);
     let body = body.to_string();
 
@@ -50,5 +69,9 @@ fn render_pseudo_class(pseudo_class: OutputPseudoClass) -> TokenStream {
 }
 
 fn render_token_body(tokens: Vec<Token>) -> String {
-    tokens.into_iter().map(|t| t.to_css_string()).collect::<Vec<_>>().join("")
+    tokens
+        .into_iter()
+        .map(|t| t.to_css_string())
+        .collect::<Vec<_>>()
+        .join("")
 }
