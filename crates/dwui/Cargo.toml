@@ -1,0 +1,12 @@
+[package]
+name = "dwui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dwind = { path = "../dwind" }
+dwind-macros = { path = "../dwind-macros" }
+dominator.workspace = true
+futures-signals.workspace = true
+futures-signals-component-macro.workspace = true
+web-sys.workspace = true

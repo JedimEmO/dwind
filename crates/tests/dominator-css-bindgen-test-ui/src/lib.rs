@@ -1,7 +1,10 @@
 #[macro_use]
 extern crate dominator;
 
-use dominator::Dom;
+#[macro_use]
+extern crate dwui;
+
+use dominator::{Dom, text};
 use dominator_css_bindgen_test::*;
 use dwind::base::*;
 use dwind::borders::*;
@@ -14,6 +17,7 @@ use dwind::typography::*;
 use dwind_macros::dwclass;
 use my_custom_theme::*;
 use wasm_bindgen::prelude::wasm_bindgen;
+use dwui::prelude::*;
 
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
@@ -51,9 +55,10 @@ fn main_view() -> Dom {
             .child(html!("div", {
                 .dwclass!("m-l-4 m-r-0 w-full")
                 .children((0..20).map(|_| {
-                    html!("div", {
-                       .text("hi there")
-                       .dwclass!("cursor-pointer hover-bg-apple hover-text-apple")
+                    card!({
+                        .content(heading!({
+                            .content(text("Hi there!"))
+                        }))
                     })
                 }))
             }))

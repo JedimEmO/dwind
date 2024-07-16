@@ -73,5 +73,5 @@ fn render_token_body(tokens: Vec<Token>) -> String {
         .into_iter()
         .map(|t| t.to_css_string())
         .collect::<Vec<_>>()
-        .join("")
+        .join(" ")
 }

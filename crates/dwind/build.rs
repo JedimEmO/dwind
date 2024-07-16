@@ -5,6 +5,7 @@ fn main() {
     let files = vec![
         "resources/css/base.css",
         "resources/css/borders.css",
+        "resources/css/box_shadow.css",
         "resources/css/interactivity.css",
         "resources/css/flexbox_and_grid.css",
         "resources/css/sizing.css",

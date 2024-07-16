@@ -54,6 +54,12 @@ export default {
                 for(let file of files3){
                     this.addWatchFile(file);
                 }
+
+                const files4 = await fg('../../crates/dwui/src/**/*');
+
+                for(let file of files4){
+                    this.addWatchFile(file);
+                }
             }
         },
         !is_watch && terser(),
