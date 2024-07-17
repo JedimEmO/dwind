@@ -1,7 +1,7 @@
 use dominator::{html, Dom};
+use dwind::box_shadow::*;
 use futures_signals::signal::option;
 use futures_signals_component_macro::component;
-use dwind::box_shadow::*;
 
 #[component(render_fn = card)]
 struct Card {

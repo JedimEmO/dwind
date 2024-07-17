@@ -181,6 +181,7 @@ dependencies = [
  "const_format",
  "dominator",
  "dominator-css-bindgen-test",
+ "futures-signals",
  "nom",
  "once_cell",
  "proc-macro2",

@@ -4,7 +4,7 @@ extern crate dominator;
 #[macro_use]
 extern crate dwui;
 
-use dominator::{Dom, text};
+use dominator::{text, Dom};
 use dominator_css_bindgen_test::*;
 use dwind::base::*;
 use dwind::borders::*;
@@ -15,9 +15,9 @@ use dwind::sizing::*;
 use dwind::spacing::*;
 use dwind::typography::*;
 use dwind_macros::dwclass;
+use dwui::prelude::*;
 use my_custom_theme::*;
 use wasm_bindgen::prelude::wasm_bindgen;
-use dwui::prelude::*;
 
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
@@ -57,6 +57,7 @@ fn main_view() -> Dom {
                 .children((0..20).map(|_| {
                     card!({
                         .content(heading!({
+                            .text_size(TextSize::Large)
                             .content(text("Hi there!"))
                         }))
                     })

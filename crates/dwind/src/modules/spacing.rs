@@ -16,7 +16,6 @@ macro_rules! margin_generator {
     };
 }
 
-
 dwgenerate_map!(
     "m",
     "margin-",

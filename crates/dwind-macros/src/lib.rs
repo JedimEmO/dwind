@@ -7,6 +7,7 @@ use crate::grammar::{parse_class_string, parse_selector};
 use macro_inputs::{DwGenerateInput, DwGenerateMapInput, DwindInput};
 use proc_macro::TokenStream;
 use quote::quote;
+use crate::macro_inputs::DwindInputSignal;
 
 /// Use dwind-macros macros on your DOMINATOR component
 ///
@@ -34,6 +35,43 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
     let classes = classes.into_iter().map(|class| {
         quote! {
             .class(#class)
+        }
+    });
+
+    quote! {
+        #self_ident #(#classes)*
+    }
+    .into()
+}
+
+
+/// Use dwind-macros macros on your DOMINATOR component
+///
+/// Basic usage:
+///
+/// # Example
+/// ```rust,no_run
+/// # use dominator::class;
+/// # use futures_signals::signal::always;
+/// # static SOME_CLASS: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {class! { .raw("")}});
+/// use dwind_macros::{dwclass, dwclass_signal};
+/// dominator::html!("div", {
+///     .dwclass_signal!("some_class", always(true))
+/// });
+/// ```
+#[proc_macro]
+pub fn dwclass_signal(input: TokenStream) -> TokenStream {
+    let DwindInputSignal {
+        input: DwindInput { self_ident, classes },
+        signal,
+    } = syn::parse::<DwindInputSignal>(input).unwrap();
+
+    let classes = parse_class_string(classes.value().as_str()).unwrap();
+    let classes = render_classes(classes);
+
+    let classes = classes.into_iter().map(|class| {
+        quote! {
+            .class_signal(#class, #signal)
         }
     });
 
@@ -149,7 +187,7 @@ pub fn dwgenerate_map(input: TokenStream) -> TokenStream {
     let out = quote! {
         #(#output)*
     }
-    .into();
+        .into();
 
     out
 }

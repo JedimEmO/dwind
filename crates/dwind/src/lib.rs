@@ -4,7 +4,6 @@ pub mod base {
     include!(concat!(env!("OUT_DIR"), "/base.rs"));
 }
 
-
 pub mod box_shadow {
     include!(concat!(env!("OUT_DIR"), "/box_shadow.rs"));
 }
