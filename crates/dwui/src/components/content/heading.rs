@@ -1,4 +1,5 @@
 use dominator::{html, Dom};
+use dwind::flexbox_and_grid::*;
 use dwind::sizing::*;
 use dwind::typography::*;
 use futures_signals::signal::{option, SignalExt};
@@ -8,7 +9,7 @@ use futures_signals_component_macro::component;
 pub enum TextSize {
     Base,
     Large,
-    ExtraLarge
+    ExtraLarge,
 }
 
 /// Creates a heading component
@@ -48,7 +49,7 @@ pub fn heading(props: impl HeadingPropsTrait + 'static) -> Dom {
     let size = size.broadcast();
     html!("div", {
         .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))
-        .dwclass!("w-auto font-semibold")
+        .dwclass!("w-auto font-semibold h-12 align-items-center flex")
         .child(html!("h1", {
             .dwclass_signal!("text-base", size.signal().eq(TextSize::Base))
             .dwclass_signal!("text-l", size.signal().eq(TextSize::Large))

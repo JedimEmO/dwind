@@ -41,15 +41,26 @@
 .font-extrabold {
     font-weight: 800;
 }
+
+.font-black {
+    font-weight: 900;
+}
+
+/*
+    text sizes
+ */
 .text-base {
     font-size: 16px;
 }
 
-
 .text-l {
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .text-xl {
+    font-size: 20px;
+}
+
+.text-xxl {
     font-size: 24px;
 }

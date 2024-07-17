@@ -46,22 +46,48 @@ fn main_view() -> Dom {
         .dwclass!("bg-manatee-950 text-manatee-50")
         .child(header())
         .child(html!("div", {
-            .dwclass!("m-x-auto max-w-lg flex")
+            .dwclass!("m-x-auto max-w-lg flex h-p-90")
             .style("margin-top", "4px")
             .child(html!("div", {
-                .dwclass!("w-32 m-l-0 border-r border-color-manatee-800 border-solid")
-                .text("hi")
+                .dwclass!("w-40 m-l-0 border-r border-color-manatee-800 border-solid text-manatee-300")
+                .children([
+                     heading!({
+                        .text_size(TextSize::Base)
+                        .content(text("Flex and Grid"))
+                    }),
+                    list!({
+                        .items(vec![
+                            text("Flex"),
+                            text("Justify"),
+                            text("Align"),
+                        ])
+                    }),
+                    heading!({
+                        .text_size(TextSize::Base)
+                        .content(text("Borders"))
+                    }),
+                    list!({
+                        .items(vec![
+                            text("Border"),
+                            text("Rounding"),
+                            text("Color"),
+                            text("Style"),
+                        ])
+                    })
+                ])
             }))
             .child(html!("div", {
                 .dwclass!("m-l-4 m-r-0 w-full")
-                .children((0..20).map(|_| {
-                    card!({
-                        .content(heading!({
-                            .text_size(TextSize::Large)
-                            .content(text("Hi there!"))
-                        }))
-                    })
-                }))
+                .children([card!({
+                    .content(html!("div", {
+                        .children([
+                            heading!({
+                                .text_size(TextSize::Large)
+                                .content(text("Flex"))
+                            })
+                        ])
+                    }))
+                })])
             }))
         }))
     })
@@ -71,7 +97,8 @@ fn header() -> Dom {
     html!("div", {
         .child(html!("div", {
             .dwclass!("border-b border-color-manatee-800 border-solid")
-            .dwclass!("sticky m-x-auto max-w-lg flex justify-stretch align-items-center top-0 height-[60px]")
+            .dwclass!("font-extrabold")
+            .dwclass!("sticky m-x-auto max-w-lg flex justify-stretch align-items-center top-0 h-12")
             .child(html!("div", {
                 .child(html!("h3", { .text("dwind") }))
             }))

@@ -9,4 +9,5 @@ dwind-macros = { path = "../dwind-macros" }
 dominator.workspace = true
 futures-signals.workspace = true
 futures-signals-component-macro.workspace = true
+once_cell.workspace = true
 web-sys.workspace = true

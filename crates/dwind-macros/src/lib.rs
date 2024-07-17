@@ -4,10 +4,10 @@ mod macro_inputs;
 use crate::codegen::string_rendering::class_name_to_struct_identifier;
 use crate::codegen::{render_classes, render_generate_dwind_class};
 use crate::grammar::{parse_class_string, parse_selector};
+use crate::macro_inputs::DwindInputSignal;
 use macro_inputs::{DwGenerateInput, DwGenerateMapInput, DwindInput};
 use proc_macro::TokenStream;
 use quote::quote;
-use crate::macro_inputs::DwindInputSignal;
 
 /// Use dwind-macros macros on your DOMINATOR component
 ///
@@ -44,7 +44,6 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
     .into()
 }
 
-
 /// Use dwind-macros macros on your DOMINATOR component
 ///
 /// Basic usage:
@@ -62,7 +61,10 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn dwclass_signal(input: TokenStream) -> TokenStream {
     let DwindInputSignal {
-        input: DwindInput { self_ident, classes },
+        input: DwindInput {
+            self_ident,
+            classes,
+        },
         signal,
     } = syn::parse::<DwindInputSignal>(input).unwrap();
 
@@ -187,7 +189,7 @@ pub fn dwgenerate_map(input: TokenStream) -> TokenStream {
     let out = quote! {
         #(#output)*
     }
-        .into();
+    .into();
 
     out
 }

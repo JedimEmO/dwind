@@ -1,6 +1,6 @@
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{parenthesized, Ident, LitStr, Token, Expr};
+use syn::{parenthesized, Expr, Ident, LitStr, Token};
 
 pub struct DwindInput {
     pub self_ident: Ident,
@@ -20,10 +20,9 @@ impl Parse for DwindInput {
     }
 }
 
-
 pub struct DwindInputSignal {
     pub input: DwindInput,
-    pub signal: syn::Expr
+    pub signal: syn::Expr,
 }
 
 impl Parse for crate::macro_inputs::DwindInputSignal {
@@ -34,7 +33,7 @@ impl Parse for crate::macro_inputs::DwindInputSignal {
 
         Ok(Self {
             input: input_value,
-            signal
+            signal,
         })
     }
 }

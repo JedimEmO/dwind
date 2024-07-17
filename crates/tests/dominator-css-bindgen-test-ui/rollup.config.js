@@ -55,7 +55,7 @@ export default {
                     this.addWatchFile(file);
                 }
 
-                const files4 = await fg('../../crates/dwui/src/**/*');
+                const files4 = await fg('../../../crates/dwui/src/**/*.rs');
 
                 for(let file of files4) {
                     this.addWatchFile(file);

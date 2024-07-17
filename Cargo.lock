@@ -199,6 +199,7 @@ dependencies = [
  "dwind-macros",
  "futures-signals",
  "futures-signals-component-macro",
+ "once_cell",
  "web-sys",
 ]
 
