@@ -7,17 +7,30 @@
     <link data-trunk rel="rust" href="../Cargo.toml" data-keep-debug>
     <title>dominator css bindgen example</title>
     <style type="text/css">
-        html { height: 100%; }
-        body { padding: 0; margin: 0; width: 100%; min-height: 100%;}
+        html {
+            height: 100%;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            min-height: 100%;
+        }
+
+        ul,li {
+            padding: 0;
+            margin: 0;
+            list-style: none    ;
+        }
+
         *,
         ::before,
         ::after {
             border-width: 0;
-            border-style: solid;
+            border-style: none;
         }
-        ul,li {
-            padding: 0;
-        }
+
         h1,
         h2,
         h3,
@@ -42,6 +55,11 @@
         p,
         pre {
             margin: 0;
+        }
+
+        *, :after, :before {
+            box-sizing: border-box;
+            border: 0 solid #e5e7eb;
         }
     </style></head>
 </html>

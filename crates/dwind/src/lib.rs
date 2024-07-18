@@ -2,8 +2,8 @@ mod modules;
 
 pub mod prelude {
     pub use super::base::*;
-    pub use super::box_shadow::*;
     pub use super::borders::*;
+    pub use super::box_shadow::*;
     pub use super::colors::*;
     pub use super::flexbox_and_grid::*;
     pub use super::interactivity::*;

@@ -196,3 +196,57 @@ dwgenerate_map!(
         ("candlelight-950", "#432005"),
     ]
 );
+
+dwgenerate_map!(
+    "bg",
+    "bg-color-",
+    [
+        ("picton-blue-50", "#f0f8fe"),
+        ("picton-blue-100", "#deedfb"),
+        ("picton-blue-200", "#c5e2f8"),
+        ("picton-blue-300", "#9dd0f3"),
+        ("picton-blue-400", "#5dadea"),
+        ("picton-blue-500", "#4c98e5"),
+        ("picton-blue-600", "#377dd9"),
+        ("picton-blue-700", "#2e68c7"),
+        ("picton-blue-800", "#2b55a2"),
+        ("picton-blue-900", "#284a80"),
+        ("picton-blue-950", "#1c2e4f"),
+    ]
+);
+
+dwgenerate_map!(
+    "text",
+    "text-color-",
+    [
+        ("picton-blue-50", "#f0f8fe"),
+        ("picton-blue-100", "#deedfb"),
+        ("picton-blue-200", "#c5e2f8"),
+        ("picton-blue-300", "#9dd0f3"),
+        ("picton-blue-400", "#5dadea"),
+        ("picton-blue-500", "#4c98e5"),
+        ("picton-blue-600", "#377dd9"),
+        ("picton-blue-700", "#2e68c7"),
+        ("picton-blue-800", "#2b55a2"),
+        ("picton-blue-900", "#284a80"),
+        ("picton-blue-950", "#1c2e4f"),
+    ]
+);
+
+dwgenerate_map!(
+    "bg-hover",
+    "hover:bg-color-",
+    [
+        ("picton-blue-50", "#f0f8fe"),
+        ("picton-blue-100", "#deedfb"),
+        ("picton-blue-200", "#c5e2f8"),
+        ("picton-blue-300", "#9dd0f3"),
+        ("picton-blue-400", "#5dadea"),
+        ("picton-blue-500", "#4c98e5"),
+        ("picton-blue-600", "#377dd9"),
+        ("picton-blue-700", "#2e68c7"),
+        ("picton-blue-800", "#2b55a2"),
+        ("picton-blue-900", "#284a80"),
+        ("picton-blue-950", "#1c2e4f"),
+    ]
+);

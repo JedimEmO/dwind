@@ -1,9 +1,13 @@
+mod pages;
+
 #[macro_use]
 extern crate dominator;
 
 #[macro_use]
 extern crate dwui;
 
+use crate::pages::docs::doc_sidebar::doc_sidebar;
+use crate::pages::docs::{doc_sections, DocPage};
 use dominator::{text, Dom};
 use dominator_css_bindgen_test::*;
 use dwind::base::*;
@@ -16,6 +20,7 @@ use dwind::spacing::*;
 use dwind::typography::*;
 use dwind_macros::dwclass;
 use dwui::prelude::*;
+use futures_signals::signal::{Mutable, SignalExt};
 use my_custom_theme::*;
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -41,6 +46,8 @@ mod my_custom_theme {
 }
 
 fn main_view() -> Dom {
+    let selected_doc = Mutable::new(Some(DocPage::Flex));
+
     html!("div", {
         .dwclass!("page-body font-sans")
         .dwclass!("bg-manatee-950 text-manatee-50")
@@ -48,34 +55,7 @@ fn main_view() -> Dom {
         .child(html!("div", {
             .dwclass!("m-x-auto max-w-lg flex h-p-90")
             .style("margin-top", "4px")
-            .child(html!("div", {
-                .dwclass!("w-40 m-l-0 border-r border-color-manatee-800 border-solid text-manatee-300")
-                .children([
-                     heading!({
-                        .text_size(TextSize::Base)
-                        .content(text("Flex and Grid"))
-                    }),
-                    list!({
-                        .items(vec![
-                            text("Flex"),
-                            text("Justify"),
-                            text("Align"),
-                        ])
-                    }),
-                    heading!({
-                        .text_size(TextSize::Base)
-                        .content(text("Borders"))
-                    }),
-                    list!({
-                        .items(vec![
-                            text("Border"),
-                            text("Rounding"),
-                            text("Color"),
-                            text("Style"),
-                        ])
-                    })
-                ])
-            }))
+            .child(doc_sidebar(doc_sections(), selected_doc.clone()))
             .child(html!("div", {
                 .dwclass!("m-l-4 m-r-0 w-full")
                 .children([card!({
