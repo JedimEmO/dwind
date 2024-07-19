@@ -10,6 +10,7 @@ pub mod prelude {
     pub use super::sizing::*;
     pub use super::spacing::*;
     pub use super::typography::*;
+    pub use super::backgrounds::*;
 }
 
 pub mod base {
@@ -37,3 +38,4 @@ pub mod typography {
 pub use modules::colors;
 pub use modules::sizing;
 pub use modules::spacing;
+pub use modules::backgrounds;

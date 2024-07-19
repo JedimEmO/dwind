@@ -250,3 +250,74 @@ dwgenerate_map!(
         ("picton-blue-950", "#1c2e4f"),
     ]
 );
+
+
+/*
+'bunker': {
+        '50': '#f3f7f8',
+        '100': '#e0e9ed',
+        '200': '#c4d5dd',
+        '300': '#9bb7c5',
+        '400': '#6b90a5',
+        '500': '#50758a',
+        '600': '#456275',
+        '700': '#3d5161',
+        '800': '#374653',
+        '900': '#323c47',
+        '950': '#0e1216',
+    },
+
+ */
+dwgenerate_map!(
+    "bg",
+    "bg-color-",
+    [
+        ("bunker-50", "#f3f7f8"),
+        ("bunker-100", "#e0e9ed"),
+        ("bunker-200", "#c4d5dd"),
+        ("bunker-300", "#9bb7c5"),
+        ("bunker-400", "#6b90a5"),
+        ("bunker-500", "#50758a"),
+        ("bunker-600", "#456275"),
+        ("bunker-700", "#3d5161"),
+        ("bunker-800", "#374653"),
+        ("bunker-900", "#323c47"),
+        ("bunker-950", "#0e1216"),
+    ]
+);
+
+dwgenerate_map!(
+    "text",
+    "text-color-",
+    [
+        ("bunker-50", "#f3f7f8"),
+        ("bunker-100", "#e0e9ed"),
+        ("bunker-200", "#c4d5dd"),
+        ("bunker-300", "#9bb7c5"),
+        ("bunker-400", "#6b90a5"),
+        ("bunker-500", "#50758a"),
+        ("bunker-600", "#456275"),
+        ("bunker-700", "#3d5161"),
+        ("bunker-800", "#374653"),
+        ("bunker-900", "#323c47"),
+        ("bunker-950", "#0e1216"),
+    ]
+);
+
+dwgenerate_map!(
+    "bg-hover",
+    "hover:bg-color-",
+    [
+        ("bunker-50", "#f3f7f8"),
+        ("bunker-100", "#e0e9ed"),
+        ("bunker-200", "#c4d5dd"),
+        ("bunker-300", "#9bb7c5"),
+        ("bunker-400", "#6b90a5"),
+        ("bunker-500", "#50758a"),
+        ("bunker-600", "#456275"),
+        ("bunker-700", "#3d5161"),
+        ("bunker-800", "#374653"),
+        ("bunker-900", "#323c47"),
+        ("bunker-950", "#0e1216"),
+    ]
+);

@@ -37,3 +37,20 @@
 .align-items-center {
     align-items: center;
 }
+
+
+.flex-none {
+    flex: none;
+}
+
+.flex-auto {
+    flex: 1 1 auto;
+}
+
+.flex-1 {
+    flex: 1 1 0;
+}
+
+.flex-initial {
+    flex: 0 1 auto;
+}

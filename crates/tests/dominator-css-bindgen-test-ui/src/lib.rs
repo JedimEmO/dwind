@@ -23,6 +23,7 @@ use dwui::prelude::*;
 use futures_signals::signal::{Mutable, SignalExt};
 use my_custom_theme::*;
 use wasm_bindgen::prelude::wasm_bindgen;
+use crate::pages::docs::doc_main::doc_main_view;
 
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
@@ -58,16 +59,7 @@ fn main_view() -> Dom {
             .child(doc_sidebar(doc_sections(), selected_doc.clone()))
             .child(html!("div", {
                 .dwclass!("m-l-4 m-r-0 w-full")
-                .children([card!({
-                    .content(html!("div", {
-                        .children([
-                            heading!({
-                                .text_size(TextSize::Large)
-                                .content(text("Flex"))
-                            })
-                        ])
-                    }))
-                })])
+                .child(doc_main_view(selected_doc.signal()))
             }))
         }))
     })

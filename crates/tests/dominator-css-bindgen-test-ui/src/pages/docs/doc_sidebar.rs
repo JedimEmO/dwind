@@ -14,7 +14,6 @@ pub fn doc_sidebar(
     html!("div", {
         .dwclass!("w-40 m-l-0 border-r border-color-manatee-800 border-solid text-manatee-300")
         .children(doc_sections.into_iter().map(clone!(selected_doc_page => move |section| {
-
             let section_cloned = section.clone();
             let selected_index_signal = map_ref! {
                 let selected_doc = selected_doc_page.signal() =>  {

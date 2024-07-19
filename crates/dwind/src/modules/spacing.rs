@@ -16,6 +16,21 @@ macro_rules! margin_generator {
     };
 }
 
+#[macro_export]
+macro_rules! padding_generator {
+    ($padding:tt) => {
+        const_format::formatcp!("padding: {};", $padding)
+    };
+}
+
+
+#[macro_export]
+macro_rules! gap_generator {
+    ($gap:tt) => {
+        const_format::formatcp!("gap: {};", $gap)
+    };
+}
+
 dwgenerate_map!(
     "m",
     "margin-",
@@ -134,3 +149,51 @@ dwgenerate_map!(
         ("x-20", "80px"),
     ]
 );
+
+dwgenerate_map!("p", "padding-", [
+    ("0", "0"),
+    ("1", "4px"),
+    ("2", "8px"),
+    ("3", "12px"),
+    ("4", "16px"),
+    ("5", "20px"),
+    ("6", "24px"),
+    ("7", "28px"),
+    ("8", "32px"),
+    ("9", "36px"),
+    ("10", "40px"),
+    ("11", "44px"),
+    ("12", "48px"),
+    ("13", "52px"),
+    ("14", "56px"),
+    ("15", "60px"),
+    ("16", "64px"),
+    ("17", "68px"),
+    ("18", "72px"),
+    ("19", "76px"),
+    ("20", "80px"),
+]);
+
+dwgenerate_map!("gap", "gap-", [
+    ("0", "0"),
+    ("1", "4px"),
+    ("2", "8px"),
+    ("3", "12px"),
+    ("4", "16px"),
+    ("5", "20px"),
+    ("6", "24px"),
+    ("7", "28px"),
+    ("8", "32px"),
+    ("9", "36px"),
+    ("10", "40px"),
+    ("11", "44px"),
+    ("12", "48px"),
+    ("13", "52px"),
+    ("14", "56px"),
+    ("15", "60px"),
+    ("16", "64px"),
+    ("17", "68px"),
+    ("18", "72px"),
+    ("19", "76px"),
+    ("20", "80px"),
+]);
