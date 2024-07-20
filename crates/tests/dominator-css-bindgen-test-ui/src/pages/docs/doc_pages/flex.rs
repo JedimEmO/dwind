@@ -30,14 +30,14 @@ fn flex_example_1() -> Dom {
                         })
                         .apply(|b| {
                             match v {
-                                0 => dwclass!(b, "w-16"),
-                                1 => dwclass!(b, "w-64"),
-                                _ => dwclass!(b, "w-32"),
+                                0 => dwclass!(b, "w-16 bg-candlelight-900"),
+                                1 => dwclass!(b, "w-64 bg-candlelight-600"),
+                                _ => dwclass!(b, "w-32 bg-candlelight-600"),
                             }
                         })
                         .dwclass!("h-full")
                         .dwclass!("flex align-items-center justify-center")
-                        .dwclass!("bg-candlelight-600 rounded-lg font-extrabold")
+                        .dwclass!("rounded-lg font-extrabold")
                         .text(v.to_string().as_str())
                     })
                 })
