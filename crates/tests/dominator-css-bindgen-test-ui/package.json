@@ -4,7 +4,8 @@
   "scripts": {
     "build": "rimraf public/js && rollup --bundleConfigAsCjs --config",
     "build:release": "rimraf public/js && rollup --bundleConfigAsCjs --config rollup.config.release.js",
-    "start": "rimraf public/js && rollup --bundleConfigAsCjs --config --watch"
+    "start": "rimraf public/js && rollup --bundleConfigAsCjs --config --watch",
+    "start:release": "rimraf public/js && rollup --bundleConfigAsCjs --config rollup.config.release.js --watch"
   },
   "devDependencies": {
     "@wasm-tool/rollup-plugin-rust": "^2.0.0",
