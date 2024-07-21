@@ -1,6 +1,9 @@
 mod pages;
 
 #[macro_use]
+extern crate log;
+
+#[macro_use]
 extern crate dominator;
 
 #[macro_use]
@@ -24,6 +27,7 @@ use dwui::prelude::*;
 use futures_signals::signal::{Mutable, SignalExt};
 use my_custom_theme::*;
 use wasm_bindgen::prelude::wasm_bindgen;
+use dwind::bg_color_generator;
 
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
@@ -49,9 +53,13 @@ mod my_custom_theme {
 fn main_view() -> Dom {
     let selected_doc = Mutable::new(Some(DocPage::Flex));
 
+    stylesheet!("body", {
+        .raw(bg_color_generator!("#2e3138"))
+    });
+
     html!("div", {
         .dwclass!("font-sans")
-        .dwclass!("bg-manatee-950 text-manatee-50")
+        .dwclass!("text-manatee-50")
         .child(header())
         .child(html!("div", {
             .dwclass!("m-x-auto max-w-lg flex h-p-90")
