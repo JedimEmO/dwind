@@ -6,6 +6,7 @@ extern crate dominator;
 #[macro_use]
 extern crate dwui;
 
+use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
 use dominator::{text, Dom};
@@ -23,7 +24,6 @@ use dwui::prelude::*;
 use futures_signals::signal::{Mutable, SignalExt};
 use my_custom_theme::*;
 use wasm_bindgen::prelude::wasm_bindgen;
-use crate::pages::docs::doc_main::doc_main_view;
 
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
@@ -50,7 +50,7 @@ fn main_view() -> Dom {
     let selected_doc = Mutable::new(Some(DocPage::Flex));
 
     html!("div", {
-        .dwclass!("page-body font-sans")
+        .dwclass!("font-sans")
         .dwclass!("bg-manatee-950 text-manatee-50")
         .child(header())
         .child(html!("div", {

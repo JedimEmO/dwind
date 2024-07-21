@@ -1,4 +1,4 @@
-use dominator::{Dom, text};
+use dominator::{text, Dom};
 use dwui::prelude::*;
 
 pub fn doc_page_title(title: &str) -> Dom {

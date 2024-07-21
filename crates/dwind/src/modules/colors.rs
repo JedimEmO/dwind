@@ -251,7 +251,6 @@ dwgenerate_map!(
     ]
 );
 
-
 /*
 'bunker': {
         '50': '#f3f7f8',

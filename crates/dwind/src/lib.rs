@@ -1,6 +1,7 @@
 mod modules;
 
 pub mod prelude {
+    pub use super::backgrounds::*;
     pub use super::base::*;
     pub use super::borders::*;
     pub use super::box_shadow::*;
@@ -10,7 +11,6 @@ pub mod prelude {
     pub use super::sizing::*;
     pub use super::spacing::*;
     pub use super::typography::*;
-    pub use super::backgrounds::*;
 }
 
 pub mod base {
@@ -35,7 +35,7 @@ pub mod typography {
     include!(concat!(env!("OUT_DIR"), "/typography.rs"));
 }
 
+pub use modules::backgrounds;
 pub use modules::colors;
 pub use modules::sizing;
 pub use modules::spacing;
-pub use modules::backgrounds;

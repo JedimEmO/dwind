@@ -15,9 +15,9 @@ dwind-macros = { path = "../../dwind-macros" }
 dwind = { path = "../../dwind" }
 dwui = { path = "../../dwui" }
 dominator.workspace = true
+example-html-macro = { path = "../../example-html-macro" }
 futures.workspace = true
 futures-signals.workspace = true
-syntect = { version = "5.2.0", default-features = false, features = ["default-fancy", "default-syntaxes", "default-themes"]  }
 once_cell.workspace = true
 wasm-bindgen.workspace = true
 wasm-bindgen-futures.workspace = true

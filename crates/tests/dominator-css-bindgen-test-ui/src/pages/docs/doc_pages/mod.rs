@@ -1,2 +1,2 @@
-pub mod flex;
 pub mod doc_page;
+pub mod flex;
