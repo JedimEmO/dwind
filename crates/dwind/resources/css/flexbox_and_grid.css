@@ -54,3 +54,7 @@
 .flex-initial {
     flex: 0 1 auto;
 }
+
+.grid {
+    display: grid;
+}

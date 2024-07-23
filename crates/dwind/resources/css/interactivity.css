@@ -1,3 +1,15 @@
 .cursor-pointer {
     cursor: pointer;
 }
+
+.cursor-col-resize {
+    cursor: col-resize;
+}
+
+.pointer-events-none {
+    pointer-events: none;
+}
+
+.pointer-events-auto {
+    pointer-events: auto;
+}

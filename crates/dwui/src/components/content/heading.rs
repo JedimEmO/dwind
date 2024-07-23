@@ -22,6 +22,7 @@ pub enum TextSize {
 /// # use crate::dwui::heading;
 /// html!("div", {
 ///     .child(heading!({
+///         .apply(|b| b)
 ///         .content(text("Hi there"))
 ///         .content_signal(always(text("Hello there!")))
 ///         .text_size(TextSize::Large)

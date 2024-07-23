@@ -3,6 +3,8 @@ use std::fmt::{Display, Formatter};
 pub mod doc_main;
 pub mod doc_pages;
 pub mod doc_sidebar;
+pub mod code_widget;
+pub mod example_box;
 
 #[derive(Clone)]
 pub struct DocSection {

@@ -8,6 +8,7 @@ fn main() {
         "resources/css/box_shadow.css",
         "resources/css/interactivity.css",
         "resources/css/flexbox_and_grid.css",
+        "resources/css/position.css",
         "resources/css/sizing.css",
         "resources/css/spacing.css",
         "resources/css/typography.css",
