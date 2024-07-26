@@ -10,6 +10,9 @@ dominator-css-bindgen = { path = "../dominator-css-bindgen" }
 dwind-macros = { path = "../dwind-macros" }
 modern-normalize-cssys = { path = "../modern-normalize-cssys" }
 once_cell.workspace = true
+serde = { version = "1.0.204", features = ["derive"] }
 
 [build-dependencies]
 dominator-css-bindgen = { path = "../dominator-css-bindgen" }
+serde.workspace = true
+serde_json.workspace = true

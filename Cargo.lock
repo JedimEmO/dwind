@@ -210,6 +210,7 @@ dependencies = [
  "futures",
  "futures-signals",
  "log",
+ "matchit",
  "once_cell",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -243,6 +244,8 @@ dependencies = [
  "dwind-macros",
  "modern-normalize-cssys",
  "once_cell",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -515,6 +518,12 @@ name = "log"
 version = "0.4.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
+
+[[package]]
+name = "matchit"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3"
 
 [[package]]
 name = "memchr"

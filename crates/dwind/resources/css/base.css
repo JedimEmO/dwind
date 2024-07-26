@@ -1,9 +1,14 @@
+
 .sticky {
     position: sticky;
 }
 
 .top-0 {
     top: 0;
+}
+
+:root {
+    color-scheme: dark;
 }
 
 html {

@@ -1,6 +1,6 @@
 use dominator::{Dom, events};
-use futures_signals::signal::{Mutable, SignalExt};
-use dwind_macros::dwclass;
+use futures_signals::signal::{Mutable, not, SignalExt};
+use dwind_macros::{dwclass, dwclass_signal};
 use dwind::prelude::*;
 
 pub fn example_box(child: Dom, resizeable: bool) -> Dom {
@@ -10,15 +10,18 @@ pub fn example_box(child: Dom, resizeable: bool) -> Dom {
     html!("div", {
         .dwclass!("relative grid m-t-10")
         .child(html!("div", {
-            .dwclass!("rounded-lg bg-bunker-950 pointer-events-none")
-            .dwclass!("border border-color-manatee-800")
+            .dwclass!("rounded-lg bg-bunker-950")
+            .dwclass!("border border-woodsmoke-800")
             .dwclass!("flex align-items-center p-5")
+            .dwclass_signal!("pointer-events-none", dragging.signal())
             .style_signal("width", width.signal().map(|v| format!("{v}%")))
             .child(child)
         }))
         .child(html!("div", {
-            .dwclass!("absolute w-full h-full flex align-items-center pointer-events-auto")
-              .with_node!(element => {
+            .dwclass!("absolute w-full h-full flex align-items-center")
+            .dwclass_signal!("pointer-events-auto", dragging.signal())
+            .dwclass_signal!("pointer-events-none", not(dragging.signal()))
+            .with_node!(element => {
                 .event(clone!(dragging, width => move |event: events::MouseMove| {
                     if !dragging.get() {
                         return;
@@ -32,7 +35,7 @@ pub fn example_box(child: Dom, resizeable: bool) -> Dom {
             })
             .child(html!("div", {
                 .style_signal("right", width.signal().map(|v| format!("{}%", 97.0 - v)))
-                .dwclass!("absolute bg-manatee-600 rounded-md h-10 w-2 cursor-col-resize pointer-events-auto")
+                .dwclass!("absolute bg-woodsmoke-600 rounded-md h-10 w-2 cursor-col-resize pointer-events-auto")
                 .with_node!(element => {
                     .event(clone!(dragging => move |_: events::MouseDown| {
                         dragging.set(true);

@@ -22,6 +22,10 @@
     border-style: none;
 }
 
+.border-inset {
+    border-style: inset;
+}
+
 .border {
     border-width: 1px;
 }

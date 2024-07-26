@@ -20,8 +20,8 @@ struct List<TClickHandler: Fn(usize) -> () = fn(usize) -> ()> {
     item_click_handler: TClickHandler,
 }
 
-dwgenerate!("li-item-text", "hover:text-manatee-400");
-dwgenerate!("li-item-border", "hover:border-color-manatee-200");
+dwgenerate!("li-item-text", "hover:text-woodsmoke-400");
+dwgenerate!("li-item-border", "hover:border-woodsmoke-200");
 
 pub fn pretty_list(props: impl ListPropsTrait + 'static) -> Dom {
     let ListProps {
@@ -44,13 +44,13 @@ pub fn pretty_list(props: impl ListPropsTrait + 'static) -> Dom {
             }.broadcast();
 
             html!("li", {
-                .dwclass!("li-item-border li-item-text border-l h-6 border-color-manatee-600 text-manatee-600 cursor-pointer")
+                .dwclass!("li-item-border li-item-text border-l h-6 border-woodsmoke-600 text-woodsmoke-600 cursor-pointer")
                 .style("padding-left", "10px")
                 .child(item)
                 .dwclass_signal!("text-picton-blue-400", selected_signal.signal())
                 .dwclass_signal!("hover:text-picton-blue-400", selected_signal.signal())
                 .dwclass_signal!("font-bold", selected_signal.signal())
-                .dwclass_signal!("border-color-picton-blue-400", selected_signal.signal())
+                .dwclass_signal!("border-picton-blue-400", selected_signal.signal())
                 .apply(clone!(item_click_handler =>move |b| {
                     b.event(clone!(item_click_handler => move |_: events::Click| {
                         if let Some(idx) = index.get() {

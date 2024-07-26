@@ -7,7 +7,7 @@ use crate::pages::docs::example_box::example_box;
 pub fn code(example_map: &BTreeMap<String, String>) -> Dom {
     html!("div", {
         .dwclass!("rounded-lg bg-bunker-950 w-full m-t-10")
-        .dwclass!("border border-color-manatee-800")
+        .dwclass!("border border-woodsmoke-800")
         .child(html!("code", {
             .dwclass!("h-full")
             .prop("innerHTML", example_map["base16-ocean.dark"].as_str())

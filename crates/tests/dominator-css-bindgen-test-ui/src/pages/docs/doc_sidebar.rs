@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use crate::pages::docs::{DocPage, DocSection};
 use dominator::{text, Dom};
 use dwind::prelude::*;
@@ -5,19 +6,22 @@ use dwind_macros::dwclass;
 use dwui::heading;
 use dwui::prelude::*;
 use futures_signals::map_ref;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 
 pub fn doc_sidebar(
     doc_sections: Vec<DocSection>,
-    selected_doc_page: Mutable<Option<DocPage>>,
+    selected_doc: impl Signal<Item=DocPage> + 'static,
+    goto: Arc<impl Fn(DocPage) -> () + 'static>
 ) -> Dom {
+    let selected_doc_bc = selected_doc.broadcast();
+
     html!("div", {
-        .dwclass!("w-40 m-l-0 border-r border-color-manatee-800 border-solid text-manatee-300")
-        .children(doc_sections.into_iter().map(clone!(selected_doc_page => move |section| {
+        .dwclass!("w-40 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-300")
+        .children(doc_sections.into_iter().map(clone!(goto => move |section| {
             let section_cloned = section.clone();
             let selected_index_signal = map_ref! {
-                let selected_doc = selected_doc_page.signal() =>  {
-                    section_cloned.docs.iter().position(|v| Some(v) == selected_doc.as_ref())
+                let selected_doc = selected_doc_bc.signal() =>  {
+                    section_cloned.docs.iter().position(|v| v == selected_doc)
                 }
             }.broadcast();
 
@@ -29,8 +33,8 @@ pub fn doc_sidebar(
                     }),
                     list!({
                         .selected_index_signal(selected_index_signal.signal())
-                        .item_click_handler(clone!(section, selected_doc_page => move |idx| {
-                            selected_doc_page.set(Some(section.docs[idx]))
+                        .item_click_handler(clone!(section, goto => move |idx| {
+                            goto(section.docs[idx])
                         }))
                         .items(section.docs.iter().map(move |doc| {
                             text(doc.to_string().as_str())

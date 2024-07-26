@@ -1,4 +1,5 @@
 mod pages;
+mod router;
 
 #[macro_use]
 extern crate log;
@@ -9,6 +10,7 @@ extern crate dominator;
 #[macro_use]
 extern crate dwui;
 
+use std::sync::Arc;
 use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
@@ -25,10 +27,13 @@ use dwind::typography::*;
 use dwind_macros::dwclass;
 use dwui::prelude::*;
 use futures_signals::signal::{Mutable, SignalExt};
+use matchit::Params;
 use my_custom_theme::*;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::UnwrapThrowExt;
 use web_sys::window;
 use dwind::bg_color_generator;
+use crate::router::AppRouter;
 
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
@@ -41,8 +46,7 @@ async fn main() {
 mod my_custom_theme {
     use crate::margin_left_generator;
     use crate::padding_generator;
-    use dwind::colors::*;
-    use dwind::interactivity::*;
+    use dwind::prelude::*;
     use dwind_macros::dwgenerate;
 
     dwgenerate!("nth-2-padding", "nth-child(2):hover:padding-[20px]");
@@ -51,26 +55,41 @@ mod my_custom_theme {
     dwgenerate!("hover-text-apple", "hover:text-apple-950");
 }
 
+fn make_app_router() -> AppRouter<DocPage> {
+    let mut router = matchit::Router::<Box<dyn Fn(Params) -> Result<DocPage, ()>>>::new();
+
+    router.insert("#/docs/colors", Box::new(|_| {
+        Ok(DocPage::Colors)
+    })).unwrap_throw();
+
+    router.insert("#/docs/flex", Box::new(|_| {
+        Ok(DocPage::Flex)
+    })).unwrap_throw();
+
+    AppRouter::new(router)
+}
 fn main_view() -> Dom {
-    let selected_doc = Mutable::new(Some(DocPage::Flex));
+    let router = make_app_router();
 
     dwind::stylesheet();
 
     stylesheet!(["body"], {
-        .raw(bg_color_generator!("#2e3138"))
+        // Use the generated DWIND_COLORS map if we need to programatically access color values
+        .style("background-color", &DWIND_COLORS["woodsmoke"][&950])
+        .style("overflow-y", "scroll")
     });
 
     html!("div", {
         .dwclass!("font-sans")
-        .dwclass!("text-manatee-50")
+        .dwclass!("text-woodsmoke-200")
         .child(header())
         .child(html!("div", {
             .dwclass!("m-x-auto max-w-lg flex h-p-90")
             .style("margin-top", "4px")
-            .child(doc_sidebar(doc_sections(), selected_doc.clone()))
+            .child(doc_sidebar(doc_sections(), make_app_router().signal(), Arc::new(|v: DocPage| v.goto())))
             .child(html!("div", {
                 .dwclass!("m-l-4 m-r-0 w-full")
-                .child(doc_main_view(selected_doc.signal()))
+                .child(doc_main_view(router.signal().map(Some)))
             }))
         }))
     })
@@ -79,7 +98,7 @@ fn main_view() -> Dom {
 fn header() -> Dom {
     html!("div", {
         .child(html!("div", {
-            .dwclass!("border-b border-color-manatee-800 border-solid")
+            .dwclass!("border-b border-woodsmoke-800 border-solid")
             .dwclass!("font-extrabold")
             .dwclass!("sticky m-x-auto max-w-lg flex justify-stretch align-items-center top-0 h-12")
             .child(html!("div", {

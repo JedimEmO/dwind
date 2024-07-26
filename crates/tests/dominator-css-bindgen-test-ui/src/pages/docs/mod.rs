@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+use dominator::routing::go_to_url;
 
 pub mod doc_main;
 pub mod doc_pages;
@@ -14,6 +15,8 @@ pub struct DocSection {
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum DocPage {
+    Colors,
+
     // Flex
     Flex,
     Justify,
@@ -26,6 +29,26 @@ pub enum DocPage {
     Style,
 }
 
+impl DocPage {
+    pub fn goto(&self) {
+        match self {
+            DocPage::Colors => go_to_url("#/docs/colors"),
+            DocPage::Flex => go_to_url("#/docs/flex"),
+            DocPage::Justify => {}
+            DocPage::Align => {}
+            DocPage::Border => {}
+            DocPage::Rounding => {}
+            DocPage::Color => {}
+            DocPage::Style => {}
+        }
+    }
+}
+impl Default for DocPage {
+    fn default() -> Self {
+        Self::Colors
+    }
+}
+
 impl Display for DocPage {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{self:?}")
@@ -34,6 +57,10 @@ impl Display for DocPage {
 
 pub fn doc_sections() -> Vec<DocSection> {
     vec![
+        DocSection {
+            title: "General".to_string(),
+            docs: vec![DocPage::Colors],
+        },
         DocSection {
             title: "Flex and Grid".to_string(),
             docs: vec![DocPage::Flex, DocPage::Justify, DocPage::Align],

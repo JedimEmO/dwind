@@ -54,8 +54,8 @@ html!("div", {
                     .apply(|b| {
                         match v {
                             0 => dwclass!(b, "w-14 bg-candlelight-900 flex-none"),
-                            1 => dwclass!(b, "w-64 bg-candlelight-500 flex-initial"),
-                            _ => dwclass!(b, "w-32 bg-candlelight-500 flex-initial"),
+                            1 => dwclass!(b, "w-64 bg-candlelight-600 flex-initial"),
+                            _ => dwclass!(b, "w-32 bg-candlelight-600 flex-initial"),
                         }
                     })
                     .dwclass!("h-full")
@@ -80,8 +80,8 @@ fn flex_example_1() -> Dom {
                     .apply(|b| {
                         match v {
                             0 => dwclass!(b, "w-14 bg-candlelight-900 flex-none"),
-                            1 => dwclass!(b, "w-64 bg-candlelight-500 flex-1"),
-                            _ => dwclass!(b, "w-32 bg-candlelight-500 flex-1"),
+                            1 => dwclass!(b, "w-64 bg-candlelight-600 flex-1"),
+                            _ => dwclass!(b, "w-32 bg-candlelight-600 flex-1"),
                         }
                     })
                     .dwclass!("h-full")
@@ -106,8 +106,8 @@ fn flex_example_auto() -> Dom {
                     .apply(|b| {
                         match v {
                             0 => dwclass!(b, "w-14 bg-candlelight-900 flex-none"),
-                            1 => dwclass!(b, "w-64 bg-candlelight-500 flex-auto"),
-                            _ => dwclass!(b, "w-32 bg-candlelight-500 flex-auto"),
+                            1 => dwclass!(b, "w-64 bg-candlelight-600 flex-auto"),
+                            _ => dwclass!(b, "w-32 bg-candlelight-600 flex-auto"),
                         }
                     })
                     .dwclass!("h-full")
