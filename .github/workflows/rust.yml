@@ -33,7 +33,7 @@ jobs:
       - name: Run chrome tests
         run: RUST_BACKTRACE=1 CHROMEDRIVER=/usr/local/share/chromedriver-linux64/chromedriver cargo test --target wasm32-unknown-unknown
       - name: Run firefox tests
-        run: RUST_BACKTRACE=1 GECKODRIVER=$GECKOWEBDRIVER cargo test --target wasm32-unknown-unknown
+        run: RUST_BACKTRACE=1 GECKODRIVER=$GECKOWEBDRIVER/geckodriver cargo test --target wasm32-unknown-unknown
       - name: clippy checks
         run: cargo clippy
       - name: Run unit tests
