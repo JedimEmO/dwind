@@ -90,7 +90,7 @@ fn try_take_class<'a>(input: &mut Vec<Token<'a>>) -> Option<CowRcStr<'a>> {
 /// converts the token vec into a vec of selectors from the group of selectors
 fn get_selectors(tokens: Vec<Token>) -> Vec<Vec<Token>> {
     let out = tokens
-        .split(|token| *token == Token::Delim(','))
+        .split(|token| *token == Token::Delim(',') || *token == Token::Comma)
         .map(|v| v.to_vec())
         .filter(|v| v.len() > 0)
         .collect();
@@ -100,6 +100,8 @@ fn get_selectors(tokens: Vec<Token>) -> Vec<Vec<Token>> {
 /// Consume tokens until the beginning of a declaration block
 fn take_until_block<'a, 'b, 'aa>(parser: &'b mut Parser<'a, 'aa>) -> DCssResult<Vec<Token<'a>>> {
     let mut out = vec![];
+
+    parser.skip_whitespace();
 
     while let Some(token) = take(parser)? {
         if token == Token::CurlyBracketBlock {
@@ -119,6 +121,11 @@ fn take_until_block<'a, 'b, 'aa>(parser: &'b mut Parser<'a, 'aa>) -> DCssResult<
                 out.append(&mut paren_block);
                 out.push(Token::CloseParenthesis);
             }
+            Token::SquareBracketBlock => {
+                let mut paren_block = parser.parse_nested_block(take_block_flattened)?;
+                out.append(&mut paren_block);
+                out.push(Token::CloseSquareBracket);
+            }
             _ => {}
         }
     }
@@ -131,7 +138,7 @@ fn take<'a, 'b, 'aa>(parser: &'b mut Parser<'a, 'aa>) -> DCssResult<Option<Token
         return Ok(None);
     }
 
-    Ok(Some(parser.next()?.clone()))
+    Ok(Some(parser.next_including_whitespace()?.clone()))
 }
 
 pub fn take_block_flattened<'a, 'aa>(
@@ -140,7 +147,7 @@ pub fn take_block_flattened<'a, 'aa>(
     let mut out = vec![];
 
     while !parser.is_exhausted() {
-        let next = parser.next()?;
+        let next = parser.next_including_whitespace()?;
         out.push(next.clone());
 
         if let Some(mut block) = match next {

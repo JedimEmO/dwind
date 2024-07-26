@@ -18,11 +18,19 @@ pub struct OutputPseudoClass<'a> {
     pub body: Vec<Token<'a>>,
 }
 
-pub fn parsed_to_output_model<'a>(parsed_files: Vec<ParsedCssFile<'a>>) -> Vec<OutputClass<'a>> {
+pub struct OutputStyleSheet<'a> {
+    pub selectors: Vec<Vec<Token<'a>>>,
+    pub body: Vec<Token<'a>>
+}
+
+pub fn parsed_to_output_model<'a>(parsed_files: Vec<ParsedCssFile<'a>>) -> (Vec<OutputClass<'a>>, Vec<OutputStyleSheet<'a>>){
     let mut out_classes: HashMap<CowRcStr<'a>, OutputClass> = HashMap::new();
+    let mut out_style_sheets = vec![];
 
     for file in parsed_files {
         for block in file.blocks {
+            let mut style_sheet_selectors = vec![];
+
             for selector in block.selector {
                 match selector {
                     ParsedSelector::SingleClass {
@@ -47,11 +55,23 @@ pub fn parsed_to_output_model<'a>(parsed_files: Vec<ParsedCssFile<'a>>) -> Vec<O
                             });
                         }
                     }
-                    ParsedSelector::Complex(_) => {}
+                    ParsedSelector::Complex(complex) => {
+                        style_sheet_selectors.push(complex);
+                    }
                 }
+            }
+
+            if !style_sheet_selectors.is_empty() {
+                out_style_sheets.push(OutputStyleSheet {
+                    selectors: style_sheet_selectors,
+                    body: block.data,
+                })
             }
         }
     }
 
-    out_classes.into_iter().map(|v| v.1).collect()
+    (
+        out_classes.into_iter().map(|v| v.1).collect(),
+        out_style_sheets
+    )
 }

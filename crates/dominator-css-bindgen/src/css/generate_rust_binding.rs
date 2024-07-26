@@ -1,5 +1,5 @@
 use crate::codegen::output_model::parsed_to_output_model;
-use crate::codegen::render_output_class::render_output_class;
+use crate::codegen::render_output_class::{render_output_class, render_output_style_sheets};
 use crate::css::parse_css::{take_next_block, ParsedCssFile};
 use crate::DCssResult;
 use cssparser::{Parser, ParserInput};
@@ -12,13 +12,16 @@ pub fn generate_rust_bindings_from_file(css_file_path: impl AsRef<Path>) -> DCss
     let mut parser = Parser::new(&mut input);
 
     let parsed = parse_css_file(&mut parser).unwrap();
-    let output = parsed_to_output_model(vec![parsed]);
+    let (output, output_style_sheets) = parsed_to_output_model(vec![parsed]);
 
-    Ok(output
+    let mut out_items = vec![render_output_style_sheets(output_style_sheets).to_string()];
+
+    out_items.extend(output
         .into_iter()
         .map(|v| render_output_class(v).to_string())
-        .collect::<Vec<_>>()
-        .join("\n"))
+        .collect::<Vec<_>>());
+
+    Ok(out_items.join("\n"))
 }
 
 pub fn parse_css_file<'a, 'aa>(parser: &mut Parser<'a, 'aa>) -> DCssResult<ParsedCssFile<'a>> {

@@ -47,4 +47,4 @@
     background: #121212;
 }
 
-#test,.indeedtest {}
+#test, body .indeedtest { color: burlywood; }

@@ -14,6 +14,11 @@ pub mod prelude {
     pub use super::typography::*;
 }
 
+pub fn stylesheet() {
+    modern_normalize_cssys::stylesheet();
+    base::stylesheet();
+}
+
 pub mod base {
     include!(concat!(env!("OUT_DIR"), "/base.rs"));
 }

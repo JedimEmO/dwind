@@ -27,6 +27,7 @@ use dwui::prelude::*;
 use futures_signals::signal::{Mutable, SignalExt};
 use my_custom_theme::*;
 use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::window;
 use dwind::bg_color_generator;
 
 #[cfg(not(test))]
@@ -53,7 +54,9 @@ mod my_custom_theme {
 fn main_view() -> Dom {
     let selected_doc = Mutable::new(Some(DocPage::Flex));
 
-    stylesheet!("body", {
+    dwind::stylesheet();
+
+    stylesheet!(["body"], {
         .raw(bg_color_generator!("#2e3138"))
     });
 

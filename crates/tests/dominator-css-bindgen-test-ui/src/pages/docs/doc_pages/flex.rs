@@ -8,6 +8,7 @@ use dwind_macros::dwclass;
 use dwind_macros::dwgenerate;
 use example_html_macro::example_html;
 use std::collections::BTreeMap;
+use std::mem::{ManuallyDrop, transmute};
 use dwui::prelude::TextSize;
 use crate::pages::docs::code_widget::code;
 use crate::pages::docs::example_box::example_box;
@@ -118,4 +119,3 @@ fn flex_example_auto() -> Dom {
         )
 })
 }
-
