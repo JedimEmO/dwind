@@ -8,10 +8,12 @@ pub mod prelude {
     pub use super::colors::*;
     pub use super::flexbox_and_grid::*;
     pub use super::interactivity::*;
-    pub use super::sizing::*;
+    pub use super::layout::*;
     pub use super::position::*;
+    pub use super::sizing::*;
     pub use super::spacing::*;
     pub use super::typography::*;
+    pub use dwind_base::*;
 }
 
 pub fn stylesheet() {
@@ -32,6 +34,12 @@ pub use modules::borders;
 pub mod interactivity {
     include!(concat!(env!("OUT_DIR"), "/interactivity.rs"));
 }
+
+
+pub mod layout {
+    include!(concat!(env!("OUT_DIR"), "/layout.rs"));
+}
+
 
 pub mod position {
     include!(concat!(env!("OUT_DIR"), "/position.rs"));

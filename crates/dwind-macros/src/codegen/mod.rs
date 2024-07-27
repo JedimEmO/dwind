@@ -6,12 +6,13 @@ use crate::codegen::string_rendering::{
 use crate::grammar::DwindClassSelector;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
+use dwind_base::media_queries::Breakpoint;
 
-pub fn render_classes(classes: Vec<DwindClassSelector>) -> Vec<TokenStream> {
+pub fn render_classes(classes: Vec<DwindClassSelector>) -> Vec<(TokenStream, Option<Breakpoint>)> {
     classes
         .into_iter()
         .map(|class| render_dwind_class(class))
-        .collect::<Vec<TokenStream>>()
+        .collect::<Vec<_>>()
 }
 
 pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector) -> TokenStream {
@@ -38,7 +39,7 @@ pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector
 
     let doc_str = format!("generator call: `{}`", raw.to_string());
 
-    let rendered_class = render_dwind_class(class);
+    let rendered_class = render_dwind_class(class).0;
 
     quote! {
         #[doc(hidden)]
@@ -50,15 +51,17 @@ pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector
     }
 }
 
-pub fn render_dwind_class(class: DwindClassSelector) -> TokenStream {
+pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<Breakpoint>) {
+    let breakpoint = class.get_breakpoint();
+
     if class.is_generator() {
-        return render_generator(class);
+        return (render_generator(class), breakpoint);
     }
 
     if class.pseudo_classes.is_empty() {
         let class_ident = Ident::new(&class.class_name.to_uppercase(), Span::call_site());
 
-        quote! { &* #class_ident }
+        (quote! { &* #class_ident }, breakpoint)
     } else {
         let pseudo_selector = format!(":{}", class.pseudo_classes.join(":"));
         let class_raw_ident = Ident::new(
@@ -68,7 +71,7 @@ pub fn render_dwind_class(class: DwindClassSelector) -> TokenStream {
         let class_name = class.class_name;
         let class_prefix = sanitize_class_prefix(&class_name);
 
-        quote! {
+        (quote! {
             dominator::class! {
                 # ! [prefix=#class_prefix]
 
@@ -76,7 +79,7 @@ pub fn render_dwind_class(class: DwindClassSelector) -> TokenStream {
                     .raw(&* #class_raw_ident)
                 })
             }
-        }
+        }, breakpoint)
     }
 }
 

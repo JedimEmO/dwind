@@ -20,10 +20,12 @@ pub struct OutputPseudoClass<'a> {
 
 pub struct OutputStyleSheet<'a> {
     pub selectors: Vec<Vec<Token<'a>>>,
-    pub body: Vec<Token<'a>>
+    pub body: Vec<Token<'a>>,
 }
 
-pub fn parsed_to_output_model<'a>(parsed_files: Vec<ParsedCssFile<'a>>) -> (Vec<OutputClass<'a>>, Vec<OutputStyleSheet<'a>>){
+pub fn parsed_to_output_model<'a>(
+    parsed_files: Vec<ParsedCssFile<'a>>,
+) -> (Vec<OutputClass<'a>>, Vec<OutputStyleSheet<'a>>) {
     let mut out_classes: HashMap<CowRcStr<'a>, OutputClass> = HashMap::new();
     let mut out_style_sheets = vec![];
 
@@ -72,6 +74,6 @@ pub fn parsed_to_output_model<'a>(parsed_files: Vec<ParsedCssFile<'a>>) -> (Vec<
 
     (
         out_classes.into_iter().map(|v| v.1).collect(),
-        out_style_sheets
+        out_style_sheets,
     )
 }

@@ -1,7 +1,7 @@
-use dominator::{Dom, events};
-use futures_signals::signal::{Mutable, not, SignalExt};
-use dwind_macros::{dwclass, dwclass_signal};
+use dominator::{events, Dom};
 use dwind::prelude::*;
+use dwind_macros::{dwclass, dwclass_signal};
+use futures_signals::signal::{not, Mutable, SignalExt};
 
 pub fn example_box(child: Dom, resizeable: bool) -> Dom {
     let width = Mutable::new(100.0f64);

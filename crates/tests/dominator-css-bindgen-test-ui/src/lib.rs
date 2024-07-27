@@ -10,13 +10,14 @@ extern crate dominator;
 #[macro_use]
 extern crate dwui;
 
-use std::sync::Arc;
 use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
+use crate::router::AppRouter;
 use dominator::{text, Dom};
 use dominator_css_bindgen_test::*;
 use dwind::base::*;
+use dwind::bg_color_generator;
 use dwind::borders::*;
 use dwind::colors::*;
 use dwind::flexbox_and_grid::*;
@@ -29,11 +30,10 @@ use dwui::prelude::*;
 use futures_signals::signal::{Mutable, SignalExt};
 use matchit::Params;
 use my_custom_theme::*;
+use std::sync::Arc;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::window;
-use dwind::bg_color_generator;
-use crate::router::AppRouter;
 
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
@@ -58,13 +58,13 @@ mod my_custom_theme {
 fn make_app_router() -> AppRouter<DocPage> {
     let mut router = matchit::Router::<Box<dyn Fn(Params) -> Result<DocPage, ()>>>::new();
 
-    router.insert("#/docs/colors", Box::new(|_| {
-        Ok(DocPage::Colors)
-    })).unwrap_throw();
+    router
+        .insert("#/docs/colors", Box::new(|_| Ok(DocPage::Colors)))
+        .unwrap_throw();
 
-    router.insert("#/docs/flex", Box::new(|_| {
-        Ok(DocPage::Flex)
-    })).unwrap_throw();
+    router
+        .insert("#/docs/flex", Box::new(|_| Ok(DocPage::Flex)))
+        .unwrap_throw();
 
     AppRouter::new(router)
 }
@@ -88,7 +88,7 @@ fn main_view() -> Dom {
             .style("margin-top", "4px")
             .child(doc_sidebar(doc_sections(), make_app_router().signal(), Arc::new(|v: DocPage| v.goto())))
             .child(html!("div", {
-                .dwclass!("m-l-4 m-r-0 w-full")
+                .dwclass!("m-l-4 m-r-0 w-p-75 @md:w-full")
                 .child(doc_main_view(router.signal().map(Some)))
             }))
         }))

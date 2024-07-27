@@ -1,10 +1,10 @@
-use std::fmt::{Display, Formatter};
 use dominator::routing::go_to_url;
+use std::fmt::{Display, Formatter};
 
+pub mod code_widget;
 pub mod doc_main;
 pub mod doc_pages;
 pub mod doc_sidebar;
-pub mod code_widget;
 pub mod example_box;
 
 #[derive(Clone)]

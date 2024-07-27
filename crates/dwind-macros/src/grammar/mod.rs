@@ -1,13 +1,16 @@
 use nom::bytes::complete::{tag, take_while1};
 use nom::character::is_alphanumeric;
+use nom::combinator::opt;
 use nom::multi::{many0, separated_list1};
 use nom::sequence::{delimited, terminated};
 use nom::IResult;
+use dwind_base::media_queries::Breakpoint;
 
 #[derive(Eq, PartialEq, Debug, Default)]
 pub struct DwindClassSelector {
     pub class_name: String,
     pub pseudo_classes: Vec<String>,
+    pub conditionals: Vec<String>,
     pub generator_params: Vec<String>,
 }
 
@@ -15,20 +18,70 @@ impl DwindClassSelector {
     pub fn is_generator(&self) -> bool {
         self.generator_params.len() > 0
     }
+
+    pub fn get_breakpoint(&self) -> Option<Breakpoint> {
+        let breakpoints = self.conditionals.iter().filter_map(|v| {
+            if let Ok(bp) = Breakpoint::try_from(v.as_str()) {
+                Some(bp)
+            } else {
+                None
+            }
+        }).collect::<Vec<_>>();
+
+        if breakpoints.len() > 1 {
+            panic!("only one breakpoint allowed");
+        }
+
+        breakpoints.first().cloned()
+    }
 }
 
 pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
-    let classes_parts = input.split(" ");
+    let (_, classes) = selectors(input).unwrap();
 
-    let classes: Result<_, _> = classes_parts
-        .map(|class_part| parse_selector(class_part).map(|v| v.1))
-        .collect();
+    Ok(classes
+        .into_iter()
+        .map(|(prefixes, class_name, generator_params)| {
+            let pseudo_classes = prefixes
+                .clone()
+                .into_iter()
+                .filter(|v| !v.contains("@"))
+                .map(|v| v.to_string())
+                .collect();
+            let conditionals = prefixes
+                .clone()
+                .into_iter()
+                .filter(|v| v.contains("@"))
+                .map(|v| v.to_string())
+                .collect();
+            let generator_params = generator_params
+                .or(Some(vec![]))
+                .unwrap()
+                .into_iter()
+                .map(|v| v.to_string())
+                .collect();
 
-    Ok(classes.unwrap())
+            DwindClassSelector {
+                class_name: class_name.to_string().replace("-", "_"),
+                pseudo_classes,
+                conditionals,
+                generator_params,
+            }
+        })
+        .collect())
+}
+
+fn selectors(input: &str) -> IResult<&str, Vec<(Vec<&str>, &str, Option<Vec<&str>>)>> {
+    let prefixes = many0(pseudo_selector);
+    let parser = terminated(
+        nom::sequence::tuple((prefixes, css_identifier, opt(generator_parameters))),
+        opt(tag(" ")),
+    );
+    many0(parser)(input)
 }
 
 pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
-    let (input, pseudo_classes) = many0(pseudo_selector)(input)?;
+    let (input, prefixes) = many0(pseudo_selector)(input)?;
     let (input, identifier) = css_identifier(input)?;
 
     let generator_params = if let Ok((_input, generator_params)) = generator_parameters(input) {
@@ -40,11 +93,25 @@ pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
         vec![]
     };
 
+    let pseudo_classes = prefixes
+        .clone()
+        .into_iter()
+        .filter(|v| !v.contains("@"))
+        .map(|v| v.to_string())
+        .collect();
+    let conditionals = prefixes
+        .clone()
+        .into_iter()
+        .filter(|v| v.contains("@"))
+        .map(|v| v.to_string())
+        .collect();
+
     Ok((
         input,
         DwindClassSelector {
             class_name: identifier.to_string().replace("-", "_"),
-            pseudo_classes: pseudo_classes.into_iter().map(|v| v.to_string()).collect(),
+            pseudo_classes,
+            conditionals,
             generator_params: generator_params
                 .into_iter()
                 .map(|v| v.to_string())
@@ -64,7 +131,7 @@ fn css_identifier(input: &str) -> IResult<&str, &str> {
 }
 
 fn color(input: &str) -> IResult<&str, &str> {
-    let parser = take_while1(is_extended_alphanumeric(vec!['#', '%', '_', '-']));
+    let parser = take_while1(is_extended_alphanumeric(vec!['#', '%', '_', '-', '@']));
 
     parser(input)
 }
@@ -81,7 +148,9 @@ fn generator_parameters(input: &str) -> IResult<&str, Vec<&str>> {
 }
 
 fn pseudo_selector(input: &str) -> IResult<&str, &str> {
-    let pseudo_parser = take_while1(is_extended_alphanumeric(vec!['_', '-', '(', ')']));
+    let pseudo_parser = take_while1(is_extended_alphanumeric(vec![
+        '_', '-', '(', ')', '@', '[', ']', ',',
+    ]));
     let mut parser = terminated(pseudo_parser, tag(":"));
 
     parser(input)
@@ -90,10 +159,30 @@ fn pseudo_selector(input: &str) -> IResult<&str, &str> {
 #[cfg(test)]
 mod test {
     use crate::grammar::{
-        css_identifier, generator_parameters, parse_class_string, pseudo_selector,
+        css_identifier, generator_parameters, parse_class_string, pseudo_selector, selectors,
         DwindClassSelector,
     };
 
+    #[test]
+    fn verify_selectors_parser() {
+        let v = selectors("foo @sm:bar @is[white]:bg-[5px] ").unwrap();
+        assert_eq!(v.1.len(), 3);
+        let v = selectors("@sm:@is[dark]:@is[selected]:foo").unwrap();
+        assert_eq!(v.1.len(), 1);
+    }
+
+    #[test]
+    fn verify_conditionals_parser() {
+        assert_eq!(
+            parse_class_string("@sm:@is[dark]:padding-5").unwrap(),
+            vec![DwindClassSelector {
+                class_name: "padding_5".to_string(),
+                pseudo_classes: vec![],
+                conditionals: vec!["@sm".to_string(), "@is[dark]".to_string()],
+                generator_params: vec![],
+            }]
+        );
+    }
     #[test]
     fn verify_parser() {
         assert_eq!(
@@ -101,6 +190,7 @@ mod test {
             vec![DwindClassSelector {
                 class_name: "padding_".to_string(),
                 pseudo_classes: vec![],
+                conditionals: vec![],
                 generator_params: vec!["5px".to_string()],
             }]
         );

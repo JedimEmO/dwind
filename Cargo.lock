@@ -241,11 +241,21 @@ dependencies = [
  "const_format",
  "dominator",
  "dominator-css-bindgen",
+ "dwind-base",
  "dwind-macros",
+ "futures-signals",
  "modern-normalize-cssys",
  "once_cell",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "dwind-base"
+version = "0.1.0"
+dependencies = [
+ "dominator",
+ "futures-signals",
 ]
 
 [[package]]
@@ -255,6 +265,7 @@ dependencies = [
  "const_format",
  "dominator",
  "dominator-css-bindgen-test",
+ "dwind-base",
  "futures-signals",
  "nom",
  "once_cell",

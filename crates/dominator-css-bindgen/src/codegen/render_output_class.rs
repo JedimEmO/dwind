@@ -1,10 +1,13 @@
 use crate::codegen::output_model::{OutputClass, OutputPseudoClass, OutputStyleSheet};
 use cssparser::{ToCss, Token};
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote,};
+use quote::quote;
 
 pub fn render_output_style_sheets(output_style_sheets: Vec<OutputStyleSheet>) -> TokenStream {
-    let stylesheets = output_style_sheets.into_iter().map(render_output_style_sheet).collect::<Vec<_>>();
+    let stylesheets = output_style_sheets
+        .into_iter()
+        .map(render_output_style_sheet)
+        .collect::<Vec<_>>();
 
     quote! {
         pub fn stylesheet() {
@@ -14,21 +17,32 @@ pub fn render_output_style_sheets(output_style_sheets: Vec<OutputStyleSheet>) ->
 }
 
 fn render_output_style_sheet(output_style_sheet: OutputStyleSheet) -> TokenStream {
-    let selectors = output_style_sheet.selectors.into_iter().map(|selector| {
-        selector.into_iter()
-            .map(|t| t.to_css_string().trim_matches(&['\n', '\t']).to_string())
-            .collect::<Vec<_>>().join("").trim().to_string()
-    }).collect::<Vec<_>>();
+    let selectors = output_style_sheet
+        .selectors
+        .into_iter()
+        .map(|selector| {
+            selector
+                .into_iter()
+                .map(|t| t.to_css_string().trim_matches(&['\n', '\t']).to_string())
+                .collect::<Vec<_>>()
+                .join("")
+                .trim()
+                .to_string()
+        })
+        .collect::<Vec<_>>();
 
     let body = render_token_body(output_style_sheet.body);
 
-    let (moz, non_moz) : (Vec<_>, Vec<_>) = selectors.into_iter().map(|v| {
-        if v.to_lowercase().contains("moz") {
-            (Some(v), None)
-        } else {
-            (None, Some(v))
-        }
-    }).unzip();
+    let (moz, non_moz): (Vec<_>, Vec<_>) = selectors
+        .into_iter()
+        .map(|v| {
+            if v.to_lowercase().contains("moz") {
+                (Some(v), None)
+            } else {
+                (None, Some(v))
+            }
+        })
+        .unzip();
 
     let moz = moz.into_iter().filter_map(|v| v).collect::<Vec<_>>();
     let non_moz = non_moz.into_iter().filter_map(|v| v).collect::<Vec<_>>();

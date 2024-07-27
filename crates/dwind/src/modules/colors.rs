@@ -14,7 +14,6 @@ macro_rules! text_color_generator {
     };
 }
 
-
 #[macro_export]
 macro_rules! border_color_generator {
     ($color:tt) => {
@@ -23,4 +22,3 @@ macro_rules! border_color_generator {
 }
 
 include!(concat!(env!("OUT_DIR"), "/colors_generators.rs"));
-

@@ -8,6 +8,7 @@ use crate::macro_inputs::DwindInputSignal;
 use macro_inputs::{DwGenerateInput, DwGenerateMapInput, DwindInput};
 use proc_macro::TokenStream;
 use quote::quote;
+use dwind_base::media_queries::{breakpoint, Breakpoint};
 
 /// Use dwind-macros macros on your DOMINATOR component
 ///
@@ -32,9 +33,23 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
     let classes = parse_class_string(classes.value().as_str()).unwrap();
     let classes = render_classes(classes);
 
-    let classes = classes.into_iter().map(|class| {
-        quote! {
-            .class(#class)
+    let classes = classes.into_iter().map(|(class, breakpoint)| {
+        if let Some(bp) = breakpoint {
+            let bp_value = match bp {
+                Breakpoint::VerySmall => quote! { dwind::prelude::media_queries::Breakpoint::VerySmall },
+                Breakpoint::Small => quote! { dwind::prelude::media_queries::Breakpoint::Small },
+                Breakpoint::Medium => quote! { dwind::prelude::media_queries::Breakpoint::Medium },
+                Breakpoint::Large => quote! { dwind::prelude::media_queries::Breakpoint::Large },
+                Breakpoint::VeryLarge => quote! { dwind::prelude::media_queries::Breakpoint::VeryLarge },
+            };
+
+            quote! {
+                .class_signal(#class, dwind::prelude::media_queries::breakpoint_active_signal(#bp_value))
+            }
+        } else {
+            quote! {
+                .class(#class)
+            }
         }
     });
 
@@ -71,7 +86,7 @@ pub fn dwclass_signal(input: TokenStream) -> TokenStream {
     let classes = parse_class_string(classes.value().as_str()).unwrap();
     let classes = render_classes(classes);
 
-    let classes = classes.into_iter().map(|class| {
+    let classes = classes.into_iter().map(|(| class, breakpoint)| {
         quote! {
             .class_signal(#class, #signal)
         }
@@ -189,7 +204,7 @@ pub fn dwgenerate_map(input: TokenStream) -> TokenStream {
     let out = quote! {
         #(#output)*
     }
-    .into();
+        .into();
 
     out
 }

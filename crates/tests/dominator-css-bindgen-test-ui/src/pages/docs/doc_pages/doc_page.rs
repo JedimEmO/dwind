@@ -1,6 +1,6 @@
 use dominator::{text, Dom};
-use dwind_macros::dwclass;
 use dwind::prelude::*;
+use dwind_macros::dwclass;
 use dwui::prelude::*;
 
 pub fn doc_page_title(title: &str) -> Dom {
@@ -9,7 +9,6 @@ pub fn doc_page_title(title: &str) -> Dom {
         .text_size(TextSize::ExtraLarge)
     })
 }
-
 
 pub fn doc_page_sub_header(title: &str) -> Dom {
     heading!({

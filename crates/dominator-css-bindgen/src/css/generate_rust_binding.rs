@@ -16,10 +16,12 @@ pub fn generate_rust_bindings_from_file(css_file_path: impl AsRef<Path>) -> DCss
 
     let mut out_items = vec![render_output_style_sheets(output_style_sheets).to_string()];
 
-    out_items.extend(output
-        .into_iter()
-        .map(|v| render_output_class(v).to_string())
-        .collect::<Vec<_>>());
+    out_items.extend(
+        output
+            .into_iter()
+            .map(|v| render_output_class(v).to_string())
+            .collect::<Vec<_>>(),
+    );
 
     Ok(out_items.join("\n"))
 }

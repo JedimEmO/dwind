@@ -1,12 +1,12 @@
-use std::collections::BTreeMap;
-use dominator::{Dom, events};
-use futures_signals::signal::SignalExt;
-use futures_signals::signal::Mutable;
+use crate::pages::docs::doc_pages::doc_page::{doc_page_sub_header, doc_page_title};
+use crate::pages::docs::example_box::example_box;
+use dominator::{events, Dom};
 use dwind::colors::DWIND_COLORS;
 use dwind::prelude::*;
 use dwind_macros::{dwclass, dwclass_signal};
-use crate::pages::docs::doc_pages::doc_page::{doc_page_sub_header, doc_page_title};
-use crate::pages::docs::example_box::example_box;
+use futures_signals::signal::Mutable;
+use futures_signals::signal::SignalExt;
+use std::collections::BTreeMap;
 
 pub fn colors_page() -> Dom {
     let mut selected_color = Mutable::new(None);
@@ -56,11 +56,13 @@ pub fn color_list(selected_color: Mutable<Option<(String, u32)>>) -> Dom {
     })
 }
 
-fn color_row(color_name: &str, shades: &BTreeMap<u32, String>, selected_color: Mutable<Option<(String, u32)>>) -> Dom {
+fn color_row(
+    color_name: &str,
+    shades: &BTreeMap<u32, String>,
+    selected_color: Mutable<Option<(String, u32)>>,
+) -> Dom {
     let mut sorted = shades.iter().collect::<Vec<_>>();
-    sorted.sort_by(|l, r| {
-        l.0.cmp(r.0)
-    });
+    sorted.sort_by(|l, r| l.0.cmp(r.0));
 
     let color_name_cloned = color_name.to_string();
 

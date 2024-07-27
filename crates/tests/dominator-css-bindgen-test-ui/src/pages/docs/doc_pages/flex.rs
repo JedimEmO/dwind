@@ -1,17 +1,17 @@
+use crate::dwui::heading;
+use crate::pages::docs::code_widget::code;
 use crate::pages::docs::doc_pages::doc_page::{doc_page_sub_header, doc_page_title};
-use dominator::{Dom, text};
+use crate::pages::docs::example_box::example_box;
+use dominator::{text, Dom};
 use dwind::background_scratched_generator;
 use dwind::prelude::*;
-use dwui::prelude::*;
-use crate::dwui::heading;
 use dwind_macros::dwclass;
 use dwind_macros::dwgenerate;
+use dwui::prelude::TextSize;
+use dwui::prelude::*;
 use example_html_macro::example_html;
 use std::collections::BTreeMap;
-use std::mem::{ManuallyDrop, transmute};
-use dwui::prelude::TextSize;
-use crate::pages::docs::code_widget::code;
-use crate::pages::docs::example_box::example_box;
+use std::mem::{transmute, ManuallyDrop};
 
 pub fn flex_page() -> Dom {
     html!("div", {
@@ -47,15 +47,15 @@ dwgenerate!(
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn flex_example_initial() -> Dom {
 html!("div", {
-    .dwclass!("rounded-lg background-scratched flex gap-4 align-items-center w-full h-16")
+    .dwclass!("rounded-lg background-scratched flex gap-2 @md:gap-4 align-items-center w-full h-16")
         .children(
             (0..3).map(|v| {
                 html!("div", {
                     .apply(|b| {
                         match v {
-                            0 => dwclass!(b, "w-14 bg-candlelight-900 flex-none"),
-                            1 => dwclass!(b, "w-64 bg-candlelight-600 flex-initial"),
-                            _ => dwclass!(b, "w-32 bg-candlelight-600 flex-initial"),
+                            0 => dwclass!(b, "w-p-5 @md:w-14 bg-candlelight-900 flex-none"),
+                            1 => dwclass!(b, "w-p-15 @md:w-64 bg-candlelight-600 flex-initial"),
+                            _ => dwclass!(b, "w-p-10 @md:w-32 bg-candlelight-600 flex-initial"),
                         }
                     })
                     .dwclass!("h-full")
@@ -67,21 +67,20 @@ html!("div", {
         )
 })
 }
-
 
 #[rustfmt::skip]
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn flex_example_1() -> Dom {
     html!("div", {
-    .dwclass!("rounded-lg background-scratched flex gap-4 align-items-center w-full h-16")
+    .dwclass!("rounded-lg background-scratched flex gap-2 @md:gap-4 align-items-center w-full h-16")
         .children(
             (0..3).map(|v| {
                 html!("div", {
                     .apply(|b| {
                         match v {
-                            0 => dwclass!(b, "w-14 bg-candlelight-900 flex-none"),
-                            1 => dwclass!(b, "w-64 bg-candlelight-600 flex-1"),
-                            _ => dwclass!(b, "w-32 bg-candlelight-600 flex-1"),
+                            0 => dwclass!(b, "w-p-5 @md:w-14 bg-candlelight-900 flex-none"),
+                            1 => dwclass!(b, "w-p-15 @md:w-64 bg-candlelight-600 flex-1"),
+                            _ => dwclass!(b, "w-p-10 @md:w-32 bg-candlelight-600 flex-1"),
                         }
                     })
                     .dwclass!("h-full")
@@ -94,20 +93,19 @@ fn flex_example_1() -> Dom {
 })
 }
 
-
 #[rustfmt::skip]
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn flex_example_auto() -> Dom {
     html!("div", {
-    .dwclass!("rounded-lg background-scratched flex gap-4 align-items-center w-full h-16")
+    .dwclass!("rounded-lg background-scratched flex gap-2 @md:gap-4 align-items-center w-full h-16")
         .children(
             (0..3).map(|v| {
                 html!("div", {
                     .apply(|b| {
                         match v {
-                            0 => dwclass!(b, "w-14 bg-candlelight-900 flex-none"),
-                            1 => dwclass!(b, "w-64 bg-candlelight-600 flex-auto"),
-                            _ => dwclass!(b, "w-32 bg-candlelight-600 flex-auto"),
+                            0 => dwclass!(b, "w-p-5 @md:w-14 bg-candlelight-900 flex-none"),
+                            1 => dwclass!(b, "w-p-15 @md:w-64 bg-candlelight-600 flex-auto"),
+                            _ => dwclass!(b, "w-p-10 @md:w-32 bg-candlelight-600 flex-auto"),
                         }
                     })
                     .dwclass!("h-full")

@@ -1,8 +1,8 @@
-use std::path::Path;
-use std::{env, fs};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Write;
-use serde::{Deserialize, Serialize};
+use std::path::Path;
+use std::{env, fs};
 
 #[derive(Serialize, Deserialize)]
 struct Color {
@@ -22,6 +22,7 @@ fn main() {
         "resources/css/box_shadow.css",
         "resources/css/interactivity.css",
         "resources/css/flexbox_and_grid.css",
+        "resources/css/layout.css",
         "resources/css/position.css",
         "resources/css/sizing.css",
         "resources/css/spacing.css",
@@ -51,12 +52,20 @@ fn main() {
     let mut colors_out_file = fs::File::create(colors_out_file).unwrap();
 
     for color in colors.colors.iter() {
-        colors_out_file.write(render_color(color, "bg", "bg-color-").as_bytes()).unwrap();
-        colors_out_file.write(render_color(color, "text", "text-color-").as_bytes()).unwrap();
-        colors_out_file.write(render_color(color, "border", "border-color-").as_bytes()).unwrap();
+        colors_out_file
+            .write(render_color(color, "bg", "bg-color-").as_bytes())
+            .unwrap();
+        colors_out_file
+            .write(render_color(color, "text", "text-color-").as_bytes())
+            .unwrap();
+        colors_out_file
+            .write(render_color(color, "border", "border-color-").as_bytes())
+            .unwrap();
     }
 
-    colors_out_file.write(render_dwind_colors(&colors).as_bytes()).unwrap();
+    colors_out_file
+        .write(render_dwind_colors(&colors).as_bytes())
+        .unwrap();
 
     println!("cargo::rerun-if-changed=build.rs");
     println!("cargo::rerun-if-changed=resources/colors.json");
@@ -64,26 +73,44 @@ fn main() {
 
 // render a once cell with a hash map of all the colors
 fn render_dwind_colors(colors: &ColorFile) -> String {
-    let colors = colors.colors.iter().map(|color| {
-        let shades = color.shades.iter().map(|(shade, value)| {
-            format!("({shade}, \"{value}\".to_string())")
-        }).collect::<Vec<_>>().join(", ");
+    let colors = colors
+        .colors
+        .iter()
+        .map(|color| {
+            let shades = color
+                .shades
+                .iter()
+                .map(|(shade, value)| format!("({shade}, \"{value}\".to_string())"))
+                .collect::<Vec<_>>()
+                .join(", ");
 
-        format!("(\"{}\".to_string(), std::collections::BTreeMap::from([{shades}]))", color.name)
-    }).collect::<Vec<_>>().join(",\n");
+            format!(
+                "(\"{}\".to_string(), std::collections::BTreeMap::from([{shades}]))",
+                color.name
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(",\n");
 
-    format!(r#"pub static DWIND_COLORS: once_cell::sync::Lazy<std::collections::BTreeMap<String, std::collections::BTreeMap<u32, String>>> = once_cell::sync::Lazy::new(|| {{
+    format!(
+        r#"pub static DWIND_COLORS: once_cell::sync::Lazy<std::collections::BTreeMap<String, std::collections::BTreeMap<u32, String>>> = once_cell::sync::Lazy::new(|| {{
     std::collections::BTreeMap::from([
     {colors}
 ])
-}});"#)
+}});"#
+    )
 }
 fn render_color(color: &Color, prefix: &str, generator: &str) -> String {
-    let shades = color.shades.iter().map(|(intensity, value)| {
-        format!("    (\"{}-{intensity}\", \"{value}\")", color.name)
-    }).collect::<Vec<String>>().join(",\n");
+    let shades = color
+        .shades
+        .iter()
+        .map(|(intensity, value)| format!("    (\"{}-{intensity}\", \"{value}\")", color.name))
+        .collect::<Vec<String>>()
+        .join(",\n");
 
-    format!(r#"dwgenerate_map!("{prefix}", "{generator}", [
+    format!(
+        r#"dwgenerate_map!("{prefix}", "{generator}", [
 {shades}
-]);"#, )
+]);"#,
+    )
 }
