@@ -66,6 +66,10 @@ fn make_app_router() -> AppRouter<DocPage> {
         .insert("#/docs/flex", Box::new(|_| Ok(DocPage::Flex)))
         .unwrap_throw();
 
+    router
+        .insert("#/docs/responsive-design", Box::new(|_| Ok(DocPage::ResponsiveDesign)))
+        .unwrap_throw();
+
     AppRouter::new(router)
 }
 fn main_view() -> Dom {

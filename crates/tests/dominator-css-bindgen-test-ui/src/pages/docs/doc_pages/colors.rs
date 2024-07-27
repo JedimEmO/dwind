@@ -14,13 +14,21 @@ pub fn colors_page() -> Dom {
     html!("div", {
         .dwclass!("w-full")
         .child(doc_page_title("Colors"))
-        .text("Dwind provides a range of preconfigured colors")
+        .text("Dwind provides a collection of preconfigured colors")
         .child(doc_page_sub_header("All the colors"))
         .child(html!("p", {
-            .text("Here is a list of all the preconfigured colors, with their shades.")
-            .text("All of the colors in this list has corresponding dwclasses generated for them, i.e:")
-            .text("border-manatee-500 and bg-candlelight-950 etc.")
+            .text(r#"DWIND includes a small selection of pre-defined colors to get you started.
+They are all defined in colors.json under the resources/ directory.
+DWIND uses this file to generate classes using these colors, for instanceborder-manatee-500 and bg-candlelight-950 etc.
+"#)
         }))
+        .child(html!("p", {
+            .text(r#"It is very likely you will wish to create your own set of colors in your project.
+You can do this by creating your own colors json, and add processing of it to your build.rs file.
+You can see the examples directory in the DWIND repository for more information on how to make your own custom colors.
+"#)
+        }))
+
         .child(example_box(color_list(selected_color.clone()), false))
         .child_signal(selected_color.signal_ref(|selected_color| {
             selected_color.as_ref().map(|selected_color| example_box(show_selected_color(selected_color), false))

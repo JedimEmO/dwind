@@ -16,7 +16,7 @@ pub fn doc_sidebar(
     let selected_doc_bc = selected_doc.broadcast();
 
     html!("div", {
-        .dwclass!("w-32 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-300")
+        .dwclass!("w-40 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-300")
         .children(doc_sections.into_iter().map(clone!(goto => move |section| {
             let section_cloned = section.clone();
             let selected_index_signal = map_ref! {

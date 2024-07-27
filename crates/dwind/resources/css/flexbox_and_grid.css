@@ -55,6 +55,23 @@
     flex: 0 1 auto;
 }
 
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-row-reverse {
+    flex-direction: row-reverse;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-col-reverse {
+    flex-direction: column-reverse;
+}
+
 .grid {
     display: grid;
 }
