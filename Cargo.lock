@@ -159,9 +159,9 @@ checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
 
 [[package]]
 name = "dominator"
-version = "0.5.35"
+version = "0.5.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00bb5a935d77de90d5eb9d96aad92aa4473c711b82e50c1ac7c13e898607f81a"
+checksum = "ccc53d58e9008752db7f793c6685c19c26dc4ede5f2fb912e30320310857c39b"
 dependencies = [
  "discard",
  "futures-channel",
@@ -392,8 +392,9 @@ dependencies = [
 
 [[package]]
 name = "futures-signals"
-version = "0.3.33"
-source = "git+https://github.com/Pauan/rust-signals.git#e3c207d29b5983336d71c1bc20b806aa8d8fa375"
+version = "0.3.34"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70abe9c40a0dccd69bf7c59ba58714ebeb6c15a88143a10c6be7130e895f1696"
 dependencies = [
  "discard",
  "futures-channel",

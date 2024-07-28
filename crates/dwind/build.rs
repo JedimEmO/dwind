@@ -48,7 +48,7 @@ fn main() {
     let color_file = fs::read_to_string("resources/colors.json").unwrap();
     let colors: ColorFile = serde_json::from_str(&color_file).unwrap();
 
-    let colors_out_file = Path::new(&out_dir).join("colors_generators.rs");
+    let colors_out_file = Path::new(&out_dir).join("colors_generated.rs");
     let mut colors_out_file = fs::File::create(colors_out_file).unwrap();
 
     for color in colors.colors.iter() {

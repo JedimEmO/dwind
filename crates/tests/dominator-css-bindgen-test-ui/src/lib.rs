@@ -69,8 +69,6 @@ fn make_app_router() -> AppRouter<DocPage> {
     AppRouter::new(router)
 }
 fn main_view() -> Dom {
-    let router = make_app_router();
-
     dwind::stylesheet();
 
     stylesheet!(["body"], {
@@ -80,16 +78,17 @@ fn main_view() -> Dom {
     });
 
     html!("div", {
-        .dwclass!("font-sans")
+        .dwclass!("font-sans @sm:text-woodsmoke-200")
         .dwclass!("text-woodsmoke-200")
         .child(header())
         .child(html!("div", {
             .dwclass!("m-x-auto max-w-lg flex h-p-90")
             .style("margin-top", "4px")
-            .child(doc_sidebar(doc_sections(), make_app_router().signal(), Arc::new(|v: DocPage| v.goto())))
-            .child(html!("div", {
-                .dwclass!("m-l-4 m-r-0 w-p-75 @md:w-full")
-                .child(doc_main_view(router.signal().map(Some)))
+            .child_signal(doc_sidebar(doc_sections(), || make_app_router().signal(), Arc::new(|v: DocPage| v.goto()), || {
+                html!("div", {
+                    .dwclass!("m-l-4 m-r-0 w-p-75 @md:w-full")
+                    .child(doc_main_view(make_app_router().signal().map(Some)))
+                })
             }))
         }))
     })

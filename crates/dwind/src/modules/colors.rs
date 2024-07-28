@@ -21,4 +21,4 @@ macro_rules! border_color_generator {
     };
 }
 
-include!(concat!(env!("OUT_DIR"), "/colors_generators.rs"));
+include!(concat!(env!("OUT_DIR"), "/colors_generated.rs"));

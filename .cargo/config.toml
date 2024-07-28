@@ -5,6 +5,3 @@ runner = 'wasm-bindgen-test-runner'
 opt-level = "z"
 lto = true
 codegen-units = 1
-
-[dominator-cssqwdqwd-bindgen-test-ui.build]
-target = "wasm32-unknown-unknown"
