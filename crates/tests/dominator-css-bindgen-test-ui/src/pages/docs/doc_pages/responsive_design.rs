@@ -26,7 +26,7 @@ pub fn responsive_design() -> Dom {
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn breakpoint_example() -> Dom {
 html!("div", {
-    .dwclass!("flex w-full flex-col @sm:flex-row text-woodsmoke-950 font-extrabold")
+    .dwclass!("w-full @<sm:flex-col @sm:flex-row flex text-woodsmoke-950 font-extrabold")
     .child(html!("div", {
         .dwclass!("@sm:w-40 h-40 flex-initial bg-picton-blue-400 flex align-items-center justify-center")
         .text_signal(breakpoint_active_signal(Breakpoint::Small).map(|active| {

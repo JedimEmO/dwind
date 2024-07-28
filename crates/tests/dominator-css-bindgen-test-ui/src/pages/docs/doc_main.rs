@@ -12,7 +12,7 @@ pub fn doc_main_view(current_doc: impl Signal<Item = Option<DocPage>> + 'static)
                 match doc {
                     DocPage::Flex => flex_page(),
                     DocPage::Colors => colors_page(),
-                    DocPage::ResponsiveDesign => responsive_design(),
+                    DocPage::Responsiveness => responsive_design(),
                     _ => html!("div", { .text("todo")})
                 }
             })

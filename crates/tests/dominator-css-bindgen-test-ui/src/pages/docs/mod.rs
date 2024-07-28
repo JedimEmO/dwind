@@ -16,7 +16,7 @@ pub struct DocSection {
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum DocPage {
     Colors,
-    ResponsiveDesign,
+    Responsiveness,
     // Flex
     Flex,
     Justify,
@@ -40,7 +40,7 @@ impl DocPage {
             DocPage::Rounding => {}
             DocPage::Color => {}
             DocPage::Style => {}
-            DocPage::ResponsiveDesign => go_to_url("#/docs/responsive-design"),
+            DocPage::Responsiveness => go_to_url("#/docs/responsive-design"),
         }
     }
 }
@@ -60,13 +60,13 @@ pub fn doc_sections() -> Vec<DocSection> {
     vec![
         DocSection {
             title: "General".to_string(),
-            docs: vec![DocPage::Colors, DocPage::ResponsiveDesign],
+            docs: vec![DocPage::Colors, DocPage::Responsiveness],
         },
         DocSection {
             title: "Flex and Grid".to_string(),
-            docs: vec![DocPage::Flex, DocPage::Justify, DocPage::Align],
+            docs: vec![DocPage::Flex /*, DocPage::Justify, DocPage::Align*/],
         },
-        DocSection {
+        /*DocSection {
             title: "Borders".to_string(),
             docs: vec![
                 DocPage::Border,
@@ -74,6 +74,6 @@ pub fn doc_sections() -> Vec<DocSection> {
                 DocPage::Color,
                 DocPage::Style,
             ],
-        },
+        },*/
     ]
 }

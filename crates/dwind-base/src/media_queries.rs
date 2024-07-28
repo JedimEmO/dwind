@@ -14,6 +14,7 @@ impl TryFrom<&str> for Breakpoint {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
+            "@xs" => Ok(Breakpoint::VerySmall),
             "@sm" => Ok(Breakpoint::Small),
             "@md" => Ok(Breakpoint::Medium),
             "@lg" => Ok(Breakpoint::Large),
@@ -37,4 +38,8 @@ pub fn breakpoint() -> impl Signal<Item = Breakpoint> {
 
 pub fn breakpoint_active_signal(level: Breakpoint) -> impl Signal<Item = bool> {
     breakpoint().map(move |bp| bp >= level).dedupe()
+}
+
+pub fn breakpoint_less_than_signal(level: Breakpoint) -> impl Signal<Item = bool> {
+    breakpoint().map(move |bp| bp < level).dedupe()
 }

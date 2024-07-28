@@ -34,7 +34,9 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
     let classes = render_classes(classes);
 
     let classes = classes.into_iter().map(|(class, breakpoint)| {
-        if let Some(bp) = breakpoint {
+        if let Some(breakpoint) = breakpoint {
+            let bp = breakpoint.breakpoint;
+
             let bp_value = match bp {
                 Breakpoint::VerySmall => quote! { dwind::prelude::media_queries::Breakpoint::VerySmall },
                 Breakpoint::Small => quote! { dwind::prelude::media_queries::Breakpoint::Small },
@@ -43,9 +45,16 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
                 Breakpoint::VeryLarge => quote! { dwind::prelude::media_queries::Breakpoint::VeryLarge },
             };
 
-            quote! {
-                .class_signal(#class, dwind::prelude::media_queries::breakpoint_active_signal(#bp_value))
+            if let Some(_modifier) = breakpoint.modifier {
+                quote! {
+                    .class_signal(#class, dwind::prelude::media_queries::breakpoint_less_than_signal(#bp_value))
+                }
+            } else {
+                quote! {
+                    .class_signal(#class, dwind::prelude::media_queries::breakpoint_active_signal(#bp_value))
+                }
             }
+
         } else {
             quote! {
                 .class(#class)

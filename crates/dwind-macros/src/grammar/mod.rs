@@ -6,6 +6,8 @@ use nom::multi::{many0, separated_list1};
 use nom::sequence::{delimited, terminated};
 use nom::IResult;
 
+use crate::codegen::BreakpointInfo;
+
 #[derive(Eq, PartialEq, Debug, Default)]
 pub struct DwindClassSelector {
     pub class_name: String,
@@ -19,13 +21,24 @@ impl DwindClassSelector {
         !self.generator_params.is_empty()
     }
 
-    pub fn get_breakpoint(&self) -> Option<Breakpoint> {
+    pub fn get_breakpoint(&self) -> Option<BreakpointInfo> {
         let breakpoints = self
             .conditionals
             .iter()
             .filter_map(|v| {
+                let (v, modifier) = if v.starts_with("@<") {
+                    let mut v = v.clone();
+                    v.remove(1);
+                    (v, Some("<".to_string()))
+                } else {
+                    (v.clone(), None)
+                };
+
                 if let Ok(bp) = Breakpoint::try_from(v.as_str()) {
-                    Some(bp)
+                    Some(BreakpointInfo {
+                        breakpoint: bp,
+                        modifier,
+                    })
                 } else {
                     None
                 }
@@ -153,7 +166,7 @@ fn generator_parameters(input: &str) -> IResult<&str, Vec<&str>> {
 
 fn pseudo_selector(input: &str) -> IResult<&str, &str> {
     let pseudo_parser = take_while1(is_extended_alphanumeric(vec![
-        '_', '-', '(', ')', '@', '[', ']', ',',
+        '_', '-', '(', ')', '@', '[', ']', ',', '<',
     ]));
     let mut parser = terminated(pseudo_parser, tag(":"));
 
@@ -171,8 +184,8 @@ mod test {
     fn verify_selectors_parser() {
         let v = selectors("foo @sm:bar @is[white]:bg-[5px] ").unwrap();
         assert_eq!(v.1.len(), 3);
-        let v = selectors("@sm:@is[dark]:@is[selected]:foo").unwrap();
-        assert_eq!(v.1.len(), 1);
+        let v = selectors("@sm:@is[dark]:@is[selected]:foo @<sm:bar").unwrap();
+        assert_eq!(v.1.len(), 2);
     }
 
     #[test]

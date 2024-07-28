@@ -15,13 +15,7 @@ use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
 use crate::router::AppRouter;
 use dominator::Dom;
-use dwind::base::*;
-use dwind::borders::*;
-use dwind::colors::*;
-use dwind::flexbox_and_grid::*;
-use dwind::sizing::*;
-use dwind::spacing::*;
-use dwind::typography::*;
+use dwind::prelude::*;
 use dwind_macros::dwclass;
 use futures_signals::signal::SignalExt;
 use matchit::Params;
@@ -34,18 +28,6 @@ async fn main() {
     wasm_log::init(Default::default());
 
     dominator::append_dom(&dominator::body(), main_view());
-}
-
-mod my_custom_theme {
-    use crate::margin_left_generator;
-    use crate::padding_generator;
-    use dwind::prelude::*;
-    use dwind_macros::dwgenerate;
-
-    dwgenerate!("nth-2-padding", "nth-child(2):hover:padding-[20px]");
-    dwgenerate!("hover-margin", "hover:margin-left-[20px]");
-    dwgenerate!("hover-bg-apple", "hover:bg-apple-200");
-    dwgenerate!("hover-text-apple", "hover:text-apple-950");
 }
 
 fn make_app_router() -> AppRouter<DocPage> {
@@ -62,12 +44,13 @@ fn make_app_router() -> AppRouter<DocPage> {
     router
         .insert(
             "#/docs/responsive-design",
-            Box::new(|_| Ok(DocPage::ResponsiveDesign)),
+            Box::new(|_| Ok(DocPage::Responsiveness)),
         )
         .unwrap_throw();
 
     AppRouter::new(router)
 }
+
 fn main_view() -> Dom {
     dwind::stylesheet();
 
@@ -82,11 +65,11 @@ fn main_view() -> Dom {
         .dwclass!("text-woodsmoke-200")
         .child(header())
         .child(html!("div", {
-            .dwclass!("m-x-auto max-w-lg flex h-p-90")
+            .dwclass!("m-x-auto flex max-w-lg")
             .style("margin-top", "4px")
             .child_signal(doc_sidebar(doc_sections(), || make_app_router().signal(), Arc::new(|v: DocPage| v.goto()), || {
                 html!("div", {
-                    .dwclass!("m-l-4 m-r-0 w-p-75 @md:w-full")
+                    .dwclass!("m-l-4 m-r-0 w-p-50 @sm:w-full")
                     .child(doc_main_view(make_app_router().signal().map(Some)))
                 })
             }))
@@ -113,26 +96,4 @@ fn header() -> Dom {
             }))
          }))
     })
-}
-mod generators {
-    #[macro_export]
-    macro_rules! padding_generator {
-        ($padding:tt) => {
-            const_format::formatcp!("padding: {};", $padding)
-        };
-    }
-
-    #[macro_export]
-    macro_rules! margin_left_generator {
-        ($margin_left:tt) => {
-            const_format::formatcp!("margin-left: {};", $margin_left)
-        };
-    }
-
-    #[macro_export]
-    macro_rules! height_generator {
-        ($height:tt) => {
-            const_format::formatcp!("height: {};", $height)
-        };
-    }
 }

@@ -30,7 +30,6 @@ where
             })
             .map(move |new_url| {
                 if let Ok(route) = self.match_url(new_url.hash().as_str()) {
-                    info!("url: {}", new_url.hash().as_str());
                     route
                 } else {
                     info!("unmatched url: {}", new_url.hash().as_str());

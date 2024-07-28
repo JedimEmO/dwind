@@ -1,4 +1,3 @@
-use crate::my_custom_theme::HOVER_BG_APPLE;
 use crate::pages::docs::{DocPage, DocSection};
 use dominator::{events, text, Dom};
 use dwind::prelude::*;
@@ -10,7 +9,6 @@ use futures_signals::signal::Mutable;
 use futures_signals::signal::{Signal, SignalExt};
 use media_queries::breakpoint_active_signal;
 use std::sync::Arc;
-use wasm_bindgen_futures::spawn_local;
 
 pub fn doc_sidebar<T>(
     doc_sections: Vec<DocSection>,
@@ -34,7 +32,8 @@ where
         .map(clone!(show_small_menu => move |at_least_small| {
             if at_least_small {
                 html!("div", {
-                    .dwclass!("grid grid-cols-2 place-content-start")
+                    .dwclass!("flex")
+                    .class([&*FLEX_ROW])
                     .child(doc_sidebar_inline(doc_sections.clone(), selected_doc(), goto.clone()))
                     .child(main())
                 })
@@ -44,9 +43,11 @@ where
                 html!("div", {
                     .class([
                         &*GRID,
-                        &*GRID_FLOW_ROW
+                        &*GRID_FLOW_ROW,
+                        &*W_FULL
                     ])
                     .child(html!("div", {
+                        .class([&*W_MIN])
                         .child(html!("h1", {
                             .class([&*M_L_2, &*TEXT_XL, &*FONT_MONO, &*FONT_EXTRABOLD, &*TEXT_PICTON_BLUE_200, &*CURSOR_POINTER, &*MENU_TEXT_HOVER])
                             .text("=")
@@ -56,13 +57,13 @@ where
                         }))
                     }))
                     .child(html!("div", {
-                        .class([&*COL_START_1, &*COL_END_2, &*ROW_START_2, &*ROW_END_2])
+                        .class([&*COL_START_1, &*COL_END_1, &*ROW_START_2, &*ROW_END_2, &*W_P_100])
                         .child(main())
                     }))
                     .child_signal(show_small_menu.signal().map(clone!(doc_sections, goto, selected_doc => move |show| {
                         if show {
                             Some(html!("div", {
-                                .class([&*COL_START_1, &*COL_END_2, &*ROW_START_2, &*ROW_END_2, &*BG_WOODSMOKE_950])
+                                .class([&*COL_START_1, &*COL_END_1, &*ROW_START_2, &*ROW_END_2, &*BG_WOODSMOKE_950])
                                 .style("z-index", "2")
                                 .child(doc_sidebar_inline(doc_sections.clone(), selected_doc(), goto.clone()))
                             }))
@@ -84,7 +85,7 @@ pub fn doc_sidebar_inline(
     let selected_doc_bc = selected_doc.broadcast();
 
     html!("div", {
-        .dwclass!("w-40 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-300")
+        .dwclass!("w-44 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-300")
         .children(doc_sections.into_iter().map(clone!(goto => move |section| {
             let section_cloned = section.clone();
             let selected_index_signal = map_ref! {

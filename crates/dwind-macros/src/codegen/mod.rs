@@ -8,7 +8,9 @@ use dwind_base::media_queries::Breakpoint;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 
-pub fn render_classes(classes: Vec<DwindClassSelector>) -> Vec<(TokenStream, Option<Breakpoint>)> {
+pub fn render_classes(
+    classes: Vec<DwindClassSelector>,
+) -> Vec<(TokenStream, Option<BreakpointInfo>)> {
     classes
         .into_iter()
         .map(render_dwind_class)
@@ -51,7 +53,7 @@ pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector
     }
 }
 
-pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<Breakpoint>) {
+pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<BreakpointInfo>) {
     let breakpoint = class.get_breakpoint();
 
     if class.is_generator() {
@@ -124,4 +126,10 @@ fn render_generator_call(class: &DwindClassSelector) -> TokenStream {
     quote! {
         #generator_ident!( #(#generator_params),*)
     }
+}
+
+#[derive(Clone)]
+pub struct BreakpointInfo {
+    pub breakpoint: Breakpoint,
+    pub modifier: Option<String>,
 }
