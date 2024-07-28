@@ -11,7 +11,7 @@ use std::sync::Arc;
 pub fn doc_sidebar(
     doc_sections: Vec<DocSection>,
     selected_doc: impl Signal<Item = DocPage> + 'static,
-    goto: Arc<impl Fn(DocPage) -> () + 'static>,
+    goto: Arc<impl Fn(DocPage) + 'static>,
 ) -> Dom {
     let selected_doc_bc = selected_doc.broadcast();
 

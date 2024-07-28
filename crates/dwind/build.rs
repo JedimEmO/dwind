@@ -52,18 +52,18 @@ fn main() {
     let mut colors_out_file = fs::File::create(colors_out_file).unwrap();
 
     for color in colors.colors.iter() {
-        colors_out_file
+        let _ = colors_out_file
             .write(render_color(color, "bg", "bg-color-").as_bytes())
             .unwrap();
-        colors_out_file
+        let _ = colors_out_file
             .write(render_color(color, "text", "text-color-").as_bytes())
             .unwrap();
-        colors_out_file
+        let _ = colors_out_file
             .write(render_color(color, "border", "border-color-").as_bytes())
             .unwrap();
     }
 
-    colors_out_file
+    let _ = colors_out_file
         .write(render_dwind_colors(&colors).as_bytes())
         .unwrap();
 

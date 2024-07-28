@@ -49,7 +49,7 @@ impl Parse for ExampleHtmlArgs {
                 _ => {
                     return Err(syn::Error::new(
                         ident.span(),
-                        format!("unexpected argument: {}", ident.to_string()),
+                        format!("unexpected argument: {}", ident),
                     ))
                 }
             }
@@ -98,7 +98,7 @@ fn render_themes(fn_name: String, code: String, themes: Vec<String>) -> proc_mac
 
     for theme_name in themes {
         let theme = &theme_set.themes[&theme_name];
-        let rendered_theme = highlighted_html_for_string(&code, &syntax_set, sr, &theme).unwrap();
+        let rendered_theme = highlighted_html_for_string(&code, &syntax_set, sr, theme).unwrap();
 
         rendered_themes.push(quote! {( #theme_name.to_string(), #rendered_theme.to_string())});
     }

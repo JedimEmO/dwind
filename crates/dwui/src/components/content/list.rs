@@ -7,7 +7,7 @@ use futures_signals_component_macro::component;
 use std::sync::Arc;
 
 #[component(render_fn = pretty_list)]
-struct List<TClickHandler: Fn(usize) -> () = fn(usize) -> ()> {
+struct List<TClickHandler: Fn(usize) = fn(usize) -> ()> {
     #[signal_vec]
     #[default(vec ! [])]
     items: Dom,

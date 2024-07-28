@@ -1,12 +1,12 @@
-use dominator::Dom;
-use futures_signals::signal::SignalExt;
-use dwind_macros::dwclass;
-use dwind::prelude::*;
-use dwind::prelude::media_queries::{Breakpoint, breakpoint_active_signal};
-use example_html_macro::example_html;
 use crate::pages::docs::code_widget::code;
 use crate::pages::docs::doc_pages::doc_page::{doc_page_sub_header, doc_page_title};
 use crate::pages::docs::example_box::example_box;
+use dominator::Dom;
+use dwind::prelude::media_queries::{breakpoint_active_signal, Breakpoint};
+use dwind::prelude::*;
+use dwind_macros::dwclass;
+use example_html_macro::example_html;
+use futures_signals::signal::SignalExt;
 
 pub fn responsive_design() -> Dom {
     html!("div", {

@@ -60,10 +60,7 @@ pub fn doc_sections() -> Vec<DocSection> {
     vec![
         DocSection {
             title: "General".to_string(),
-            docs: vec![
-                DocPage::Colors,
-                DocPage::ResponsiveDesign,
-            ],
+            docs: vec![DocPage::Colors, DocPage::ResponsiveDesign],
         },
         DocSection {
             title: "Flex and Grid".to_string(),

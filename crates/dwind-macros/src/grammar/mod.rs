@@ -1,10 +1,10 @@
+use dwind_base::media_queries::Breakpoint;
 use nom::bytes::complete::{tag, take_while1};
 use nom::character::is_alphanumeric;
 use nom::combinator::opt;
 use nom::multi::{many0, separated_list1};
 use nom::sequence::{delimited, terminated};
 use nom::IResult;
-use dwind_base::media_queries::Breakpoint;
 
 #[derive(Eq, PartialEq, Debug, Default)]
 pub struct DwindClassSelector {
@@ -16,17 +16,21 @@ pub struct DwindClassSelector {
 
 impl DwindClassSelector {
     pub fn is_generator(&self) -> bool {
-        self.generator_params.len() > 0
+        !self.generator_params.is_empty()
     }
 
     pub fn get_breakpoint(&self) -> Option<Breakpoint> {
-        let breakpoints = self.conditionals.iter().filter_map(|v| {
-            if let Ok(bp) = Breakpoint::try_from(v.as_str()) {
-                Some(bp)
-            } else {
-                None
-            }
-        }).collect::<Vec<_>>();
+        let breakpoints = self
+            .conditionals
+            .iter()
+            .filter_map(|v| {
+                if let Ok(bp) = Breakpoint::try_from(v.as_str()) {
+                    Some(bp)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
 
         if breakpoints.len() > 1 {
             panic!("only one breakpoint allowed");
@@ -45,13 +49,13 @@ pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
             let pseudo_classes = prefixes
                 .clone()
                 .into_iter()
-                .filter(|v| !v.contains("@"))
+                .filter(|v| !v.contains('@'))
                 .map(|v| v.to_string())
                 .collect();
             let conditionals = prefixes
                 .clone()
                 .into_iter()
-                .filter(|v| v.contains("@"))
+                .filter(|v| v.contains('@'))
                 .map(|v| v.to_string())
                 .collect();
             let generator_params = generator_params
@@ -62,7 +66,7 @@ pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
                 .collect();
 
             DwindClassSelector {
-                class_name: class_name.to_string().replace("-", "_"),
+                class_name: class_name.to_string().replace('-', "_"),
                 pseudo_classes,
                 conditionals,
                 generator_params,
@@ -96,20 +100,20 @@ pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
     let pseudo_classes = prefixes
         .clone()
         .into_iter()
-        .filter(|v| !v.contains("@"))
+        .filter(|v| !v.contains('@'))
         .map(|v| v.to_string())
         .collect();
     let conditionals = prefixes
         .clone()
         .into_iter()
-        .filter(|v| v.contains("@"))
+        .filter(|v| v.contains('@'))
         .map(|v| v.to_string())
         .collect();
 
     Ok((
         input,
         DwindClassSelector {
-            class_name: identifier.to_string().replace("-", "_"),
+            class_name: identifier.to_string().replace('-', "_"),
             pseudo_classes,
             conditionals,
             generator_params: generator_params

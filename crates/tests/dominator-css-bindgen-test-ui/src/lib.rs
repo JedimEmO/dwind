@@ -26,11 +26,10 @@ use dwind_macros::dwclass;
 use futures_signals::signal::SignalExt;
 use matchit::Params;
 use std::sync::Arc;
-use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::UnwrapThrowExt;
 
 #[cfg(not(test))]
-#[wasm_bindgen(start)]
+#[wasm_bindgen::prelude::wasm_bindgen(start)]
 async fn main() {
     wasm_log::init(Default::default());
 

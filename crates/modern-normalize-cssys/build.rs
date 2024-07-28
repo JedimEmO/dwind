@@ -10,7 +10,7 @@ fn main() {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("generated.rs");
 
-    fs::write(&dest_path, out).unwrap();
+    fs::write(dest_path, out).unwrap();
 
     println!("cargo::rerun-if-changed=build.rs");
     println!("cargo::rerun-if-changed=modern-normalize/modern-normalize.css");

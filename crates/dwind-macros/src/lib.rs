@@ -201,10 +201,8 @@ pub fn dwgenerate_map(input: TokenStream) -> TokenStream {
         render_generate_dwind_class(ident_name, class)
     });
 
-    let out = quote! {
+    quote! {
         #(#output)*
     }
-    .into();
-
-    out
+    .into()
 }

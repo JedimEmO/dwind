@@ -4,14 +4,14 @@ use crate::codegen::string_rendering::{
     class_name_to_raw_identifier, class_name_to_struct_identifier, sanitize_class_prefix,
 };
 use crate::grammar::DwindClassSelector;
+use dwind_base::media_queries::Breakpoint;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use dwind_base::media_queries::Breakpoint;
 
 pub fn render_classes(classes: Vec<DwindClassSelector>) -> Vec<(TokenStream, Option<Breakpoint>)> {
     classes
         .into_iter()
-        .map(|class| render_dwind_class(class))
+        .map(render_dwind_class)
         .collect::<Vec<_>>()
 }
 
@@ -37,7 +37,7 @@ pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector
         quote! { #raw_inner_ident }
     };
 
-    let doc_str = format!("generator call: `{}`", raw.to_string());
+    let doc_str = format!("generator call: `{}`", raw);
 
     let rendered_class = render_dwind_class(class).0;
 
@@ -71,15 +71,18 @@ pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<Bre
         let class_name = class.class_name;
         let class_prefix = sanitize_class_prefix(&class_name);
 
-        (quote! {
-            dominator::class! {
-                # ! [prefix=#class_prefix]
+        (
+            quote! {
+                dominator::class! {
+                    # ! [prefix=#class_prefix]
 
-                .dominator::pseudo!(#pseudo_selector, {
-                    .raw(&* #class_raw_ident)
-                })
-            }
-        }, breakpoint)
+                    .dominator::pseudo!(#pseudo_selector, {
+                        .raw(&* #class_raw_ident)
+                    })
+                }
+            },
+            breakpoint,
+        )
     }
 }
 
