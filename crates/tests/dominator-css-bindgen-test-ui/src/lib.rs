@@ -14,26 +14,20 @@ use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
 use crate::router::AppRouter;
-use dominator::{text, Dom};
-use dominator_css_bindgen_test::*;
+use dominator::Dom;
 use dwind::base::*;
-use dwind::bg_color_generator;
 use dwind::borders::*;
 use dwind::colors::*;
 use dwind::flexbox_and_grid::*;
-use dwind::interactivity::*;
 use dwind::sizing::*;
 use dwind::spacing::*;
 use dwind::typography::*;
 use dwind_macros::dwclass;
-use dwui::prelude::*;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::SignalExt;
 use matchit::Params;
-use my_custom_theme::*;
 use std::sync::Arc;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::UnwrapThrowExt;
-use web_sys::window;
 
 #[cfg(not(test))]
 #[wasm_bindgen(start)]
@@ -67,7 +61,10 @@ fn make_app_router() -> AppRouter<DocPage> {
         .unwrap_throw();
 
     router
-        .insert("#/docs/responsive-design", Box::new(|_| Ok(DocPage::ResponsiveDesign)))
+        .insert(
+            "#/docs/responsive-design",
+            Box::new(|_| Ok(DocPage::ResponsiveDesign)),
+        )
         .unwrap_throw();
 
     AppRouter::new(router)

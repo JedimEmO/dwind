@@ -1,17 +1,12 @@
-use crate::dwui::heading;
 use crate::pages::docs::code_widget::code;
 use crate::pages::docs::doc_pages::doc_page::{doc_page_sub_header, doc_page_title};
 use crate::pages::docs::example_box::example_box;
-use dominator::{text, Dom};
+use dominator::Dom;
 use dwind::background_scratched_generator;
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use dwind_macros::dwgenerate;
-use dwui::prelude::TextSize;
-use dwui::prelude::*;
 use example_html_macro::example_html;
-use std::collections::BTreeMap;
-use std::mem::{transmute, ManuallyDrop};
 
 pub fn flex_page() -> Dom {
     html!("div", {

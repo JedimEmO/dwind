@@ -1,7 +1,6 @@
 mod modules;
 
 pub mod prelude {
-    pub use super::backgrounds::*;
     pub use super::base::*;
     pub use super::borders::*;
     pub use super::box_shadow::*;
@@ -17,8 +16,8 @@ pub mod prelude {
 }
 
 pub fn stylesheet() {
-    modern_normalize_cssys::stylesheet();
-    base::stylesheet();
+    modern_normalize_cssys::apply_modern_normalize_stylesheet();
+    base::apply_base_stylesheet();
 }
 
 pub mod base {
@@ -35,11 +34,9 @@ pub mod interactivity {
     include!(concat!(env!("OUT_DIR"), "/interactivity.rs"));
 }
 
-
 pub mod layout {
     include!(concat!(env!("OUT_DIR"), "/layout.rs"));
 }
-
 
 pub mod position {
     include!(concat!(env!("OUT_DIR"), "/position.rs"));

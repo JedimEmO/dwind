@@ -5,7 +5,7 @@ use dwind_macros::dwclass;
 use dwui::heading;
 use dwui::prelude::*;
 use futures_signals::map_ref;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal::{Signal, SignalExt};
 use std::sync::Arc;
 
 pub fn doc_sidebar(

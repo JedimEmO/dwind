@@ -3,14 +3,22 @@ use cssparser::{ToCss, Token};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 
-pub fn render_output_style_sheets(output_style_sheets: Vec<OutputStyleSheet>) -> TokenStream {
+pub fn render_output_style_sheets(
+    output_style_sheets: Vec<OutputStyleSheet>,
+    module_name: &str,
+) -> TokenStream {
     let stylesheets = output_style_sheets
         .into_iter()
         .map(render_output_style_sheet)
         .collect::<Vec<_>>();
 
+    let stylesheet_fn_indent = Ident::new(
+        format!("apply_{}_stylesheet", module_name.replace("-", "_")).as_str(),
+        Span::call_site(),
+    );
+
     quote! {
-        pub fn stylesheet() {
+        pub fn #stylesheet_fn_indent() {
             #(#stylesheets)*
         }
     }

@@ -29,12 +29,10 @@ pub fn breakpoint() -> impl Signal<Item = Breakpoint> {
         v if v > 1920.0 => Breakpoint::Large,
         v if v > 1280.0 => Breakpoint::Medium,
         v if v > 640.0 => Breakpoint::Small,
-        v => Breakpoint::VerySmall,
+        _v => Breakpoint::VerySmall,
     })
 }
 
-pub fn breakpoint_active_signal(level: Breakpoint) -> impl Signal<Item=bool> {
-    breakpoint().map(move |bp| {
-        bp >= level
-    })
+pub fn breakpoint_active_signal(level: Breakpoint) -> impl Signal<Item = bool> {
+    breakpoint().map(move |bp| bp >= level)
 }

@@ -1,4 +1,3 @@
-use crate::pages::docs::example_box::example_box;
 use dominator::Dom;
 use dwind::prelude::*;
 use dwind_macros::dwclass;

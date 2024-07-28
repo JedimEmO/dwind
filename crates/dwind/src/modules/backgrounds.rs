@@ -1,5 +1,3 @@
-use dwind_macros::dwgenerate_map;
-
 #[macro_export]
 macro_rules! background_scratched_generator {
     ($color1:tt, $color2:tt) => {

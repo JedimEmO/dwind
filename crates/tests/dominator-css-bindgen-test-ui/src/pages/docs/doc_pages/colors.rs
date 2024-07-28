@@ -9,7 +9,7 @@ use futures_signals::signal::SignalExt;
 use std::collections::BTreeMap;
 
 pub fn colors_page() -> Dom {
-    let mut selected_color = Mutable::new(None);
+    let selected_color = Mutable::new(None);
 
     html!("div", {
         .dwclass!("w-full")

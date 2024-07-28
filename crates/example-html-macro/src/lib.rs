@@ -1,12 +1,12 @@
-use proc_macro::{Delimiter, TokenStream, TokenTree};
+use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
-use syn::{Expr, ExprArray, ExprLit, File, Lit, LitStr, Token};
-use syntect::highlighting::{Theme, ThemeSet};
+use syn::{Expr, ExprArray, ExprLit, Lit, Token};
+use syntect::highlighting::ThemeSet;
 use syntect::html::highlighted_html_for_string;
-use syntect::parsing::{SyntaxReference, SyntaxSet};
+use syntect::parsing::SyntaxSet;
 
 struct ExampleHtmlArgs {
     themes: Option<Vec<String>>,

@@ -30,24 +30,22 @@ pub fn example_box(child: Dom, resizeable: bool) -> Dom {
                     let bounding_rect = element.get_bounding_client_rect();
                     let offset_x = event.offset_x();
                     let pct = 100.0 * offset_x as f64 / bounding_rect.width();
-                    width.set(50.0f64.max(100.0 * offset_x as f64 / bounding_rect.width()));
+                    width.set(50.0f64.max(pct));
                 }))
             })
             .apply_if(resizeable, |b| {
                 b.child(html!("div", {
                     .style_signal("right", width.signal().map(|v| format!("{}%", 97.0 - v)))
                     .dwclass!("absolute bg-woodsmoke-600 rounded-md h-10 w-2 cursor-col-resize pointer-events-auto")
-                    .with_node!(element => {
-                        .event(clone!(dragging => move |_: events::MouseDown| {
-                            dragging.set(true);
-                        }))
-                        .event(clone!(dragging => move |event: events::MouseMove| {
-                            event.stop_propagation();
-                        }))
-                        .global_event(clone!(dragging => move |_: events::MouseUp| {
-                            dragging.set(false);
-                        }))
+                    .event(clone!(dragging => move |_: events::MouseDown| {
+                        dragging.set(true);
+                    }))
+                    .event(|event: events::MouseMove| {
+                        event.stop_propagation();
                     })
+                    .global_event(clone!(dragging => move |_: events::MouseUp| {
+                        dragging.set(false);
+                    }))
                 }))
             })
         }))
