@@ -38,77 +38,74 @@ dwgenerate!(
     "background-scratched-[#1c2e4f,#191919]"
 );
 
-#[rustfmt::skip]
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn flex_example_initial() -> Dom {
-html!("div", {
-    .dwclass!("rounded-lg background-scratched flex gap-2 @md:gap-4 align-items-center w-full h-16")
-        .children(
-            (0..3).map(|v| {
-                html!("div", {
-                    .apply(|b| {
-                        match v {
-                            0 => dwclass!(b, "w-14 bg-apple-900 flex-none"),
-                            1 => dwclass!(b, "w-p-15 @md:w-64 bg-apple-600 flex-initial"),
-                            _ => dwclass!(b, "w-p-10 @md:w-32 bg-apple-600 flex-initial"),
-                        }
+    html!("div", {
+        .dwclass!("rounded-lg background-scratched flex gap-2 @md:gap-4 align-items-center w-full h-16")
+            .children(
+                (0..3).map(|v| {
+                    html!("div", {
+                        .apply(|b| {
+                            match v {
+                                0 => dwclass!(b, "w-14 bg-apple-900 flex-none"),
+                                1 => dwclass!(b, "w-p-15 @md:w-64 bg-apple-600 flex-initial"),
+                                _ => dwclass!(b, "w-p-10 @md:w-32 bg-apple-600 flex-initial"),
+                            }
+                        })
+                        .dwclass!("h-full")
+                        .dwclass!("flex align-items-center justify-center")
+                        .dwclass!("rounded-lg font-extrabold")
+                        .text(v.to_string().as_str())
                     })
-                    .dwclass!("h-full")
-                    .dwclass!("flex align-items-center justify-center")
-                    .dwclass!("rounded-lg font-extrabold")
-                    .text(v.to_string().as_str())
                 })
-            })
-        )
-})
+            )
+    })
 }
 
-#[rustfmt::skip]
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn flex_example_1() -> Dom {
     html!("div", {
-    .dwclass!("rounded-lg background-scratched flex gap-2 @md:gap-4 align-items-center w-full h-16")
-        .children(
-            (0..3).map(|v| {
-                html!("div", {
-                    .apply(|b| {
-                        match v {
-                            0 => dwclass!(b, "w-14 bg-charm-900 flex-none"),
-                            1 => dwclass!(b, "w-p-15 @md:w-64 bg-charm-600 flex-1"),
-                            _ => dwclass!(b, "w-p-10 @md:w-32 bg-charm-600 flex-1"),
-                        }
+        .dwclass!("rounded-lg background-scratched flex gap-2 @md:gap-4 align-items-center w-full h-16")
+            .children(
+                (0..3).map(|v| {
+                    html!("div", {
+                        .apply(|b| {
+                            match v {
+                                0 => dwclass!(b, "w-14 bg-charm-900 flex-none"),
+                                1 => dwclass!(b, "w-p-15 @md:w-64 bg-charm-600 flex-1"),
+                                _ => dwclass!(b, "w-p-10 @md:w-32 bg-charm-600 flex-1"),
+                            }
+                        })
+                        .dwclass!("h-full")
+                        .dwclass!("flex align-items-center justify-center")
+                        .dwclass!("rounded-lg font-extrabold")
+                        .text(v.to_string().as_str())
                     })
-                    .dwclass!("h-full")
-                    .dwclass!("flex align-items-center justify-center")
-                    .dwclass!("rounded-lg font-extrabold")
-                    .text(v.to_string().as_str())
                 })
-            })
-        )
-})
+            )
+    })
 }
 
-#[rustfmt::skip]
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn flex_example_auto() -> Dom {
     html!("div", {
-    .dwclass!("rounded-lg background-scratched flex gap-2 @md:gap-4 align-items-center w-full h-16")
-        .children(
-            (0..3).map(|v| {
-                html!("div", {
-                    .apply(|b| {
-                        match v {
-                            0 => dwclass!(b, "w-14 bg-candlelight-900 flex-none"),
-                            1 => dwclass!(b, "w-15 @md:w-64 bg-candlelight-600 flex-auto"),
-                            _ => dwclass!(b, "w-10 @md:w-32 bg-candlelight-600 flex-auto"),
-                        }
+        .dwclass!("rounded-lg background-scratched flex gap-2 @md:gap-4 align-items-center w-full h-16")
+            .children(
+                (0..3).map(|v| {
+                    html!("div", {
+                        .apply(|b| {
+                            match v {
+                                0 => dwclass!(b, "w-14 bg-candlelight-900 flex-none"),
+                                1 => dwclass!(b, "w-15 @md:w-64 bg-candlelight-600 flex-auto"),
+                                _ => dwclass!(b, "w-10 @md:w-32 bg-candlelight-600 flex-auto"),
+                            }
+                        })
+                        .dwclass!("h-full")
+                        .dwclass!("flex align-items-center justify-center")
+                        .dwclass!("rounded-lg font-extrabold")
+                        .text(v.to_string().as_str())
                     })
-                    .dwclass!("h-full")
-                    .dwclass!("flex align-items-center justify-center")
-                    .dwclass!("rounded-lg font-extrabold")
-                    .text(v.to_string().as_str())
                 })
-            })
-        )
-})
+            )
+    })
 }

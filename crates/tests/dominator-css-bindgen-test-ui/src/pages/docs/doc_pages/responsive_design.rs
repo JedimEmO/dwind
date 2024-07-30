@@ -15,103 +15,79 @@ pub fn responsive_design() -> Dom {
         .text("Any modern web app must look good on on both small mobile devices, as well as on enormous desktop monitors.")
         .child(doc_page_sub_header("Breakpoints"))
         .text("To chose a breakpoint, we can use the @constraint syntax. The following breakpoints are available:")
-        .child(example_box(breakpoint_table(), false))
+        .child(breakpoint_table())
         .child(doc_page_sub_header("Responsive Example"))
         .child(example_box(breakpoint_example(), false))
         .child(code(&BREAKPOINT_EXAMPLE_EXAMPLE_HTML_MAP))
     })
 }
 
-#[rustfmt::skip]
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn breakpoint_example() -> Dom {
-html!("div", {
-    .dwclass!("w-full @<sm:flex-col @sm:flex-row flex text-woodsmoke-950 font-extrabold")
-    .child(html!("div", {
-        .dwclass!("@sm:w-40 h-40 flex-initial bg-picton-blue-400 flex align-items-center justify-center")
-        .text_signal(breakpoint_active_signal(Breakpoint::Small).map(|active| {
-            if active {
-                "Horizontal"
-            } else {
-                "Vertical"
-            }
+    html!("div", {
+        .dwclass!("w-full @<sm:flex-col @sm:flex-row flex text-woodsmoke-950 font-extrabold")
+        .child(html!("div", {
+            .dwclass!("@sm:w-40 h-40 flex-initial bg-picton-blue-400 flex align-items-center justify-center")
+            .text_signal(breakpoint_active_signal(Breakpoint::Small).map(|active| {
+                if active {
+                    "Horizontal"
+                } else {
+                    "Vertical"
+                }
+            }))
         }))
-    }))
-    .child(html!("div", {
-        .dwclass!("w-full h-40 flex-initial bg-charm-400")
-    }))
-})
+        .child(html!("div", {
+            .dwclass!("w-full h-40 flex-initial bg-charm-400")
+        }))
+    })
 }
 
 fn breakpoint_table() -> Dom {
+    let breakpoints = vec![
+        ("dwclass!(\"my-cls\")", "very small screens", "< 640px"),
+        ("dwclass!(\"@sm:my-cls\")", "small screens", ">= 640px"),
+        ("dwclass!(\"@md:my-cls\")", "medium screens", ">= 1280px"),
+        ("dwclass!(\"@lg:my-cls\")", "large screens", ">= 1920px"),
+        ("dwclass!(\"@xl:my-cls\")", "large screens", ">= 2560px"),
+    ];
+
     html!("table", {
-        .dwclass!("text-woodsmoke-500 font-mono")
-        .children([
+        .dwclass!("m-t-10 text-woodsmoke-400 divide-y border-collapse border-woodsmoke-900 w-full text-left text-sm")
+        .child(html!("tr", {
+            .children([
+                html!("th", {
+                    .dwclass!("p-b-2")
+                    .text("Usage")
+                }),
+                html!("th", {
+                    .dwclass!("p-b-2")
+                    .text("Description")
+                }),
+                html!("th", {
+                    .dwclass!("p-b-2")
+                    .text("Size")
+                })
+            ])
+        }))
+        .children(breakpoints.into_iter().map(|(selector, description, size)| {
             html!("tr", {
-                .children([
-                    html!("th", {
-                        .text("Selector")
-                    }),
-                    html!("th", {
-                        .text("Description")
-                    }),
-                    html!("th", {
-                        .text("Size")
-                    })
-                ])
-            }),
-            html!("tr", {
-                .children([
-                    html!("td", {
-                        .text("default")
-                    }),
-                    html!("td", {
-                        .text("Very small screens")
-                    }),
-                    html!("td", {
-                        .text("< 640")
-                    })
-                ])
-            }),
-            html!("tr", {
+                .dwclass!("border-woodsmoke-900")
                 .children([
                     html!("td", {
-                        .text("@sm")
+                        .dwclass!("text-picton-blue-400 font-bold font-mono")
+                        .dwclass!("p-t-2 p-b-2")
+                        .text(selector)
                     }),
                     html!("td", {
-                        .text("Small screens")
+                        .dwclass!("p-t-2 p-b-2")
+                        .text(description)
                     }),
                     html!("td", {
-                        .text("< 1280")
+                        .dwclass!("p-t-2 p-b-2")
+                        .text(size)
                     })
                 ])
-            }),
-            html!("tr", {
-                .children([
-                    html!("td", {
-                        .text("@md")
-                    }),
-                    html!("td", {
-                        .text("Medium screens")
-                    }),
-                    html!("td", {
-                        .text("< 1920")
-                    })
-                ])
-            }),
-            html!("tr", {
-                .children([
-                    html!("td", {
-                        .text("@lg")
-                    }),
-                    html!("td", {
-                        .text("Large screens")
-                    }),
-                    html!("td", {
-                        .text("< 2560")
-                    })
-                ])
-            }),
-        ])
+            })
+        }))
     })
 }

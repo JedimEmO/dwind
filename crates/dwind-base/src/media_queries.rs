@@ -27,10 +27,10 @@ impl TryFrom<&str> for Breakpoint {
 pub fn breakpoint() -> impl Signal<Item = Breakpoint> {
     dominator::window_size()
         .map(|v| match v.width {
-            v if v > 2560.0 => Breakpoint::VeryLarge,
-            v if v > 1920.0 => Breakpoint::Large,
-            v if v > 1280.0 => Breakpoint::Medium,
-            v if v > 640.0 => Breakpoint::Small,
+            v if v >= 2560.0 => Breakpoint::VeryLarge,
+            v if v >= 1920.0 => Breakpoint::Large,
+            v if v >= 1280.0 => Breakpoint::Medium,
+            v if v >= 640.0 => Breakpoint::Small,
             _v => Breakpoint::VerySmall,
         })
         .dedupe()

@@ -4,7 +4,7 @@ use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
 use syn::{Expr, ExprArray, ExprLit, Lit, Token};
-use syntect::highlighting::ThemeSet;
+use syntect::highlighting::{Color, ThemeSet};
 use syntect::html::highlighted_html_for_string;
 use syntect::parsing::SyntaxSet;
 
@@ -70,6 +70,8 @@ pub fn example_html(args: TokenStream, token_stream: TokenStream) -> TokenStream
 
     let fn_ = syn::parse::<syn::ItemFn>(token_stream.clone()).unwrap();
 
+    let sig = fn_.sig.clone();
+    let fn_name = quote! {#sig}.to_string();
     let source_code = fn_
         .block
         .span()
@@ -77,14 +79,14 @@ pub fn example_html(args: TokenStream, token_stream: TokenStream) -> TokenStream
         .or(Some("".to_string()))
         .expect("did not find function block source text");
 
-    let rendered_themes = render_themes(fn_.sig.ident.to_string(), source_code, themes);
+    let rendered_themes = render_themes(fn_.sig.ident.to_string(), format!("{fn_name} {source_code}"), themes);
     let original_tokens: proc_macro2::TokenStream = token_stream.into();
 
     let out: TokenStream = quote! {
         #rendered_themes
         #original_tokens
     }
-    .into();
+        .into();
 
     out
 }
@@ -97,8 +99,17 @@ fn render_themes(fn_name: String, code: String, themes: Vec<String>) -> proc_mac
     let mut rendered_themes = vec![];
 
     for theme_name in themes {
-        let theme = &theme_set.themes[&theme_name];
-        let rendered_theme = highlighted_html_for_string(&code, &syntax_set, sr, theme).unwrap();
+        let mut theme = theme_set.themes[&theme_name].clone();
+
+        theme.settings.background = Some(Color {
+            r: 0,
+            g: 0,
+            b: 0,
+            a: 0,
+        });
+
+        let rendered_theme = highlighted_html_for_string(&code, &syntax_set, sr, &theme).unwrap()
+            .replace("style=\"background-color:#000000;\"", "");
 
         rendered_themes.push(quote! {( #theme_name.to_string(), #rendered_theme.to_string())});
     }
