@@ -55,7 +55,7 @@ fn main_view() -> Dom {
     dwind::stylesheet();
 
     stylesheet!(["body"], {
-        // Use the generated DWIND_COLORS map if we need to programatically access color values
+        // Use the generated DWIND_COLORS map if we need to programmatically access color values
         .style("background-color", &DWIND_COLORS["woodsmoke"][&950])
         .style("overflow-y", "scroll")
     });
@@ -69,8 +69,9 @@ fn main_view() -> Dom {
             .style("margin-top", "4px")
             .child_signal(doc_sidebar(doc_sections(), || make_app_router().signal(), Arc::new(|v: DocPage| v.goto()), || {
                 html!("div", {
-                    .dwclass!("m-l-4 m-r-0 w-p-50 @sm:w-full")
-                    .child(doc_main_view(make_app_router().signal().map(Some)))
+                    .dwclass!("m-l-4 m-r-0")
+                    .style("width", "94%")
+                    .child_signal(doc_main_view(make_app_router().signal().map(Some)))
                 })
             }))
         }))

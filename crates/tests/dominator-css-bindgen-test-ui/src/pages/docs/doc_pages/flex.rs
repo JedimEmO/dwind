@@ -48,7 +48,7 @@ html!("div", {
                 html!("div", {
                     .apply(|b| {
                         match v {
-                            0 => dwclass!(b, "w-p-5 @md:w-14 bg-apple-900 flex-none"),
+                            0 => dwclass!(b, "w-14 bg-apple-900 flex-none"),
                             1 => dwclass!(b, "w-p-15 @md:w-64 bg-apple-600 flex-initial"),
                             _ => dwclass!(b, "w-p-10 @md:w-32 bg-apple-600 flex-initial"),
                         }
@@ -73,7 +73,7 @@ fn flex_example_1() -> Dom {
                 html!("div", {
                     .apply(|b| {
                         match v {
-                            0 => dwclass!(b, "w-p-5 @md:w-14 bg-charm-900 flex-none"),
+                            0 => dwclass!(b, "w-14 bg-charm-900 flex-none"),
                             1 => dwclass!(b, "w-p-15 @md:w-64 bg-charm-600 flex-1"),
                             _ => dwclass!(b, "w-p-10 @md:w-32 bg-charm-600 flex-1"),
                         }
@@ -98,7 +98,7 @@ fn flex_example_auto() -> Dom {
                 html!("div", {
                     .apply(|b| {
                         match v {
-                            0 => dwclass!(b, "w-5 @md:w-14 bg-candlelight-900 flex-none"),
+                            0 => dwclass!(b, "w-14 bg-candlelight-900 flex-none"),
                             1 => dwclass!(b, "w-15 @md:w-64 bg-candlelight-600 flex-auto"),
                             _ => dwclass!(b, "w-10 @md:w-32 bg-candlelight-600 flex-auto"),
                         }

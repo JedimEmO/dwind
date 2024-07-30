@@ -58,6 +58,7 @@ pub fn show_selected_color(selected_color: &(String, u32)) -> Dom {
 pub fn color_list(selected_color: Mutable<Option<(String, u32)>>) -> Dom {
     html!("table", {
         .dwclass!("w-full")
+        .style("min-width", "300px")
         .children(DWIND_COLORS.iter().map(|(color_name, shades)| {
             color_row(color_name, shades, selected_color.clone())
         }))

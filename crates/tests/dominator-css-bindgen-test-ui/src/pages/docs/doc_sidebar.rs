@@ -19,18 +19,18 @@ pub fn doc_sidebar<T>(
 where
     T: Signal<Item = DocPage> + 'static,
 {
-    let which_signal = breakpoint_active_signal(media_queries::Breakpoint::Small);
-    let show_small_menu = Mutable::new(false);
+    let which_signal = breakpoint_active_signal(media_queries::Breakpoint::Medium);
+    let show_menu = Mutable::new(false);
     let selected_doc = Arc::new(selected_doc);
 
-    let goto = Arc::new(clone!(show_small_menu =>  move |v| {
-        show_small_menu.set(false);
+    let goto = Arc::new(clone!(show_menu =>  move |v| {
+        show_menu.set(false);
         goto(v)
     }));
 
     which_signal
-        .map(clone!(show_small_menu => move |at_least_small| {
-            if at_least_small {
+        .map(clone!(show_menu    => move |at_least_medium| {
+            if at_least_medium {
                 html!("div", {
                     .dwclass!("flex")
                     .class([&*FLEX_ROW])
@@ -41,31 +41,30 @@ where
                 dwgenerate!("menu-text-hover", "hover:text-picton-blue-500");
 
                 html!("div", {
-                    .class([
-                        &*GRID,
-                        &*GRID_FLOW_ROW,
-                        &*W_FULL
-                    ])
+                    .dwclass!("flex flex-col w-full")
                     .child(html!("div", {
-                        .class([&*W_MIN])
                         .child(html!("h1", {
-                            .class([&*M_L_2, &*TEXT_XL, &*FONT_MONO, &*FONT_EXTRABOLD, &*TEXT_PICTON_BLUE_200, &*CURSOR_POINTER, &*MENU_TEXT_HOVER])
-                            .text("=")
-                            .event(clone!(show_small_menu => move |_: events::Click| {
-                                show_small_menu.set(!show_small_menu.get());
+                            .dwclass!("m-l-2 text-xl font-mono font-extrabold text-picton-blue-200 cursor-pointer menu-text-hover")
+                            .text_signal(selected_doc().map(|doc| format!("= {doc:?}")))
+                            .event(clone!(show_menu => move |_: events::Click| {
+                                show_menu.set(!show_menu.get());
                             }))
                         }))
                     }))
-                    .child(html!("div", {
-                        .class([&*COL_START_1, &*COL_END_1, &*ROW_START_2, &*ROW_END_2, &*W_P_100])
-                        .child(main())
-                    }))
-                    .child_signal(show_small_menu.signal().map(clone!(doc_sections, goto, selected_doc => move |show| {
+                    .child(main())
+                    .child_signal(show_menu.signal().map(clone!(doc_sections, goto, selected_doc => move |show| {
                         if show {
                             Some(html!("div", {
-                                .class([&*COL_START_1, &*COL_END_1, &*ROW_START_2, &*ROW_END_2, &*BG_WOODSMOKE_950])
-                                .style("z-index", "2")
-                                .child(doc_sidebar_inline(doc_sections.clone(), selected_doc(), goto.clone()))
+                                .child(html!("div", {
+                                   .dwclass!("bg-woodsmoke-950 absolute left-0 top-0 right-0 bottom-0")
+                                    .style("z-index", "2")
+                                    .style("opacity", "97%")
+                                }))
+                                .child(html!("div", {
+                                   .dwclass!("absolute left-0 top-0 right-0 bottom-0")
+                                    .style("z-index", "3")
+                                    .child(doc_sidebar_inline(doc_sections.clone(), selected_doc(), goto.clone()))
+                                }))
                             }))
                         } else {
                             None
@@ -85,7 +84,7 @@ pub fn doc_sidebar_inline(
     let selected_doc_bc = selected_doc.broadcast();
 
     html!("div", {
-        .dwclass!("w-44 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-300")
+        .dwclass!("w-44 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-300 h-full")
         .children(doc_sections.into_iter().map(clone!(goto => move |section| {
             let section_cloned = section.clone();
             let selected_index_signal = map_ref! {

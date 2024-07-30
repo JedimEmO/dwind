@@ -30,7 +30,7 @@ pub fn example_box(child: Dom, resizeable: bool) -> Dom {
                     let bounding_rect = element.get_bounding_client_rect();
                     let offset_x = event.offset_x();
                     let pct = 100.0 * offset_x as f64 / bounding_rect.width();
-                    width.set(50.0f64.max(pct));
+                    width.set(30.0f64.max(pct));
                 }))
             })
             .apply_if(resizeable, |b| {
