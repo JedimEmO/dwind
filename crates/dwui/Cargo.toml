@@ -11,3 +11,6 @@ futures-signals.workspace = true
 futures-signals-component-macro.workspace = true
 once_cell.workspace = true
 web-sys.workspace = true
+
+[dev-dependencies]
+wasm-bindgen-test.workspace = true

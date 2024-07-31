@@ -84,14 +84,33 @@ fn color_row(
             .dwclass!("flex gap-2")
             .children(sorted.into_iter().map(clone!(color_name_cloned, selected_color => move |(shade, value)| {
                 let shade = *shade;
-
+                let is_selected_signal = selected_color.signal_cloned().map(clone!(color_name_cloned => move |selected| {
+                    if let Some((selected_name, selected_shade)) = selected {
+                            color_name_cloned == selected_name && shade == selected_shade
+                    } else {
+                        false
+                    }
+                }));
                 html!("div", {
-                   .dwclass!("rounded-sm h-10 flex-auto cursor-pointer")
-                   .dwclass_signal!("border border-purple-500 border-w-4px border-inset", selected_color.signal_cloned().map(clone!( color_name_cloned=> move |selected| {
-                        if let Some((selected_name, selected_shade)) = selected {
-                                color_name_cloned == selected_name && shade == selected_shade
+                   .dwclass!("rounded-sm h-10 flex-auto cursor-pointer flex align-items-center justify-center")
+                   .child_signal(is_selected_signal.map(clone!(selected_color => move |selected| {
+                        if selected {
+                            let color = selected_color.get_cloned().unwrap();
+                            let shades_map = DWIND_COLORS.get(&color.0).unwrap();
+                            let mut shades = shades_map.keys().collect::<Vec<_>>();
+
+                            shades.sort();
+
+                            let selected_shade_index = shades.iter().position(|v| **v == color.1).unwrap();
+                            let shifted_shade_position = (selected_shade_index  - 6) % shades.len();
+                            let shade_color = shades_map.get(shades[shifted_shade_position]).unwrap();
+
+                            Some(html!("div", {
+                                .style("background-color", format!("{shade_color}"))
+                                .dwclass!("w-p-30 h-p-30")
+                            }))
                         } else {
-                            false
+                            None
                         }
                     })))
                    .style("background-color", value)
