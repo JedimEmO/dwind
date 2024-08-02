@@ -29,7 +29,7 @@ where
     }));
 
     which_signal
-        .map(clone!(show_menu    => move |at_least_medium| {
+        .map(clone!(show_menu => move |at_least_medium| {
             if at_least_medium {
                 html!("div", {
                     .dwclass!("flex")
@@ -84,7 +84,7 @@ pub fn doc_sidebar_inline(
     let selected_doc_bc = selected_doc.broadcast();
 
     html!("div", {
-        .dwclass!("w-44 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-300 h-full")
+        .dwclass!("w-44 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-300 h-full flex-none")
         .children(doc_sections.into_iter().map(clone!(goto => move |section| {
             let section_cloned = section.clone();
             let selected_index_signal = map_ref! {

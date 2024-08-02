@@ -102,7 +102,7 @@ fn color_row(
                             shades.sort();
 
                             let selected_shade_index = shades.iter().position(|v| **v == color.1).unwrap();
-                            let shifted_shade_position = (selected_shade_index  - 6) % shades.len();
+                            let shifted_shade_position = (selected_shade_index + 6) % shades.len();
                             let shade_color = shades_map.get(shades[shifted_shade_position]).unwrap();
 
                             Some(html!("div", {

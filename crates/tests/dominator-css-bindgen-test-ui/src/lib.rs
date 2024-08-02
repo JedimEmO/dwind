@@ -48,6 +48,10 @@ fn make_app_router() -> AppRouter<DocPage> {
         )
         .unwrap_throw();
 
+    router
+        .insert("#/docs/pseudoclasses", Box::new(|_| Ok(DocPage::Pseudoclasses)))
+        .unwrap_throw();
+
     AppRouter::new(router)
 }
 

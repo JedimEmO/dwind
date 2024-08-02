@@ -17,6 +17,7 @@ pub struct DocSection {
 pub enum DocPage {
     Colors,
     Responsiveness,
+    Pseudoclasses,
     // Flex
     Flex,
     Justify,
@@ -41,6 +42,7 @@ impl DocPage {
             DocPage::Color => {}
             DocPage::Style => {}
             DocPage::Responsiveness => go_to_url("#/docs/responsive-design"),
+            DocPage::Pseudoclasses => go_to_url("#/docs/pseudoclasses"),
         }
     }
 }
@@ -52,7 +54,18 @@ impl Default for DocPage {
 
 impl Display for DocPage {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{self:?}")
+        match self {
+            DocPage::Colors => write!(f, "Colors"),
+            DocPage::Flex => write!(f, "Flex"),
+            DocPage::Justify => write!(f, "Justify"),
+            DocPage::Align => write!(f, "Align"),
+            DocPage::Border => write!(f, "Border"),
+            DocPage::Rounding => write!(f, "Rounding"),
+            DocPage::Color => write!(f, "Color"),
+            DocPage::Style => write!(f, "Style"),
+            DocPage::Responsiveness => write!(f, "Responsiveness"),
+            DocPage::Pseudoclasses => write!(f, "Pseudoclasses"),
+        }
     }
 }
 
@@ -60,7 +73,11 @@ pub fn doc_sections() -> Vec<DocSection> {
     vec![
         DocSection {
             title: "General".to_string(),
-            docs: vec![DocPage::Colors, DocPage::Responsiveness],
+            docs: vec![
+                DocPage::Colors,
+                DocPage::Responsiveness,
+                DocPage::Pseudoclasses
+            ],
         },
         DocSection {
             title: "Flex and Grid".to_string(),
