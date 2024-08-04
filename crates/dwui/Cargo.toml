@@ -12,5 +12,10 @@ futures-signals-component-macro.workspace = true
 once_cell.workspace = true
 web-sys.workspace = true
 
+[build-dependencies]
+dominator-css-bindgen = { path = "../dominator-css-bindgen" }
+serde_json.workspace = true
+serde.workspace = true
+
 [dev-dependencies]
 wasm-bindgen-test.workspace = true

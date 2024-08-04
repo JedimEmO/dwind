@@ -3,7 +3,7 @@ use crate::pages::docs::example_box::example_box;
 use dominator::{events, Dom};
 use dwind::colors::DWIND_COLORS;
 use dwind::prelude::*;
-use dwind_macros::{dwclass, dwclass_signal};
+use dwind_macros::{dwclass};
 use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
 use std::collections::BTreeMap;

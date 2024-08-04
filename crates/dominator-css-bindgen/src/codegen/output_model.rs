@@ -1,6 +1,7 @@
 use crate::css::parse_css::{ParsedCssFile, ParsedSelector};
-use cssparser::{CowRcStr, Token};
+use cssparser::{CowRcStr, ToCss, Token};
 use std::collections::HashMap;
+use quote::quote;
 
 /// Represent a simple output class and its pseudo classes
 pub struct OutputClass<'a> {
@@ -48,7 +49,9 @@ pub fn parsed_to_output_model<'a>(
                                     pseudo_classes: vec![],
                                 });
 
-                        if pseudo_classes.is_empty() {
+                        if pseudo_classes.is_empty() || pseudo_classes.iter().all(|v| {
+                            v.to_css_string().trim().is_empty()
+                        }){
                             out_class.main_class_body = block.data.clone();
                         } else {
                             out_class.pseudo_classes.push(OutputPseudoClass {

@@ -57,6 +57,7 @@ fn make_app_router() -> AppRouter<DocPage> {
 
 fn main_view() -> Dom {
     dwind::stylesheet();
+    dwui::theme::apply_style_sheet();
 
     stylesheet!(["body"], {
         // Use the generated DWIND_COLORS map if we need to programmatically access color values
