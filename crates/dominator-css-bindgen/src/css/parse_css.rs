@@ -24,6 +24,24 @@ pub struct ParsedCssFile<'a> {
     pub blocks: Vec<ParsedCssBlock<'a>>,
 }
 
+impl<'a> ParsedCssFile<'a> {
+    pub fn referenced_variable_names(&self) -> Vec<String> {
+        self.blocks.iter().flat_map(|block| {
+            block.data.iter().filter_map(|token| {
+                if let Token::Ident(ident) = token {
+                    if ident.starts_with("--") {
+                        Some(ident.to_string())
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+        }).collect()
+    }
+}
+
 pub fn take_next_block<'a, 'b, 'aa>(
     parser: &'b mut Parser<'a, 'aa>,
 ) -> DCssResult<Option<ParsedCssBlock<'a>>> {

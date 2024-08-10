@@ -1,6 +1,6 @@
 use dominator::{Dom, events, html};
 use futures_signals_component_macro::component;
-use crate::theme::button::*;
+use crate::theme::prelude::*;
 use dwind::prelude::*;
 use dwind_macros::dwgenerate;
 

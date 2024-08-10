@@ -173,11 +173,3 @@ rounding
     border-top-width: 1px;
     border-bottom-width: 1px;
 }
-
-.divide-y-reverse > * + * {
-    --tw-divide-y-reverse: 1;
-}
-
-.divide-x-reverse > * + * {
-    --tw-divide-x-reverse: 1;
-}

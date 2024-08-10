@@ -21,6 +21,7 @@ use futures_signals::signal::SignalExt;
 use matchit::Params;
 use std::sync::Arc;
 use wasm_bindgen::UnwrapThrowExt;
+use dwui::theme::colors::ColorsCssVariables;
 
 #[cfg(not(test))]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
@@ -57,7 +58,11 @@ fn make_app_router() -> AppRouter<DocPage> {
 
 fn main_view() -> Dom {
     dwind::stylesheet();
-    dwui::theme::apply_style_sheet();
+    dwui::theme::apply_style_sheet(Some(ColorsCssVariables {
+        dwui_light_primary_300: "#404045".to_string(),
+        dwui_light_text_on_primary_700: "beige".to_string(),
+        ..Default::default()
+    }));
 
     stylesheet!(["body"], {
         // Use the generated DWIND_COLORS map if we need to programmatically access color values

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+case.workspace = true
 cssparser.workspace = true
 nom.workspace = true
 proc-macro2.workspace = true

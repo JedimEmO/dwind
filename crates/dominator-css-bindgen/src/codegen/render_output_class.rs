@@ -13,7 +13,7 @@ pub fn render_output_style_sheets(
         .collect::<Vec<_>>();
 
     let stylesheet_fn_indent = Ident::new(
-        format!("apply_{}_stylesheet", module_name.replace("-", "_")).as_str(),
+        format!("apply_{}_stylesheet", module_name).as_str(),
         Span::call_site(),
     );
 
