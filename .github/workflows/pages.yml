@@ -56,12 +56,12 @@ jobs:
         with:
           node-version: 20
       - name: Install and Build 🔧
-        working-directory: crates/tests/dominator-css-bindgen-test-ui
+        working-directory: examples/webpage
         run: npm ci && npm run build:release
       - name: Docs
         run: cargo doc --no-deps
       - name: Populate docs
-        run: mkdir pages && cp -r target/doc pages && cp -r crates/tests/dominator-css-bindgen-test-ui/public pages/examples
+        run: mkdir pages && cp -r target/doc pages && cp -r examples/webpage/public pages/examples
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

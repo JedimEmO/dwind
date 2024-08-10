@@ -1,6 +1,6 @@
-# DWIND example UI
+# DWIND webpage
 
-## Running the example UI
+## Running the webpage in local developer mode
 
 You need a recent (>= 1.79.0) version of rust, please refer to https://rustup.rs/ for how to install this.
 

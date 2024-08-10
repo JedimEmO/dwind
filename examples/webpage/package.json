@@ -1,5 +1,5 @@
 {
-  "name": "dwind-example",
+  "name": "dwind-webpage",
   "version": "0.1.0",
   "scripts": {
     "build": "rimraf public/js && rollup --bundleConfigAsCjs --config",

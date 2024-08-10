@@ -14,13 +14,15 @@ use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
 use crate::router::AppRouter;
-use dominator::Dom;
+use dominator::{Dom, events};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use futures_signals::signal::SignalExt;
 use matchit::Params;
 use std::sync::Arc;
+use dominator::routing::go_to_url;
 use wasm_bindgen::UnwrapThrowExt;
+use web_sys::window;
 use dwui::theme::colors::ColorsCssVariables;
 
 #[cfg(not(test))]
@@ -100,9 +102,27 @@ fn header() -> Dom {
             .child(html!("div", {
                 .dwclass!("m-l-auto m-r-0 flex justify-stretch")
                 .children([
-                    html!("h3", { .text("examples").dwclass!("m-x-2") }),
-                    html!("h3", { .text("docs").dwclass!("m-x-2") }),
-                    html!("h3", { .text("github").dwclass!("m-x-2") }),
+                    html!("h3", {
+                        .text("examples")
+                        .dwclass!("m-x-2 hover:text-picton-blue-400 hover:font-bold cursor-pointer")
+                        .event(|_: events::Click| {
+                            go_to_url("#/examples")
+                        })
+                    }),
+                    html!("h3", {
+                        .text("docs")
+                        .dwclass!("m-x-2 hover:text-picton-blue-400 hover:font-bold cursor-pointer")
+                        .event(|_: events::Click| {
+                            go_to_url("#/docs")
+                        })
+                    }),
+                    html!("h3", {
+                        .text("github")
+                        .dwclass!("m-x-2 hover:text-picton-blue-400 hover:font-bold cursor-pointer")
+                        .event(|_: events::Click| {
+                            window().unwrap().open_with_url_and_target("https://github.com/JedimEmO/dwind", "_blank").unwrap();
+                        })
+                    }),
                 ])
             }))
          }))

@@ -11,12 +11,11 @@ crate-type = ["cdylib"]
 
 [dependencies]
 const_format = "0.2.32"
-dominator-css-bindgen-test = { path = "../dominator-css-bindgen-test" }
-dwind-macros = { path = "../../dwind-macros" }
-dwind = { path = "../../dwind" }
-dwui = { path = "../../dwui" }
+dwind-macros = { path = "../../crates/dwind-macros" }
+dwind = { path = "../../crates/dwind" }
+dwui = { path = "../../crates/dwui" }
 dominator.workspace = true
-example-html-macro = { path = "../../example-html-macro" }
+example-html-macro = { path = "../../crates/example-html-macro" }
 futures.workspace = true
 futures-signals.workspace = true
 matchit.workspace = true

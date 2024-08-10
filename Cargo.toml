@@ -10,7 +10,7 @@ members = [
     "crates/example-html-macro",
     "crates/modern-normalize-cssys",
     "crates/tests/dominator-css-bindgen-test",
-    "crates/tests/dominator-css-bindgen-test-ui",
+    "examples/webpage",
 ]
 
 [workspace.dependencies]
