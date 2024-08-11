@@ -248,6 +248,7 @@ dependencies = [
  "dominator",
  "dominator-css-bindgen",
  "dwind-base",
+ "dwind-build",
  "dwind-macros",
  "futures-signals",
  "modern-normalize-cssys",
@@ -262,6 +263,14 @@ version = "0.1.0"
 dependencies = [
  "dominator",
  "futures-signals",
+]
+
+[[package]]
+name = "dwind-build"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

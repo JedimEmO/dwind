@@ -1,5 +1,5 @@
-use nom::branch::alt;
 use dwind_base::media_queries::Breakpoint;
+use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while1};
 use nom::character::is_alphanumeric;
 use nom::combinator::opt;
@@ -165,26 +165,33 @@ fn generator_parameters(input: &str) -> IResult<&str, Vec<&str>> {
     parser(input)
 }
 
-const CHARS_EXT: [char; 12] = [
-    '_', '-', '@', ',', '<', '>', '*', ' ', '.', ' ', ':', '#'
-];
+const CHARS_EXT: [char; 12] = ['_', '-', '@', ',', '<', '>', '*', ' ', '.', ' ', ':', '#'];
 
-fn bracketed<'a>(bracket: &'a str, bracket_end: &'a str, body_parser: impl Fn(&str) -> IResult<&str, String> + Clone + 'a) -> impl Fn(&str) -> IResult<&str, String> + 'a {
-    move |v| delimited(tag(bracket), body_parser.clone(), tag(bracket_end))(v).map(|v| (v.0, format!("{}{}{}", bracket, v.1, bracket_end)))
+fn bracketed<'a>(
+    bracket: &'a str,
+    bracket_end: &'a str,
+    body_parser: impl Fn(&str) -> IResult<&str, String> + Clone + 'a,
+) -> impl Fn(&str) -> IResult<&str, String> + 'a {
+    move |v| {
+        delimited(tag(bracket), body_parser.clone(), tag(bracket_end))(v)
+            .map(|v| (v.0, format!("{}{}{}", bracket, v.1, bracket_end)))
+    }
 }
 
 fn recursive_selector<'a>(input: &'a str) -> IResult<&'a str, String> {
     many0(alt((
         bracketed("(", ")", recursive_selector),
         bracketed("[", "]", recursive_selector),
-        |v: &'a str| take_while1(is_extended_alphanumeric(CHARS_EXT.to_vec()))(v).map(move |v| (v.0, v.1.to_string())),
-    )))(input).map(|r| (r.0, r.1.join("")))
+        |v: &'a str| {
+            take_while1(is_extended_alphanumeric(CHARS_EXT.to_vec()))(v)
+                .map(move |v| (v.0, v.1.to_string()))
+        },
+    )))(input)
+    .map(|r| (r.0, r.1.join("")))
 }
 
 fn pseudo_selector(input: &str) -> IResult<&str, String> {
-    let chars = [
-        '_', '-', '@', ',', '<', '*', '.'
-    ];
+    let chars = ['_', '-', '@', ',', '<', '*', '.'];
 
     let name_parser = many0(take_while1(is_extended_alphanumeric(chars.to_vec())));
 
@@ -193,9 +200,12 @@ fn pseudo_selector(input: &str) -> IResult<&str, String> {
         bracketed("[", "]", recursive_selector),
     ));
 
-    let mut parser = terminated(nom::sequence::tuple((name_parser, many0(bracketed_parser))), tag(":"));
+    let mut parser = terminated(
+        nom::sequence::tuple((name_parser, many0(bracketed_parser))),
+        tag(":"),
+    );
 
-    parser(input).map(|r| (r.0, r.1.0.join("").to_string() + &r.1.1.join("")))
+    parser(input).map(|r| (r.0, r.1 .0.join("").to_string() + &r.1 .1.join("")))
 }
 
 #[cfg(test)]
@@ -264,7 +274,10 @@ mod test {
     fn verify_pseudo_selector() {
         assert_eq!(pseudo_selector("foo:").unwrap().1, "foo".to_string());
         assert_eq!(pseudo_selector("foo(1):").unwrap().1, "foo(1)".to_string());
-        assert_eq!(pseudo_selector("is(:not(:nth-child(1)) *):").unwrap().1, "is(:not(:nth-child(1)) *)".to_string());
+        assert_eq!(
+            pseudo_selector("is(:not(:nth-child(1)) *):").unwrap().1,
+            "is(:not(:nth-child(1)) *)".to_string()
+        );
     }
 
     #[test]

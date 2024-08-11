@@ -13,17 +13,15 @@ extern crate dwui;
 use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
-use crate::router::AppRouter;
-use dominator::{Dom, events};
+use crate::router::make_app_router;
+use dominator::routing::go_to_url;
+use dominator::{events, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use futures_signals::signal::SignalExt;
-use matchit::Params;
 use std::sync::Arc;
-use dominator::routing::go_to_url;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::window;
-use dwui::theme::colors::ColorsCssVariables;
 
 #[cfg(not(test))]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
@@ -33,38 +31,9 @@ async fn main() {
     dominator::append_dom(&dominator::body(), main_view());
 }
 
-fn make_app_router() -> AppRouter<DocPage> {
-    let mut router = matchit::Router::<Box<dyn Fn(Params) -> Result<DocPage, ()>>>::new();
-
-    router
-        .insert("#/docs/colors", Box::new(|_| Ok(DocPage::Colors)))
-        .unwrap_throw();
-
-    router
-        .insert("#/docs/flex", Box::new(|_| Ok(DocPage::Flex)))
-        .unwrap_throw();
-
-    router
-        .insert(
-            "#/docs/responsive-design",
-            Box::new(|_| Ok(DocPage::Responsiveness)),
-        )
-        .unwrap_throw();
-
-    router
-        .insert("#/docs/pseudoclasses", Box::new(|_| Ok(DocPage::Pseudoclasses)))
-        .unwrap_throw();
-
-    AppRouter::new(router)
-}
-
 fn main_view() -> Dom {
     dwind::stylesheet();
-    dwui::theme::apply_style_sheet(Some(ColorsCssVariables {
-        dwui_light_primary_300: "#404045".to_string(),
-        dwui_light_text_on_primary_700: "beige".to_string(),
-        ..Default::default()
-    }));
+    dwui::theme::apply_style_sheet(Some(Default::default()));
 
     stylesheet!(["body"], {
         // Use the generated DWIND_COLORS map if we need to programmatically access color values

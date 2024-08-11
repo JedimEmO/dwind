@@ -16,10 +16,7 @@ struct ColorFile {
 }
 
 fn main() {
-    let files = vec![
-        "resources/css/base.css",
-        "resources/css/colors.css"
-    ];
+    let files = vec!["resources/css/base.css", "resources/css/colors.css"];
 
     let out_dir = env::var_os("OUT_DIR").unwrap();
 

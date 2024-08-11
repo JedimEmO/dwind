@@ -21,34 +21,49 @@ pub mod base {
 }
 
 pub mod colors {
+    use std::collections::BTreeMap;
+
     include!(concat!(env!("OUT_DIR"), "/colors.rs"));
+
+    impl ColorsCssVariables {
+        pub fn new(
+            primary: &BTreeMap<u32, String>,
+            text_on_primary: &BTreeMap<u32, String>,
+        ) -> Self {
+            Self {
+                dwui_primary_50: primary.get(&50).unwrap().clone(),
+                dwui_primary_100: primary.get(&100).unwrap().clone(),
+                dwui_primary_200: primary.get(&200).unwrap().clone(),
+                dwui_primary_300: primary.get(&300).unwrap().clone(),
+                dwui_primary_400: primary.get(&400).unwrap().clone(),
+                dwui_primary_500: primary.get(&500).unwrap().clone(),
+                dwui_primary_600: primary.get(&600).unwrap().clone(),
+                dwui_primary_700: primary.get(&700).unwrap().clone(),
+                dwui_primary_800: primary.get(&800).unwrap().clone(),
+                dwui_primary_900: primary.get(&900).unwrap().clone(),
+                dwui_primary_950: primary.get(&950).unwrap().clone(),
+
+                dwui_text_on_primary_50: text_on_primary.get(&50).unwrap().clone(),
+                dwui_text_on_primary_100: text_on_primary.get(&100).unwrap().clone(),
+                dwui_text_on_primary_200: text_on_primary.get(&200).unwrap().clone(),
+                dwui_text_on_primary_300: text_on_primary.get(&300).unwrap().clone(),
+                dwui_text_on_primary_400: text_on_primary.get(&400).unwrap().clone(),
+                dwui_text_on_primary_500: text_on_primary.get(&500).unwrap().clone(),
+                dwui_text_on_primary_600: text_on_primary.get(&600).unwrap().clone(),
+                dwui_text_on_primary_700: text_on_primary.get(&700).unwrap().clone(),
+                dwui_text_on_primary_800: text_on_primary.get(&800).unwrap().clone(),
+                dwui_text_on_primary_900: text_on_primary.get(&900).unwrap().clone(),
+                dwui_text_on_primary_950: text_on_primary.get(&950).unwrap().clone(),
+            }
+        }
+    }
 
     impl Default for ColorsCssVariables {
         fn default() -> Self {
-            Self {
-                dwui_light_primary_50: "#fbf4f7".to_string(),
-                dwui_light_primary_100: "#f8ebf0".to_string(),
-                dwui_light_primary_200: "#f2d8e4".to_string(),
-                dwui_light_primary_300: "#e9b8cd".to_string(),
-                dwui_light_primary_400: "#d57b9f".to_string(),
-                dwui_light_primary_500: "#cc688d".to_string(),
-                dwui_light_primary_600: "#b74b6e".to_string(),
-                dwui_light_primary_700: "#9d3957".to_string(),
-                dwui_light_primary_800: "#833148".to_string(),
-                dwui_light_primary_900: "#6e2d3f".to_string(),
-                dwui_light_primary_950: "#421521".to_string(),
-                dwui_light_text_on_primary_50: "#f3f7f8".to_string(),
-                dwui_light_text_on_primary_100: "#e0e9ed".to_string(),
-                dwui_light_text_on_primary_200: "#c4d5dd".to_string(),
-                dwui_light_text_on_primary_300: "#9bb7c5".to_string(),
-                dwui_light_text_on_primary_400: "#6b90a5".to_string(),
-                dwui_light_text_on_primary_500: "#50758a".to_string(),
-                dwui_light_text_on_primary_600: "#456275".to_string(),
-                dwui_light_text_on_primary_700: "#3d5161".to_string(),
-                dwui_light_text_on_primary_800: "#374653".to_string(),
-                dwui_light_text_on_primary_900: "#323c47".to_string(),
-                dwui_light_text_on_primary_950: "#0e1216".to_string(),
-            }
+            let primary = dwind::colors::DWIND_COLORS.get("bunker").unwrap();
+            let text_on_primary = dwind::colors::DWIND_COLORS.get("candlelight").unwrap();
+
+            Self::new(primary, text_on_primary)
         }
     }
 }

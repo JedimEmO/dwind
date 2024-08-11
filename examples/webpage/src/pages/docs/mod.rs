@@ -76,7 +76,7 @@ pub fn doc_sections() -> Vec<DocSection> {
             docs: vec![
                 DocPage::Colors,
                 DocPage::Responsiveness,
-                DocPage::Pseudoclasses
+                DocPage::Pseudoclasses,
             ],
         },
         DocSection {

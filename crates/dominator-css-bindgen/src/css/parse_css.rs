@@ -26,19 +26,22 @@ pub struct ParsedCssFile<'a> {
 
 impl<'a> ParsedCssFile<'a> {
     pub fn referenced_variable_names(&self) -> Vec<String> {
-        self.blocks.iter().flat_map(|block| {
-            block.data.iter().filter_map(|token| {
-                if let Token::Ident(ident) = token {
-                    if ident.starts_with("--") {
-                        Some(ident.to_string())
+        self.blocks
+            .iter()
+            .flat_map(|block| {
+                block.data.iter().filter_map(|token| {
+                    if let Token::Ident(ident) = token {
+                        if ident.starts_with("--") {
+                            Some(ident.to_string())
+                        } else {
+                            None
+                        }
                     } else {
                         None
                     }
-                } else {
-                    None
-                }
+                })
             })
-        }).collect()
+            .collect()
     }
 }
 

@@ -79,14 +79,18 @@ pub fn example_html(args: TokenStream, token_stream: TokenStream) -> TokenStream
         .or(Some("".to_string()))
         .expect("did not find function block source text");
 
-    let rendered_themes = render_themes(fn_.sig.ident.to_string(), format!("{fn_name} {source_code}"), themes);
+    let rendered_themes = render_themes(
+        fn_.sig.ident.to_string(),
+        format!("{fn_name} {source_code}"),
+        themes,
+    );
     let original_tokens: proc_macro2::TokenStream = token_stream.into();
 
     let out: TokenStream = quote! {
         #rendered_themes
         #original_tokens
     }
-        .into();
+    .into();
 
     out
 }
@@ -108,7 +112,8 @@ fn render_themes(fn_name: String, code: String, themes: Vec<String>) -> proc_mac
             a: 0,
         });
 
-        let rendered_theme = highlighted_html_for_string(&code, &syntax_set, sr, &theme).unwrap()
+        let rendered_theme = highlighted_html_for_string(&code, &syntax_set, sr, &theme)
+            .unwrap()
             .replace("style=\"background-color:#000000;\"", "");
 
         rendered_themes.push(quote! {( #theme_name.to_string(), #rendered_theme.to_string())});

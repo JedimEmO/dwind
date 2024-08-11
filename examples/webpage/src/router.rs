@@ -1,3 +1,4 @@
+use crate::pages::docs::DocPage;
 use dominator::routing::url;
 use futures_signals::signal::Signal;
 use futures_signals::signal::SignalExt;
@@ -37,4 +38,32 @@ where
                 }
             })
     }
+}
+
+pub fn make_app_router() -> AppRouter<DocPage> {
+    let mut router = matchit::Router::<Box<dyn Fn(Params) -> Result<DocPage, ()>>>::new();
+
+    router
+        .insert("#/docs/colors", Box::new(|_| Ok(DocPage::Colors)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/flex", Box::new(|_| Ok(DocPage::Flex)))
+        .unwrap_throw();
+
+    router
+        .insert(
+            "#/docs/responsive-design",
+            Box::new(|_| Ok(DocPage::Responsiveness)),
+        )
+        .unwrap_throw();
+
+    router
+        .insert(
+            "#/docs/pseudoclasses",
+            Box::new(|_| Ok(DocPage::Pseudoclasses)),
+        )
+        .unwrap_throw();
+
+    AppRouter::new(router)
 }
