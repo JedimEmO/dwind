@@ -18,6 +18,7 @@ use dominator::routing::go_to_url;
 use dominator::{events, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
+use dwui::theme::prelude::ColorsCssVariables;
 use futures_signals::signal::SignalExt;
 use std::sync::Arc;
 use wasm_bindgen::UnwrapThrowExt;
@@ -33,7 +34,11 @@ async fn main() {
 
 fn main_view() -> Dom {
     dwind::stylesheet();
-    dwui::theme::apply_style_sheet(Some(Default::default()));
+    dwui::theme::apply_style_sheet(Some(ColorsCssVariables::new(
+        &DWIND_COLORS["apple"],
+        &DWIND_COLORS["woodsmoke"],
+        &DWIND_COLORS["woodsmoke"],
+    )));
 
     stylesheet!(["body"], {
         // Use the generated DWIND_COLORS map if we need to programmatically access color values

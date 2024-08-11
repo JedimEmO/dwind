@@ -85,3 +85,47 @@
 .dwui-text-on-primary-950 {
     color: var(--dwui-text-on-primary-950);
 }
+
+.dwui-bg-void-50 {
+    background-color: var(--dwui-void-50);
+}
+
+.dwui-bg-void-100 {
+    background-color: var(--dwui-void-100);
+}
+
+.dwui-bg-void-200 {
+    background-color: var(--dwui-void-200);
+}
+
+.dwui-bg-void-300 {
+    background-color: var(--dwui-void-300);
+}
+
+.dwui-bg-void-400 {
+    background-color: var(--dwui-void-400);
+}
+
+.dwui-bg-void-500 {
+    background-color: var(--dwui-void-500);
+}
+
+.dwui-bg-void-600 {
+    background-color: var(--dwui-void-600);
+}
+
+.dwui-bg-void-700 {
+    background-color: var(--dwui-void-700);
+}
+
+.dwui-bg-void-800 {
+    background-color: var(--dwui-void-800);
+}
+
+.dwui-bg-void-900 {
+    background-color: var(--dwui-void-900);
+}
+
+.dwui-bg-void-950 {
+    background-color: var(--dwui-void-950);
+}

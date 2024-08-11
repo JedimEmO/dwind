@@ -1,7 +1,5 @@
 use dominator::stylesheet;
 
-pub mod classes;
-
 pub fn apply_style_sheet(colors: Option<crate::theme::colors::ColorsCssVariables>) {
     stylesheet!(":root", {
         .raw(colors.unwrap_or_default().to_style_sheet_raw())
@@ -29,6 +27,7 @@ pub mod colors {
         pub fn new(
             primary: &BTreeMap<u32, String>,
             text_on_primary: &BTreeMap<u32, String>,
+            bg_void: &BTreeMap<u32, String>,
         ) -> Self {
             Self {
                 dwui_primary_50: primary.get(&50).unwrap().clone(),
@@ -54,6 +53,18 @@ pub mod colors {
                 dwui_text_on_primary_800: text_on_primary.get(&800).unwrap().clone(),
                 dwui_text_on_primary_900: text_on_primary.get(&900).unwrap().clone(),
                 dwui_text_on_primary_950: text_on_primary.get(&950).unwrap().clone(),
+
+                dwui_void_50: bg_void.get(&50).unwrap().clone(),
+                dwui_void_100: bg_void.get(&100).unwrap().clone(),
+                dwui_void_200: bg_void.get(&200).unwrap().clone(),
+                dwui_void_300: bg_void.get(&300).unwrap().clone(),
+                dwui_void_400: bg_void.get(&400).unwrap().clone(),
+                dwui_void_500: bg_void.get(&500).unwrap().clone(),
+                dwui_void_600: bg_void.get(&600).unwrap().clone(),
+                dwui_void_700: bg_void.get(&700).unwrap().clone(),
+                dwui_void_800: bg_void.get(&800).unwrap().clone(),
+                dwui_void_900: bg_void.get(&900).unwrap().clone(),
+                dwui_void_950: bg_void.get(&950).unwrap().clone(),
             }
         }
     }
@@ -61,9 +72,10 @@ pub mod colors {
     impl Default for ColorsCssVariables {
         fn default() -> Self {
             let primary = dwind::colors::DWIND_COLORS.get("bunker").unwrap();
+            let void = dwind::colors::DWIND_COLORS.get("bunker").unwrap();
             let text_on_primary = dwind::colors::DWIND_COLORS.get("candlelight").unwrap();
 
-            Self::new(primary, text_on_primary)
+            Self::new(primary, text_on_primary, void)
         }
     }
 }
