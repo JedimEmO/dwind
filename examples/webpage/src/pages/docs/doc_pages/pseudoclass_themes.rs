@@ -54,19 +54,20 @@ fn pseudo_class_theme() -> Dom {
         .class_signal(&*SCHEME_CLASS, alternate_scheme.signal())
         .class_signal(&*SCHEME_CLASS_LIGHT, not(alternate_scheme.signal()))
         .class_signal("light", not(dark_theme.signal()))
-        .dwclass!("m-x-auto")
+        .dwclass!("m-x-auto p-b-4")
         .dwclass!("bg-bunker-950 w-full flex align-items-center flex-col")
         .dwclass!("is(.light):bg-bunker-100")
         .child(html!("div", {
-            .dwclass!("w-52 h-44")
-            .dwclass!("flex gap-4 align-items-center justify-center")
+            .dwclass!("flex gap-4 align-items-center justify-center @<sm:flex-col @sm:flex-row p-t-4 p-b-4")
             .child(button!({
+                .apply(|b| dwclass!(b, "w-64 h-8"))
                 .content(Some(text("Toggle Theme")))
                 .click_handler(clone!(dark_theme => move |_| {
                     dark_theme.set(!dark_theme.get());
                 }))
             }))
             .child(button!({
+                .apply(|b| dwclass!(b, "w-64 h-8"))
                 .content(Some(text("Toggle Scheme")))
                 .click_handler(clone!(alternate_scheme => move |_| {
                     alternate_scheme.set(!alternate_scheme.get());

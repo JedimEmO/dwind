@@ -30,6 +30,9 @@ pub fn button(props: impl ButtonPropsTrait + 'static) -> Dom {
     html!("button", {
         .dwclass!("button-text-light button-bg-light button-bg-hover-light hover:dwui-bg-primary-800 dwui-bg-primary-700 dwui-text-on-primary-200")
         .dwclass!("w-full font-bold p-2 cursor-pointer rounded-lg")
+        .apply_if(apply.is_some(), move |b| {
+            b.apply(apply.unwrap())
+        })
         .child_signal(content)
         .event(move |e: events::Click| {
             click_handler(e);
