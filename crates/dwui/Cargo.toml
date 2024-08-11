@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+const_format.workspace = true
 dwind = { path = "../dwind" }
 dwind-macros = { path = "../dwind-macros" }
 dominator.workspace = true

@@ -149,7 +149,7 @@ fn css_identifier(input: &str) -> IResult<&str, &str> {
 }
 
 fn color(input: &str) -> IResult<&str, &str> {
-    let parser = take_while1(is_extended_alphanumeric(vec!['#', '%', '_', '-', '@']));
+    let parser = take_while1(is_extended_alphanumeric(vec!['#', '%', '_', '-', '@', '(', ')']));
 
     parser(input)
 }

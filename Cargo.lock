@@ -294,6 +294,7 @@ dependencies = [
 name = "dwui"
 version = "0.1.0"
 dependencies = [
+ "const_format",
  "dominator",
  "dominator-css-bindgen",
  "dwind",

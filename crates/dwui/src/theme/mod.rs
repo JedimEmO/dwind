@@ -78,4 +78,23 @@ pub mod colors {
             Self::new(primary, text_on_primary, void)
         }
     }
+
+    use dwind::border_color_generator;
+    dwgenerate_map!(
+        "dwui-border-color-primary",
+        "border-color-",
+        [
+            ("50", "var(--dwui-primary-50)"),
+            ("100", "var(--dwui-primary-100)"),
+            ("200", "var(--dwui-primary-200)"),
+            ("300", "var(--dwui-primary-300)"),
+            ("400", "var(--dwui-primary-400)"),
+            ("500", "var(--dwui-primary-500)"),
+            ("600", "var(--dwui-primary-600)"),
+            ("700", "var(--dwui-primary-700)"),
+            ("800", "var(--dwui-primary-800)"),
+            ("900", "var(--dwui-primary-900)"),
+            ("950", "var(--dwui-primary-950)")
+        ]
+    );
 }

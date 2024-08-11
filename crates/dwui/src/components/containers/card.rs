@@ -23,6 +23,7 @@ struct Card {
 }
 
 dwgenerate!("card-bg-primary-light", "is(.light *):dwui-bg-primary-200");
+dwgenerate!("card-text-primary-light", "is(.light *):dwui-text-on-primary-500");
 dwgenerate!("card-bg-void-light", "is(.light *):dwui-bg-void-200");
 
 pub fn card(props: impl CardPropsTrait + 'static) -> Dom {
@@ -36,7 +37,7 @@ pub fn card(props: impl CardPropsTrait + 'static) -> Dom {
 
     html!("div", {
         .dwclass!("shadow-md rounded-lg w-full")
-        .dwclass_signal!("dwui-bg-void-900 card-bg-void-light", scheme.signal().map(|v| v == ColorScheme::Void))
+        .dwclass_signal!("dwui-bg-void-900 card-bg-void-light card-text-primary-light dwui-text-on-primary-200", scheme.signal().map(|v| v == ColorScheme::Void))
         .dwclass_signal!("dwui-bg-primary-900 card-bg-primary-light", scheme.signal().map(|v| v == ColorScheme::Primary))
         //.dwclass_signal!("dwui-bg-secondary-900", scheme.signal().map(|v| v == ColorScheme::Secondary))
         .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))
