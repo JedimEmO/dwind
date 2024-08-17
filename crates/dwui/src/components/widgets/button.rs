@@ -1,15 +1,17 @@
+use std::pin::Pin;
 use crate::theme::prelude::*;
-use dominator::{class, events, html, pseudo, Dom};
+use dominator::{class, events, html, pseudo, Dom, DomBuilder};
 use dwind::prelude::*;
 use dwind_macros::dwgenerate;
 use futures_signals_component_macro::component;
-use futures_signals::signal::{and, SignalExt};
+use futures_signals::signal::{always, and, Always, Signal, SignalExt};
+use web_sys::HtmlElement;
 use dwind::border_color_generator;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum ButtonType {
     Flat,
-    Border
+    Border,
 }
 
 #[component(render_fn = button)]
@@ -24,7 +26,7 @@ struct Button<THandler: Fn(events::Click) -> () = fn(events::Click) -> ()> {
     disabled: bool,
     #[signal]
     #[default(ButtonType::Flat)]
-    button_type: ButtonType
+    button_type: ButtonType,
 }
 
 dwgenerate!("button-bg-light", "is(.light *):dwui-bg-primary-400");
