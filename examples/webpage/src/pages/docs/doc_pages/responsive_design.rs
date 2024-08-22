@@ -1,7 +1,7 @@
 use crate::pages::docs::code_widget::code;
 use crate::pages::docs::doc_pages::doc_page::{doc_page_sub_header, doc_page_title};
 use crate::pages::docs::example_box::example_box;
-use dominator::Dom;
+use dominator::{media_query, Dom};
 use dwind::prelude::media_queries::{breakpoint_active_signal, Breakpoint};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
@@ -25,9 +25,9 @@ pub fn responsive_design() -> Dom {
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn breakpoint_example() -> Dom {
     html!("div", {
-        .dwclass!("w-full @<sm:flex-col @sm:flex-row flex text-woodsmoke-950 font-extrabold")
+        .dwclass!("w-full @<sm:flex-col @sm:flex-row flex text-woodsmoke-950")
         .child(html!("div", {
-            .dwclass!("@sm:w-40 h-40 flex-initial bg-picton-blue-400 flex align-items-center justify-center")
+            .dwclass!("@sm:w-40 h-40 flex-initial bg-picton-blue-400 flex align-items-center justify-center @((max-width: 700px)):bg-candlelight-400")
             .text_signal(breakpoint_active_signal(Breakpoint::Small).map(|active| {
                 if active {
                     "Horizontal"
@@ -49,6 +49,7 @@ fn breakpoint_table() -> Dom {
         ("dwclass!(\"@md:my-cls\")", "medium screens", ">= 1280px"),
         ("dwclass!(\"@lg:my-cls\")", "large screens", ">= 1920px"),
         ("dwclass!(\"@xl:my-cls\")", "large screens", ">= 2560px"),
+        ("dwclass!(\"@((max-width: 500px)):bg-candlelight-400)\")", "Custom media query", "-")
     ];
 
     html!("table", {

@@ -27,21 +27,32 @@ impl DwindClassSelector {
             .conditionals
             .iter()
             .filter_map(|v| {
-                let (v, modifier) = if v.starts_with("@<") {
+                let (v, modifier, is_media_query) = if v.starts_with("@<") {
                     let mut v = v.clone();
                     v.remove(1);
-                    (v, Some("<".to_string()))
+                    (v, Some("<".to_string()), false)
                 } else {
-                    (v.clone(), None)
+                    let is_mq = v.trim().starts_with("@(") && v.trim().ends_with(")");
+
+                    (v.clone(), None, is_mq)
                 };
 
-                if let Ok(bp) = Breakpoint::try_from(v.as_str()) {
+                if is_media_query {
                     Some(BreakpointInfo {
-                        breakpoint: bp,
+                        breakpoint: Breakpoint::MediaQuery(v[2..v.len() - 1].to_string()),
                         modifier,
+                        is_media_query: true,
                     })
                 } else {
-                    None
+                    if let Ok(bp) = Breakpoint::try_from(v.as_str()) {
+                        Some(BreakpointInfo {
+                            breakpoint: bp,
+                            modifier,
+                            is_media_query: false,
+                        })
+                    } else {
+                        None
+                    }
                 }
             })
             .collect::<Vec<_>>();
@@ -149,7 +160,9 @@ fn css_identifier(input: &str) -> IResult<&str, &str> {
 }
 
 fn color(input: &str) -> IResult<&str, &str> {
-    let parser = take_while1(is_extended_alphanumeric(vec!['#', '%', '_', '-', '@', '(', ')']));
+    let parser = take_while1(is_extended_alphanumeric(vec![
+        '#', '%', '_', '-', '@', '(', ')',
+    ]));
 
     parser(input)
 }
@@ -187,7 +200,7 @@ fn recursive_selector<'a>(input: &'a str) -> IResult<&'a str, String> {
                 .map(move |v| (v.0, v.1.to_string()))
         },
     )))(input)
-    .map(|r| (r.0, r.1.join("")))
+        .map(|r| (r.0, r.1.join("")))
 }
 
 fn pseudo_selector(input: &str) -> IResult<&str, String> {
@@ -205,7 +218,7 @@ fn pseudo_selector(input: &str) -> IResult<&str, String> {
         tag(":"),
     );
 
-    parser(input).map(|r| (r.0, r.1 .0.join("").to_string() + &r.1 .1.join("")))
+    parser(input).map(|r| (r.0, r.1.0.join("").to_string() + &r.1.1.join("")))
 }
 
 #[cfg(test)]
@@ -214,6 +227,15 @@ mod test {
         css_identifier, generator_parameters, parse_class_string, pseudo_selector, selectors,
         DwindClassSelector,
     };
+
+    #[test]
+    fn media_query_parser() {
+        let v =
+            selectors("foo @((max-width: 500px) and (max-height: 500px)):bar @is[white]:bg-[5px] ")
+                .unwrap();
+        assert_eq!(v.1.len(), 3);
+        assert_eq!(v.1[1].0[0], "@((max-width: 500px) and (max-height: 500px))")
+    }
 
     #[test]
     fn verify_selectors_parser() {

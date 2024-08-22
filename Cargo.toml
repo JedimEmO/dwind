@@ -17,7 +17,7 @@ members = [
 case = "1.0.0"
 cssparser = "0.34.0"
 const_format = "0.2.32"
-dominator = "^0.5.36"
+dominator = "^0.5.37"
 futures = "0.3.30"
 futures-signals = "^0.3.33"
 futures-signals-component-macro = { version = "0.1.1", features = [

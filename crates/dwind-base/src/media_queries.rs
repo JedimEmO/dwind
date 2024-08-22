@@ -1,12 +1,13 @@
 use futures_signals::signal::{Signal, SignalExt};
 
-#[derive(Ord, PartialOrd, Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(PartialOrd, Debug, Eq, PartialEq, Clone)]
 pub enum Breakpoint {
-    VerySmall = 0,
-    Small = 1,
-    Medium = 2,
-    Large = 3,
-    VeryLarge = 4,
+    VerySmall,
+    Small,
+    Medium,
+    Large,
+    VeryLarge,
+    MediaQuery(String)
 }
 
 impl TryFrom<&str> for Breakpoint {
@@ -33,7 +34,7 @@ pub fn breakpoint() -> impl Signal<Item = Breakpoint> {
             v if v >= 640.0 => Breakpoint::Small,
             _v => Breakpoint::VerySmall,
         })
-        .dedupe()
+        .dedupe_cloned()
 }
 
 pub fn breakpoint_active_signal(level: Breakpoint) -> impl Signal<Item = bool> {

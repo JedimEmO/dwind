@@ -132,4 +132,5 @@ fn render_generator_call(class: &DwindClassSelector) -> TokenStream {
 pub struct BreakpointInfo {
     pub breakpoint: Breakpoint,
     pub modifier: Option<String>,
+    pub is_media_query: bool,
 }

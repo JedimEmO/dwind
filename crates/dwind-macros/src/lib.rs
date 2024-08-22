@@ -37,24 +37,32 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
         if let Some(breakpoint) = breakpoint {
             let bp = breakpoint.breakpoint;
 
-            let bp_value = match bp {
-                Breakpoint::VerySmall => quote! { dwind::prelude::media_queries::Breakpoint::VerySmall },
-                Breakpoint::Small => quote! { dwind::prelude::media_queries::Breakpoint::Small },
-                Breakpoint::Medium => quote! { dwind::prelude::media_queries::Breakpoint::Medium },
-                Breakpoint::Large => quote! { dwind::prelude::media_queries::Breakpoint::Large },
-                Breakpoint::VeryLarge => quote! { dwind::prelude::media_queries::Breakpoint::VeryLarge },
-            };
+            if breakpoint.is_media_query {
+                let Breakpoint::MediaQuery(mq) = bp  else { unreachable!() };
 
-            if let Some(_modifier) = breakpoint.modifier {
                 quote! {
-                    .class_signal(#class, dwind::prelude::media_queries::breakpoint_less_than_signal(#bp_value))
+                    .class_signal(#class, dominator::media_query(#mq))
                 }
             } else {
-                quote! {
-                    .class_signal(#class, dwind::prelude::media_queries::breakpoint_active_signal(#bp_value))
+                let bp_value = match bp {
+                    Breakpoint::VerySmall => quote! { dwind::prelude::media_queries::Breakpoint::VerySmall },
+                    Breakpoint::Small => quote! { dwind::prelude::media_queries::Breakpoint::Small },
+                    Breakpoint::Medium => quote! { dwind::prelude::media_queries::Breakpoint::Medium },
+                    Breakpoint::Large => quote! { dwind::prelude::media_queries::Breakpoint::Large },
+                    Breakpoint::VeryLarge => quote! { dwind::prelude::media_queries::Breakpoint::VeryLarge },
+                    _ => { panic!("media query breakpoint not supported here")}
+                };
+
+                if let Some(_modifier) = breakpoint.modifier {
+                    quote! {
+                        .class_signal(#class, dwind::prelude::media_queries::breakpoint_less_than_signal(#bp_value))
+                    }
+                    } else {
+                        quote! {
+                        .class_signal(#class, dwind::prelude::media_queries::breakpoint_active_signal(#bp_value))
+                    }
                 }
             }
-
         } else {
             quote! {
                 .class(#class)
