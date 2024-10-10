@@ -77,7 +77,6 @@ pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<Bre
             quote! {
                 dominator::class! {
                     # ! [prefix=#class_prefix]
-
                     .dominator::pseudo!(#pseudo_selector, {
                         .raw(&* #class_raw_ident)
                     })

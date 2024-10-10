@@ -50,6 +50,10 @@ pub mod typography {
     include!(concat!(env!("OUT_DIR"), "/typography.rs"));
 }
 
+pub mod transition {
+    include!(concat!(env!("OUT_DIR"), "/transition.rs"));
+}
+
 pub use modules::backgrounds;
 pub use modules::colors;
 pub use modules::sizing;

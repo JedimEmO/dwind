@@ -201,18 +201,21 @@ pub fn dwgenerate_map(input: TokenStream) -> TokenStream {
     } = input;
 
     let output = args.tuples.into_iter().map(|input_tuple| {
+        // create the full name of the new class
         let ident_name = class_name_to_struct_identifier(&format!(
             "{}-{}",
             base_output_ident.value(),
             input_tuple.first.value()
         ));
 
+        // create generator dwind string literal
         let class_literal = format!(
             "{}[{}]",
             dwind_class_lit.value(),
             input_tuple.second.value()
         );
 
+        // parse the generator string into a class selector
         let class = parse_selector(class_literal.as_str()).unwrap().1;
 
         render_generate_dwind_class(ident_name, class)
