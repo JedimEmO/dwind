@@ -9,6 +9,7 @@ fn main() {
         "resources/css/borders.css",
         "resources/css/box_shadow.css",
         "resources/css/colors.css",
+        "resources/css/effects.css",
         "resources/css/interactivity.css",
         "resources/css/flexbox_and_grid.css",
         "resources/css/layout.css",

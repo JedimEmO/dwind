@@ -104,6 +104,10 @@ rounding
     border-radius: 1rem; /* 16px */
 }
 
+.rounded-full {
+    border-radius: 9999px;
+}
+
 .divide-solid > * + * {
     border-style: solid;
 }

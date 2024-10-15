@@ -5,12 +5,14 @@ pub mod prelude {
     pub use super::borders::*;
     pub use super::box_shadow::*;
     pub use super::colors::*;
+    pub use super::effects::*;
     pub use super::flexbox_and_grid::*;
     pub use super::interactivity::*;
     pub use super::layout::*;
     pub use super::position::*;
     pub use super::sizing::*;
     pub use super::spacing::*;
+    pub use super::transition::*;
     pub use super::typography::*;
     pub use dwind_base::*;
 }
@@ -26,6 +28,10 @@ pub mod base {
 
 pub mod box_shadow {
     include!(concat!(env!("OUT_DIR"), "/box_shadow.rs"));
+}
+
+pub mod effects {
+    include!(concat!(env!("OUT_DIR"), "/effects.rs"));
 }
 
 pub use modules::borders;
