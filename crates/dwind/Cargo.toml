@@ -1,0 +1,21 @@
+[package]
+name = "dwind"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+const_format.workspace = true
+dominator.workspace = true
+dominator-css-bindgen = { path = "../dominator-css-bindgen" }
+dwind-base = { path = "../dwind-base" }
+dwind-macros = { path = "../dwind-macros" }
+futures-signals.workspace = true
+modern-normalize-cssys = { path = "../modern-normalize-cssys" }
+once_cell.workspace = true
+serde = { version = "1.0.204", features = ["derive"] }
+
+[build-dependencies]
+dominator-css-bindgen = { path = "../dominator-css-bindgen" }
+dwind-build = { path = "../dwind-build" }
+serde.workspace = true
+serde_json.workspace = true

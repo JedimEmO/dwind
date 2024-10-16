@@ -1,0 +1,16 @@
+[package]
+name = "modern-normalize-cssys"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dominator.workspace = true
+dominator-css-bindgen = { path = "../dominator-css-bindgen" }
+once_cell.workspace = true
+web-sys.workspace = true
+
+[build-dependencies]
+dominator-css-bindgen = { path = "../dominator-css-bindgen" }
+
+[dev-dependencies]
+wasm-bindgen-test.workspace = true

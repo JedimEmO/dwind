@@ -1,0 +1,12 @@
+[package]
+name = "dominator-css-bindgen-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dominator.workspace = true
+dominator-css-bindgen = { path = "../../dominator-css-bindgen" }
+once_cell.workspace = true
+
+[build-dependencies]
+dominator-css-bindgen = { path = "../../dominator-css-bindgen" }

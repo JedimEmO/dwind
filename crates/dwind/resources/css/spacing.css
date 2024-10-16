@@ -1,0 +1,36 @@
+.m-auto {
+    margin: auto;
+}
+
+.m-x-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.m-y-auto {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+/* Horizontal margin */
+.m-l-auto {
+    margin-left: auto;
+}
+
+.m-r-auto {
+    margin-right: auto;
+}
+
+/* Vertical margin */
+.m-t-auto {
+    margin-top: auto;
+}
+
+.m-b-auto {
+    margin-bottom: auto;
+}
+
+/* All sides margin */
+.m-all-auto {
+    margin: auto;
+}
