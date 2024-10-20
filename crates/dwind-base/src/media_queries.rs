@@ -7,7 +7,7 @@ pub enum Breakpoint {
     Medium,
     Large,
     VeryLarge,
-    MediaQuery(String)
+    MediaQuery(String),
 }
 
 impl TryFrom<&str> for Breakpoint {

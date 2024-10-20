@@ -13,3 +13,11 @@
 .pointer-events-auto {
     pointer-events: auto;
 }
+
+.appearance-none {
+    appearance: none;
+}
+
+.appearance-auto {
+    appearance: auto;
+}

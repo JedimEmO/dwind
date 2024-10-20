@@ -21,5 +21,12 @@ macro_rules! border_color_generator {
     };
 }
 
+#[macro_export]
+macro_rules! shadow_color_generator {
+    ($color:tt) => {
+        const_format::formatcp!("border-color: {};", $color)
+    };
+}
+
 include!(concat!(env!("OUT_DIR"), "/colors_generated.rs"));
 include!(concat!(env!("OUT_DIR"), "/colors.rs"));

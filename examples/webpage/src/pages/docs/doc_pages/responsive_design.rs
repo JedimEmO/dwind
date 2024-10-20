@@ -24,22 +24,22 @@ pub fn responsive_design() -> Dom {
 
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn breakpoint_example() -> Dom {
-html!("div", {
-    .dwclass!("w-full @<sm:flex-col @sm:flex-row flex text-woodsmoke-950")
-    .child(html!("div", {
-        .dwclass!("@sm:w-40 h-40 flex-initial bg-picton-blue-400 flex align-items-center justify-center @((max-width: 700px)):bg-candlelight-400")
-        .text_signal(breakpoint_active_signal(Breakpoint::Small).map(|active| {
-            if active {
-                "Horizontal"
-            } else {
-                "Vertical"
-            }
+    html!("div", {
+        .dwclass!("w-full @<sm:flex-col @sm:flex-row flex text-woodsmoke-950")
+        .child(html!("div", {
+            .dwclass!("@sm:w-40 h-40 flex-initial bg-picton-blue-400 flex align-items-center justify-center @((max-width: 700px)):bg-candlelight-400")
+            .text_signal(breakpoint_active_signal(Breakpoint::Small).map(|active| {
+                if active {
+                    "Horizontal"
+                } else {
+                    "Vertical"
+                }
+            }))
         }))
-    }))
-    .child(html!("div", {
-        .dwclass!("w-full h-40 flex-initial bg-charm-400")
-    }))
-})
+        .child(html!("div", {
+            .dwclass!("w-full h-40 flex-initial bg-charm-400")
+        }))
+    })
 }
 
 fn breakpoint_table() -> Dom {
@@ -49,7 +49,11 @@ fn breakpoint_table() -> Dom {
         ("dwclass!(\"@md:my-cls\")", "medium screens", ">= 1280px"),
         ("dwclass!(\"@lg:my-cls\")", "large screens", ">= 1920px"),
         ("dwclass!(\"@xl:my-cls\")", "large screens", ">= 2560px"),
-        ("dwclass!(\"@((max-width: 500px)):bg-candlelight-400)\")", "Custom media query", "-")
+        (
+            "dwclass!(\"@((max-width: 500px)):bg-candlelight-400)\")",
+            "Custom media query",
+            "-",
+        ),
     ];
 
     html!("table", {

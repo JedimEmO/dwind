@@ -200,7 +200,7 @@ fn recursive_selector<'a>(input: &'a str) -> IResult<&'a str, String> {
                 .map(move |v| (v.0, v.1.to_string()))
         },
     )))(input)
-        .map(|r| (r.0, r.1.join("")))
+    .map(|r| (r.0, r.1.join("")))
 }
 
 fn pseudo_selector(input: &str) -> IResult<&str, String> {
@@ -218,7 +218,7 @@ fn pseudo_selector(input: &str) -> IResult<&str, String> {
         tag(":"),
     );
 
-    parser(input).map(|r| (r.0, r.1.0.join("").to_string() + &r.1.1.join("")))
+    parser(input).map(|r| (r.0, r.1 .0.join("").to_string() + &r.1 .1.join("")))
 }
 
 #[cfg(test)]

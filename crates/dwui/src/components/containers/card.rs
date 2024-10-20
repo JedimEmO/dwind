@@ -23,7 +23,10 @@ struct Card {
 }
 
 dwgenerate!("card-bg-primary-light", "is(.light *):dwui-bg-primary-200");
-dwgenerate!("card-text-primary-light", "is(.light *):dwui-text-on-primary-500");
+dwgenerate!(
+    "card-text-primary-light",
+    "is(.light *):dwui-text-on-primary-500"
+);
 dwgenerate!("card-bg-void-light", "is(.light *):dwui-bg-void-200");
 
 pub fn card(props: impl CardPropsTrait + 'static) -> Dom {

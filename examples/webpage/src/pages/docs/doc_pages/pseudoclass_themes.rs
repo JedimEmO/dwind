@@ -1,6 +1,7 @@
 use crate::pages::docs::code_widget::code;
 use crate::pages::docs::doc_pages::doc_page::doc_page_title;
 use crate::pages::docs::example_box::example_box;
+use crate::pages::dwui::example_small::dwui_example_small;
 use dominator::{text, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
@@ -9,7 +10,6 @@ use dwui::theme::prelude::ColorsCssVariables;
 use example_html_macro::example_html;
 use futures_signals::signal::{not, Mutable};
 use once_cell::sync::Lazy;
-use crate::pages::dwui::example_small::dwui_example_small;
 
 pub fn pseudo_class_themes() -> Dom {
     html!("div", {

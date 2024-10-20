@@ -46,7 +46,6 @@ fn example_card_buttons() -> Dom {
     })
 }
 
-
 fn example_card_border_buttons() -> Dom {
     card!({
         .scheme(ColorScheme::Void)

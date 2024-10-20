@@ -1,12 +1,12 @@
-use std::pin::Pin;
 use crate::theme::prelude::*;
 use dominator::{class, events, html, pseudo, Dom, DomBuilder};
+use dwind::border_color_generator;
 use dwind::prelude::*;
 use dwind_macros::dwgenerate;
-use futures_signals_component_macro::component;
 use futures_signals::signal::{always, and, Always, Signal, SignalExt};
+use futures_signals_component_macro::component;
+use std::pin::Pin;
 use web_sys::HtmlElement;
-use dwind::border_color_generator;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum ButtonType {
@@ -30,14 +30,35 @@ struct Button<THandler: Fn(events::Click) -> () = fn(events::Click) -> ()> {
 }
 
 dwgenerate!("button-bg-light", "is(.light *):dwui-bg-primary-400");
-dwgenerate!("button-border-light", "is(.light *):dwui-border-color-primary-400");
-dwgenerate!("button-bg-light-disabled", "is(.light *):disabled:dwui-bg-primary-700");
-dwgenerate!("button-border-light-disabled", "is(.light *):disabled:dwui-border-color-primary-700");
-dwgenerate!("button-bg-hover-light", "is(.light *):hover:dwui-bg-primary-600");
-dwgenerate!("button-border-hover-light", "is(.light *):hover:dwui-border-color-primary-800");
+dwgenerate!(
+    "button-border-light",
+    "is(.light *):dwui-border-color-primary-400"
+);
+dwgenerate!(
+    "button-bg-light-disabled",
+    "is(.light *):disabled:dwui-bg-primary-700"
+);
+dwgenerate!(
+    "button-border-light-disabled",
+    "is(.light *):disabled:dwui-border-color-primary-700"
+);
+dwgenerate!(
+    "button-bg-hover-light",
+    "is(.light *):hover:dwui-bg-primary-600"
+);
+dwgenerate!(
+    "button-border-hover-light",
+    "is(.light *):hover:dwui-border-color-primary-800"
+);
 dwgenerate!("button-text-light", "is(.light *):dwui-text-on-primary-700");
-dwgenerate!("button-text-light-disabled", "is(.light *):disabled:dwui-text-on-primary-800");
-dwgenerate!("button-border-text-light", "is(.light *):dwui-text-on-primary-700");
+dwgenerate!(
+    "button-text-light-disabled",
+    "is(.light *):disabled:dwui-text-on-primary-800"
+);
+dwgenerate!(
+    "button-border-text-light",
+    "is(.light *):dwui-text-on-primary-700"
+);
 
 pub fn button(props: impl ButtonPropsTrait + 'static) -> Dom {
     let ButtonProps {
