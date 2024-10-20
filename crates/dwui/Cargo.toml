@@ -1,0 +1,22 @@
+[package]
+name = "dwui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+const_format.workspace = true
+dwind = { path = "../dwind" }
+dwind-macros = { path = "../dwind-macros" }
+dominator.workspace = true
+futures-signals.workspace = true
+futures-signals-component-macro.workspace = true
+once_cell.workspace = true
+web-sys.workspace = true
+
+[build-dependencies]
+dominator-css-bindgen = { path = "../dominator-css-bindgen" }
+serde_json.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+wasm-bindgen-test.workspace = true

@@ -1,0 +1,8 @@
+[build]
+target = "public/trunk_index.html"
+
+[serve]
+port=8811
+
+[clean]
+cargo = true

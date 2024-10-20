@@ -1,0 +1,179 @@
+.border-collapse {
+    border-collapse: collapse;
+}
+
+.border-solid {
+    border-style: solid;
+}
+
+.border-dashed {
+    border-style: dashed;
+}
+
+.border-dotted {
+    border-style: dotted;
+}
+
+.border-double {
+    border-style: double;
+}
+
+.border-hidden {
+    border-style: hidden;
+}
+
+.border-none {
+    border-style: none;
+}
+
+.border-inset {
+    border-style: inset;
+}
+
+.border {
+    border-width: 1px;
+}
+
+.border-x {
+    border-left-width: 1px;
+    border-right-width: 1px;
+}
+
+.border-y {
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+.border-s {
+    border-inline-start-width: 1px;
+}
+
+.border-e {
+    border-inline-end-width: 1px;
+}
+
+.border-t {
+    border-top-width: 1px;
+}
+
+.border-r {
+    border-right-width: 1px;
+}
+
+.border-b {
+    border-bottom-width: 1px;
+}
+
+.border-l {
+    border-left-width: 1px;
+}
+
+.border-l2 {
+    border-left-width: 2px;
+}
+
+/*
+rounding
+ */
+
+.rounded-none {
+    border-radius: 0;
+}
+
+.rounded-sm {
+    border-radius: 0.125rem;
+}
+
+.rounded {
+    border-radius: 0.25rem;
+}
+
+.rounded-md {
+    border-radius: 0.375rem;
+}
+
+.rounded-lg {
+    border-radius: 0.5rem; /* 8px */
+}
+
+.rounded-xl {
+    border-radius: 0.75rem; /* 12px */
+}
+
+.rounded-2xl {
+    border-radius: 1rem; /* 16px */
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+.divide-solid > * + * {
+    border-style: solid;
+}
+
+.divide-dashed > * + * {
+    border-style: dashed;
+}
+
+.divide-dotted > * + * {
+    border-style: dotted;
+}
+
+.divide-double > * + * {
+    border-style: double;
+}
+
+.divide-none > * + * {
+    border-style: none;
+}
+
+.divide-x-0 > * + * {
+    border-right-width: 0;
+    border-left-width: 0;
+}
+
+.divide-x-2 > * + * {
+    border-right-width: 0;
+    border-left-width: 2px;
+}
+
+.divide-x-4 > * + * {
+    border-right-width: 0;
+    border-left-width: 4px;
+}
+
+.divide-x-8 > * + * {
+    border-right-width: 0;
+    border-left-width: 8px;
+}
+
+.divide-x > * + * {
+    border-right-width: 0;
+    border-left-width: 1px;
+}
+
+.divide-y-0 > * + * {
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.divide-y-2 > * + * {
+    border-top-width: 2px;
+    border-bottom-width: 0px;
+}
+
+.divide-y-4 > * + * {
+    border-top-width: 4px;
+    border-bottom-width: 0px;
+}
+
+.divide-y-8 > * + * {
+    border-top-width: 8px;
+    border-bottom-width: 0px;
+}
+
+.divide-y > * + * {
+    border-top-width: 1px;
+    border-bottom-width: 0px;
+}
