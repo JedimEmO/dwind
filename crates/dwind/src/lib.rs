@@ -13,6 +13,7 @@ pub mod prelude {
     pub use super::sizing::*;
     pub use super::spacing::*;
     pub use super::transition::*;
+    pub use super::transforms::*;
     pub use super::typography::*;
     pub use dwind_base::*;
 }
@@ -52,12 +53,16 @@ pub mod flexbox_and_grid {
     include!(concat!(env!("OUT_DIR"), "/flexbox_and_grid.rs"));
 }
 
-pub mod typography {
-    include!(concat!(env!("OUT_DIR"), "/typography.rs"));
-}
-
 pub mod transition {
     include!(concat!(env!("OUT_DIR"), "/transition.rs"));
+}
+
+pub mod transforms {
+    include!(concat!(env!("OUT_DIR"), "/transforms.rs"));
+}
+
+pub mod typography {
+    include!(concat!(env!("OUT_DIR"), "/typography.rs"));
 }
 
 pub use modules::backgrounds;

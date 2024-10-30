@@ -1,0 +1,90 @@
+/*
+    Rotations
+*/
+.rotate-0 {
+    transform: rotate(0deg);
+}
+
+.rotate-1 {
+    transform: rotate(1deg);
+}
+
+.rotate-2 {
+    transform: rotate(2deg);
+}
+
+.rotate-3 {
+    transform: rotate(3deg);
+}
+
+.rotate-6 {
+    transform: rotate(6deg);
+}
+
+.rotate-12 {
+    transform: rotate(12deg);
+}
+
+.rotate-45 {
+    transform: rotate(45deg);
+}
+
+.rotate-90 {
+    transform: rotate(90deg);
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/*
+    Skews
+ */
+
+.skew-x-0 {
+    transform: skewX(0deg);
+}
+
+.skew-y-0 {
+    transform: skewY(0deg);
+}
+
+.skew-x-1 {
+    transform: skewX(1deg);
+}
+
+.skew-x-2 {
+    transform: skewX(2deg);
+}
+
+.skew-x-3 {
+    transform: skewX(3deg);
+}
+
+.skew-x-6 {
+    transform: skewX(6deg);
+}
+
+.skew-x-12 {
+    transform: skewX(12deg);
+}
+
+.skew-y-1 {
+    transform: skewY(1deg);
+}
+
+.skew-y-2 {
+    transform: skewY(2deg);
+}
+
+.skew-y-3 {
+    transform: skewY(3deg);
+}
+
+.skew-y-6 {
+    transform: skewY(6deg);
+}
+
+.skew-y-12 {
+    transform: skewY(12deg);
+}

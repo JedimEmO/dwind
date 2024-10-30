@@ -17,6 +17,7 @@ fn main() {
         "resources/css/sizing.css",
         "resources/css/spacing.css",
         "resources/css/typography.css",
+        "resources/css/transforms.css",
         "resources/css/transition.css",
     ];
 
