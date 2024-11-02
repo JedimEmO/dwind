@@ -81,7 +81,7 @@ pub mod colors {
 
     use dwind::border_color_generator;
     dwgenerate_map!(
-        "dwui-border-color-primary",
+        "border-dwui-primary",
         "border-color-",
         [
             ("50", "var(--dwui-primary-50)"),
@@ -95,6 +95,24 @@ pub mod colors {
             ("800", "var(--dwui-primary-800)"),
             ("900", "var(--dwui-primary-900)"),
             ("950", "var(--dwui-primary-950)")
+        ]
+    );
+
+    dwgenerate_map!(
+        "border-dwui-void",
+        "border-color-",
+        [
+            ("50", "var(--dwui-void-50)"),
+            ("100", "var(--dwui-void-100)"),
+            ("200", "var(--dwui-void-200)"),
+            ("300", "var(--dwui-void-300)"),
+            ("400", "var(--dwui-void-400)"),
+            ("500", "var(--dwui-void-500)"),
+            ("600", "var(--dwui-void-600)"),
+            ("700", "var(--dwui-void-700)"),
+            ("800", "var(--dwui-void-800)"),
+            ("900", "var(--dwui-void-900)"),
+            ("950", "var(--dwui-void-950)")
         ]
     );
 }

@@ -1,4 +1,5 @@
 use dominator::{text, Dom};
+use futures_signals::signal::Mutable;
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use dwui::prelude::*;
@@ -7,10 +8,11 @@ pub fn dwui_example_small() -> Dom {
     html!("div", {
         .dwclass!("w-full")
         .child(html!("div", {
-            .dwclass!("flex justify-center align-items-center gap-4 @<sm:flex-col @sm:flex-row")
+            .dwclass!("flex justify-center align-items-center gap-4 flex-col")
             .child(example_card())
             .child(example_card_buttons())
             .child(example_card_border_buttons())
+            .child(example_card_input())
         }))
     })
 }
@@ -66,6 +68,22 @@ fn example_card_border_buttons() -> Dom {
                     .content(Some(text("Primary Border Disabled")))
                 })
             ])
+        })
+    })
+}
+
+fn example_card_input() -> Dom {
+    // let value = Mutable::new("Some string value".to_string());
+    let value = Mutable::new("".to_string());
+
+    card!({
+        .scheme(ColorScheme::Void)
+        .apply(move |b| {
+            dwclass!(b, "p-4 w-64 h-64 flex-initial flex flex-col gap-4")
+                .child(text_input!({
+                    .value(value.clone())
+                    .label("Hi there".to_string())
+                }))
         })
     })
 }
