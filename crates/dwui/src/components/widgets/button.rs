@@ -1,12 +1,9 @@
 use crate::theme::prelude::*;
-use dominator::{class, events, html, pseudo, Dom, DomBuilder};
-use dwind::border_color_generator;
+use dominator::{events, html, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwgenerate;
-use futures_signals::signal::{always, and, Always, Signal, SignalExt};
+use futures_signals::signal::{SignalExt};
 use futures_signals_component_macro::component;
-use std::pin::Pin;
-use web_sys::HtmlElement;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum ButtonType {
@@ -32,7 +29,7 @@ struct Button<THandler: Fn(events::Click) -> () = fn(events::Click) -> ()> {
 dwgenerate!("button-bg-light", "is(.light *):dwui-bg-primary-400");
 dwgenerate!(
     "button-border-light",
-    "is(.light *):dwui-border-color-primary-400"
+    "is(.light *):border-dwui-primary-400"
 );
 dwgenerate!(
     "button-bg-light-disabled",
@@ -40,7 +37,7 @@ dwgenerate!(
 );
 dwgenerate!(
     "button-border-light-disabled",
-    "is(.light *):disabled:dwui-border-color-primary-700"
+    "is(.light *):disabled:border-dwui-primary-700"
 );
 dwgenerate!(
     "button-bg-hover-light",
@@ -48,7 +45,7 @@ dwgenerate!(
 );
 dwgenerate!(
     "button-border-hover-light",
-    "is(.light *):hover:dwui-border-color-primary-800"
+    "is(.light *):hover:border-dwui-primary-800"
 );
 dwgenerate!("button-text-light", "is(.light *):dwui-text-on-primary-700");
 dwgenerate!(
@@ -73,7 +70,7 @@ pub fn button(props: impl ButtonPropsTrait + 'static) -> Dom {
 
     html!("button", {
         .dwclass_signal!("button-text-light button-bg-light button-bg-hover-light hover:dwui-bg-primary-800 dwui-bg-primary-700 button-bg-light-disabled disabled:dwui-bg-primary-900 button-text-light-disabled", button_type.signal().map(|v| v == ButtonType::Flat))
-        .dwclass_signal!("button-border-text-light dwui-border-color-primary-500 bg-unset border button-border-light button-border-light-disabled disabled:dwui-border-color-primary-900 button-border-hover-light hover:dwui-border-color-primary-950", button_type.signal().map(|v| v == ButtonType::Border))
+        .dwclass_signal!("button-border-text-light border-dwui-primary-500 bg-unset border button-border-light button-border-light-disabled disabled:border-dwui-primary-900 button-border-hover-light hover:border-dwui-primary-950", button_type.signal().map(|v| v == ButtonType::Border))
         .dwclass!("disabled:dwui-text-on-primary-500 dwui-text-on-primary-200")
         .dwclass!("w-full font-bold p-2 cursor-pointer rounded-lg")
         .apply_if(apply.is_some(), move |b| {
