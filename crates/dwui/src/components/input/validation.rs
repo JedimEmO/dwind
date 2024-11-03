@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -19,10 +20,10 @@ pub trait InputValueWrapper {
 
 impl<T> InputValueWrapper for Mutable<T>
 where
-    T: Clone + ToString + TryFrom<String> + 'static,
+    T: Clone + ToString + FromStr + 'static,
 {
     fn set(&self, value: String) -> ValidationResult {
-        if let Ok(v) = T::try_from(value) {
+        if let Ok(v) = T::from_str(&value) {
             self.set(v);
 
             ValidationResult::Valid
