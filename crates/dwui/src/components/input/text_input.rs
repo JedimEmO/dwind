@@ -1,7 +1,8 @@
-use dominator::{clone, events, html, Dom};
+use dominator::{clone, events, html, with_node, Dom};
 use futures_signals::map_ref;
 use futures_signals::signal::{and, not, or, Mutable, Signal, SignalExt};
 use futures_signals_component_macro::component;
+use web_sys::HtmlInputElement;
 use crate::components::input::validation::InputValueWrapper;
 use dwind::prelude::*;
 use crate::theme::prelude::*;
@@ -47,10 +48,15 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
     html!("div", {
         .dwclass!("grid")
         .children([
-            html!("input", {
+            html!("input" => HtmlInputElement, {
                 .dwclass!("h-12 p-l-2")
                 .dwclass!("grid-col-1 grid-row-1")
                 .attr_signal("value", value.value_signal_cloned())
+                .with_node!(element => {
+                    .event(move |_: events::Input| {
+                        value.set(element.value());
+                    })
+                })
                 .event(clone!(is_focused => move |_: events::FocusOut| {
                     is_focused.set(false);
                 }))
