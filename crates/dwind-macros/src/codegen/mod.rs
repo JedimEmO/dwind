@@ -60,12 +60,17 @@ pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<Bre
         return (render_generator(class), breakpoint);
     }
 
-    if class.pseudo_classes.is_empty() {
+    if class.pseudo_classes.is_empty()  && class.variant.is_none() {
         let class_ident = Ident::new(&class.class_name.to_uppercase(), Span::call_site());
 
         (quote! { &* #class_ident }, breakpoint)
     } else {
-        let pseudo_selector = format!(":{}", class.pseudo_classes.join(":"));
+        let pseudo_selector = if class.pseudo_classes.is_empty() {
+            class.variant.unwrap_or("".to_string())
+        } else {
+            format!("{}:{}", class.variant.clone().unwrap_or("".to_string()), class.pseudo_classes.join(":"))
+        };
+
         let class_raw_ident = Ident::new(
             &class_name_to_raw_identifier(&class.class_name),
             Span::call_site(),

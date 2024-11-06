@@ -1,3 +1,4 @@
+use std::env::var;
 use dwind_base::media_queries::Breakpoint;
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while1};
@@ -15,6 +16,9 @@ pub struct DwindClassSelector {
     pub pseudo_classes: Vec<String>,
     pub conditionals: Vec<String>,
     pub generator_params: Vec<String>,
+    /// Variants are the first pseudo selector, bracketed with []
+    /// [& > *]:nth-child(2):bg-red-500
+    pub variant: Option<String>
 }
 
 impl DwindClassSelector {
@@ -70,8 +74,8 @@ pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
 
     Ok(classes
         .into_iter()
-        .map(|(prefixes, class_name, generator_params)| {
-            let pseudo_classes = prefixes
+        .map(|(variant, prefixes, class_name, generator_params)| {
+            let mut pseudo_classes: Vec<String> = prefixes
                 .clone()
                 .into_iter()
                 .filter(|v| !v.contains('@'))
@@ -95,22 +99,24 @@ pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
                 pseudo_classes,
                 conditionals,
                 generator_params,
+                variant,
             }
         })
         .collect())
 }
 
-fn selectors(input: &str) -> IResult<&str, Vec<(Vec<String>, &str, Option<Vec<&str>>)>> {
+fn selectors(input: &str) -> IResult<&str, Vec<(Option<String>, Vec<String>, &str, Option<Vec<&str>>)>> {
     let prefixes = many0(pseudo_selector);
     let parser = terminated(
-        nom::sequence::tuple((prefixes, css_identifier, opt(generator_parameters))),
+        nom::sequence::tuple((variant_selector, prefixes, css_identifier, opt(generator_parameters))),
         opt(tag(" ")),
     );
     many0(parser)(input)
 }
 
 pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
-    let (input, prefixes) = many0(pseudo_selector)(input)?;
+    let (input, variant) = variant_selector(input)?;
+    let (input, mut prefixes) = many0(pseudo_selector)(input)?;
     let (input, identifier) = css_identifier(input)?;
 
     let generator_params = if let Ok((_input, generator_params)) = generator_parameters(input) {
@@ -122,12 +128,13 @@ pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
         vec![]
     };
 
-    let pseudo_classes = prefixes
+    let mut pseudo_classes: Vec<String> = prefixes
         .clone()
         .into_iter()
         .filter(|v| !v.contains('@'))
         .map(|v| v.to_string())
         .collect();
+
     let conditionals = prefixes
         .clone()
         .into_iter()
@@ -145,6 +152,7 @@ pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
                 .into_iter()
                 .map(|v| v.to_string())
                 .collect(),
+            variant,
         },
     ))
 }
@@ -178,7 +186,7 @@ fn generator_parameters(input: &str) -> IResult<&str, Vec<&str>> {
     parser(input)
 }
 
-const CHARS_EXT: [char; 12] = ['_', '-', '@', ',', '<', '>', '*', ' ', '.', ' ', ':', '#'];
+const CHARS_EXT: [char; 13] = ['_', '-', '@', ',', '<', '>', '*', ' ', '.', ' ', ':', '#', '&' ];
 
 fn bracketed<'a>(
     bracket: &'a str,
@@ -203,8 +211,25 @@ fn recursive_selector<'a>(input: &'a str) -> IResult<&'a str, String> {
     .map(|r| (r.0, r.1.join("")))
 }
 
+fn variant_selector(input: &str) -> IResult<&str, Option<String>> {
+    opt(terminated(
+        bracketed("[", "]", recursive_selector),
+        tag(":")
+    ))(input).map(|r| {
+        (r.0, r.1.map(|variant| {
+            let variant = variant[1..variant.len() -1].to_string().trim().to_string();
+
+            if variant.starts_with("&") {
+                variant[1..].to_string().trim().to_string()
+            } else {
+                variant.to_string()
+            }
+        }))
+    })
+}
+
 fn pseudo_selector(input: &str) -> IResult<&str, String> {
-    let chars = ['_', '-', '@', ',', '<', '*', '.'];
+    let chars = ['_', '-', '@', ',', '<', '>', '*', '.'];
 
     let name_parser = many0(take_while1(is_extended_alphanumeric(chars.to_vec())));
 
@@ -234,7 +259,7 @@ mod test {
             selectors("foo @((max-width: 500px) and (max-height: 500px)):bar @is[white]:bg-[5px] ")
                 .unwrap();
         assert_eq!(v.1.len(), 3);
-        assert_eq!(v.1[1].0[0], "@((max-width: 500px) and (max-height: 500px))")
+        assert_eq!(v.1[1].1[0], "@((max-width: 500px) and (max-height: 500px))")
     }
 
     #[test]
@@ -254,6 +279,7 @@ mod test {
                 pseudo_classes: vec![],
                 conditionals: vec!["@sm".to_string(), "@is[dark]".to_string()],
                 generator_params: vec![],
+                variant: None,
             }]
         );
     }
@@ -266,6 +292,7 @@ mod test {
                 pseudo_classes: vec![],
                 conditionals: vec![],
                 generator_params: vec!["5px".to_string()],
+                variant: None,
             }]
         );
     }
@@ -307,5 +334,15 @@ mod test {
         assert_eq!(css_identifier("foo").unwrap().1, "foo".to_string());
         assert_eq!(css_identifier("foo-bar").unwrap().1, "foo-bar".to_string());
         assert_eq!(css_identifier("foo_baz").unwrap().1, "foo_baz".to_string());
+    }
+
+    #[test]
+    fn verify_child_selector_parser() {
+        let parsed = parse_class_string("a [& > *]:is(p):b c").unwrap();
+        assert_eq!(parsed.len(), 3);
+        assert_eq!(parsed[1].variant, Some("> *".to_string()));
+
+        let parsed = parse_class_string("[& > *:is(span):hover]:is(p):b").unwrap();
+        assert_eq!(parsed[0].variant, Some("> *:is(span):hover".to_string()));
     }
 }

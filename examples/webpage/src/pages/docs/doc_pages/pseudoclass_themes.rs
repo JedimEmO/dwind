@@ -21,6 +21,35 @@ pub fn pseudo_class_themes() -> Dom {
         }))
         .child(example_box(pseudo_class_theme(), false))
         .child(code(&PSEUDO_CLASS_THEME_EXAMPLE_HTML_MAP))
+
+        // variants
+        .child(doc_page_title("Variants"))
+        .child(html!("p", {
+            .text(r#"We can also apply pseudo classes to specific children of a parent element:"#)
+        }))
+        .child(example_box(variants(), false))
+        .child(code(&VARIANTS_EXAMPLE_HTML_MAP))
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
+fn variants() -> Dom {
+    html!("div", {
+        .dwclass!("flex flex-col gap-2")
+        // Use the variant to apply style to the second child
+        .dwclass!("[& > *]:nth-child(2):bg-candlelight-500")
+        .dwclass!("[& > span > div:is(.foo)]:text-bunker-800")
+        .dwclass!("[> span]:p-2")
+        .children([
+            html!("span", { .text("a")}),
+            html!("span", {
+                .child(html!("div", {
+                    .class("foo")
+                    .text("b")
+                }))
+            }),
+            html!("span", { .text("c")}),
+        ])
     })
 }
 
@@ -62,14 +91,14 @@ fn pseudo_class_theme() -> Dom {
             .child(button!({
                 .apply(|b| dwclass!(b, "w-64 h-8"))
                 .content(Some(text("Toggle Theme")))
-                .click_handler(clone!(dark_theme => move |_| {
+                .on_click(clone!(dark_theme => move |_| {
                     dark_theme.set(!dark_theme.get());
                 }))
             }))
             .child(button!({
                 .apply(|b| dwclass!(b, "w-64 h-8"))
                 .content(Some(text("Toggle Scheme")))
-                .click_handler(clone!(alternate_scheme => move |_| {
+                .on_click(clone!(alternate_scheme => move |_| {
                     alternate_scheme.set(!alternate_scheme.get());
                 }))
             }))

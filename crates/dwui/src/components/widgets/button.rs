@@ -17,7 +17,7 @@ struct Button<THandler: Fn(events::Click) -> () = fn(events::Click) -> ()> {
     #[default(None)]
     content: Option<Dom>,
     #[default(| _: events::Click | {})]
-    click_handler: THandler,
+    on_click: THandler,
     #[signal]
     #[default(false)]
     disabled: bool,
@@ -60,7 +60,7 @@ dwgenerate!(
 pub fn button(props: impl ButtonPropsTrait + 'static) -> Dom {
     let ButtonProps {
         content,
-        click_handler,
+        on_click,
         disabled,
         button_type,
         apply,
@@ -80,7 +80,7 @@ pub fn button(props: impl ButtonPropsTrait + 'static) -> Dom {
         .attr_signal("disabled", disabled.map(|v| if v { Some("disabled") } else { None }))
         .child_signal(content)
         .event(move |e: events::Click| {
-            click_handler(e);
+            on_click(e);
         })
     })
 }
