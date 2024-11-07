@@ -5,6 +5,9 @@ use dwui::prelude::*;
 
 pub fn doc_page_title(title: &str) -> Dom {
     heading!({
+        .apply(|b| {
+            dwclass!(b, "m-t-8")
+        })
         .content(text(title))
         .text_size(TextSize::ExtraLarge)
     })

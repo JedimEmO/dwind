@@ -8,7 +8,7 @@ pub fn dwui_example_small() -> Dom {
     html!("div", {
         .dwclass!("w-full")
         .child(html!("div", {
-            .dwclass!("flex justify-center align-items-center gap-4 flex-row")
+            .dwclass!("flex justify-center align-items-center gap-4 @sm:flex-row @<sm:flex-col")
             .child(example_card_border_buttons())
             .child(example_card_input())
         }))

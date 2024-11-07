@@ -217,10 +217,10 @@ fn variant_selector(input: &str) -> IResult<&str, Option<String>> {
         tag(":")
     ))(input).map(|r| {
         (r.0, r.1.map(|variant| {
-            let variant = variant[1..variant.len() -1].to_string().trim().to_string();
+            let variant = variant[1..variant.len() -1].to_string().to_string();
 
             if variant.starts_with("&") {
-                variant[1..].to_string().trim().to_string()
+                variant[1..].to_string().to_string()
             } else {
                 variant.to_string()
             }
@@ -340,9 +340,9 @@ mod test {
     fn verify_child_selector_parser() {
         let parsed = parse_class_string("a [& > *]:is(p):b c").unwrap();
         assert_eq!(parsed.len(), 3);
-        assert_eq!(parsed[1].variant, Some("> *".to_string()));
+        assert_eq!(parsed[1].variant, Some(" > *".to_string()));
 
         let parsed = parse_class_string("[& > *:is(span):hover]:is(p):b").unwrap();
-        assert_eq!(parsed[0].variant, Some("> *:is(span):hover".to_string()));
+        assert_eq!(parsed[0].variant, Some(" > *:is(span):hover".to_string()));
     }
 }

@@ -49,8 +49,10 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
         .dwclass!("grid")
         .children([
             html!("input" => HtmlInputElement, {
+                .dwclass!("is(.light *):dwui-bg-void-300 font-bold text-base")
                 .dwclass!("h-12 p-l-2")
                 .dwclass!("grid-col-1 grid-row-1")
+                .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
                 .attr_signal("value", value.value_signal_cloned())
                 .with_node!(element => {
                     .event(move |_: events::Input| {
@@ -65,9 +67,10 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
                 }))
             }),
             html!("label", {
-                .dwclass!("grid-col-1 grid-row-1 pointer-events-none transition-all m-l-4 dwui-text-on-primary-300")
-                .dwclass_signal!("text-xs", raise_label.signal())
-                .dwclass_signal!("text-sm", not(raise_label.signal()))
+                .dwclass!("grid-col-1 grid-row-1 pointer-events-none transition-all m-l-4")
+                .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
+                .dwclass_signal!("text-sm", raise_label.signal())
+                .dwclass_signal!("text-base", not(raise_label.signal()))
                 .style_signal("margin-top", raise_label.signal().map(|v| {
                     if v {
                         "-8px"
@@ -79,16 +82,16 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
             }),
             html!("div", {
                 .dwclass!("grid-col-1 grid-row-1 pointer-events-none")
-                .dwclass!("border-l border-r border-b border-dwui-void-600")
+                .dwclass!("border-l border-r border-b dwui-border-void-600 is(.light *):dwui-border-void-200")
             })
         ])
         .child(html!("div", {
             .dwclass!("grid-col-1 grid-row-1 pointer-events-none w-2")
-            .dwclass!("border-t border-dwui-void-600")
+            .dwclass!("border-t dwui-border-void-600 is(.light *):dwui-border-void-200")
         }))
         .child(html!("div", {
             .dwclass!("grid-col-1 grid-row-1 pointer-events-none transition-all")
-            .dwclass!("border-t border-dwui-void-600")
+            .dwclass!("border-t dwui-border-void-600 is(.light *):dwui-border-void-200")
             .style_signal("margin-left", top_border_margin_signal)
         }))
     })

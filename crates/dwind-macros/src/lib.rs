@@ -18,9 +18,10 @@ use quote::quote;
 /// ```rust,no_run
 /// # use dominator::class;
 /// # const SOME_CLASS: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {class! { .raw("")}});
+/// # const SOME_OTHER_CLASS_RAW: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {class! { .raw("")}});
 /// use dwind_macros::dwclass;
 /// dominator::html!("div", {
-///     .dwclass!("some_class")
+///     .dwclass!("some_class [>*]:hover:some-other-class")
 /// });
 /// ```
 #[proc_macro]

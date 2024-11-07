@@ -39,7 +39,8 @@ fn variants() -> Dom {
         // Use the variant to apply style to the second child
         .dwclass!("[& > *]:nth-child(2):bg-candlelight-500")
         .dwclass!("[& > span > div:is(.foo)]:text-bunker-800")
-        .dwclass!("[> span]:p-2")
+        .dwclass!("[> span]:text-apple-300 [& *]:w-40 [& *]:text-center")
+        .dwclass!("[> span]:border [& *:nth-child(odd)]:border-woodsmoke-700")
         .children([
             html!("span", { .text("a")}),
             html!("span", {
@@ -61,7 +62,7 @@ fn pseudo_class_theme() -> Dom {
     static SCHEME_CLASS: Lazy<String> = Lazy::new(|| {
         class! {
             .raw(ColorsCssVariables::new(
-                DWIND_COLORS.get("charm").unwrap(),
+                DWIND_COLORS.get("bunker").unwrap(),
                 DWIND_COLORS.get("woodsmoke").unwrap(),
                 DWIND_COLORS.get("woodsmoke").unwrap(),
             ).to_style_sheet_raw())
@@ -85,18 +86,18 @@ fn pseudo_class_theme() -> Dom {
         .class_signal("light", not(dark_theme.signal()))
         .dwclass!("m-x-auto p-b-4")
         .dwclass!("bg-bunker-950 w-full flex align-items-center flex-col")
-        .dwclass!("is(.light):bg-bunker-100")
+        .dwclass!("is(.light):bg-bunker-300")
         .child(html!("div", {
             .dwclass!("flex gap-4 align-items-center justify-center @<sm:flex-col @sm:flex-row p-t-4 p-b-4")
             .child(button!({
-                .apply(|b| dwclass!(b, "w-64 h-8"))
+                .apply(|b| dwclass!(b, "w-64"))
                 .content(Some(text("Toggle Theme")))
                 .on_click(clone!(dark_theme => move |_| {
                     dark_theme.set(!dark_theme.get());
                 }))
             }))
             .child(button!({
-                .apply(|b| dwclass!(b, "w-64 h-8"))
+                .apply(|b| dwclass!(b, "w-64"))
                 .content(Some(text("Toggle Scheme")))
                 .on_click(clone!(alternate_scheme => move |_| {
                     alternate_scheme.set(!alternate_scheme.get());
