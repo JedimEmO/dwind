@@ -1,4 +1,3 @@
-use std::env::var;
 use dwind_base::media_queries::Breakpoint;
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while1};
@@ -7,6 +6,7 @@ use nom::combinator::opt;
 use nom::multi::{many0, separated_list1};
 use nom::sequence::{delimited, terminated};
 use nom::IResult;
+use std::env::var;
 
 use crate::codegen::BreakpointInfo;
 
@@ -18,7 +18,7 @@ pub struct DwindClassSelector {
     pub generator_params: Vec<String>,
     /// Variants are the first pseudo selector, bracketed with []
     /// [& > *]:nth-child(2):bg-red-500
-    pub variant: Option<String>
+    pub variant: Option<String>,
 }
 
 impl DwindClassSelector {
@@ -105,10 +105,17 @@ pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
         .collect())
 }
 
-fn selectors(input: &str) -> IResult<&str, Vec<(Option<String>, Vec<String>, &str, Option<Vec<&str>>)>> {
+fn selectors(
+    input: &str,
+) -> IResult<&str, Vec<(Option<String>, Vec<String>, &str, Option<Vec<&str>>)>> {
     let prefixes = many0(pseudo_selector);
     let parser = terminated(
-        nom::sequence::tuple((variant_selector, prefixes, css_identifier, opt(generator_parameters))),
+        nom::sequence::tuple((
+            variant_selector,
+            prefixes,
+            css_identifier,
+            opt(generator_parameters),
+        )),
         opt(tag(" ")),
     );
     many0(parser)(input)
@@ -186,7 +193,9 @@ fn generator_parameters(input: &str) -> IResult<&str, Vec<&str>> {
     parser(input)
 }
 
-const CHARS_EXT: [char; 13] = ['_', '-', '@', ',', '<', '>', '*', ' ', '.', ' ', ':', '#', '&' ];
+const CHARS_EXT: [char; 13] = [
+    '_', '-', '@', ',', '<', '>', '*', ' ', '.', ' ', ':', '#', '&',
+];
 
 fn bracketed<'a>(
     bracket: &'a str,
@@ -214,17 +223,21 @@ fn recursive_selector<'a>(input: &'a str) -> IResult<&'a str, String> {
 fn variant_selector(input: &str) -> IResult<&str, Option<String>> {
     opt(terminated(
         bracketed("[", "]", recursive_selector),
-        tag(":")
-    ))(input).map(|r| {
-        (r.0, r.1.map(|variant| {
-            let variant = variant[1..variant.len() -1].to_string().to_string();
+        tag(":"),
+    ))(input)
+    .map(|r| {
+        (
+            r.0,
+            r.1.map(|variant| {
+                let variant = variant[1..variant.len() - 1].to_string().to_string();
 
-            if variant.starts_with("&") {
-                variant[1..].to_string().to_string()
-            } else {
-                variant.to_string()
-            }
-        }))
+                if variant.starts_with("&") {
+                    variant[1..].to_string().to_string()
+                } else {
+                    variant.to_string()
+                }
+            }),
+        )
     })
 }
 

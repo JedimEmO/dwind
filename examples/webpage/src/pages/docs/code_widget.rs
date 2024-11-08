@@ -1,10 +1,10 @@
-use dominator::{events, text, Dom};
+use dominator::{events, Dom};
 use dwind::prelude::*;
 use dwind_macros::{dwclass, dwclass_signal};
 use dwui::prelude::*;
-use std::collections::BTreeMap;
-use futures_signals::signal::{Mutable, SignalExt};
 use futures_signals::signal::not;
+use futures_signals::signal::Mutable;
+use std::collections::BTreeMap;
 
 pub fn code(example_map: &BTreeMap<String, String>) -> Dom {
     let expanded = Mutable::new(false);

@@ -130,3 +130,46 @@
     background-color: var(--dwui-void-950);
 }
 
+.dwui-bg-error-50 {
+    background-color: var(--dwui-error-50);
+}
+
+.dwui-bg-error-100 {
+    background-color: var(--dwui-error-100);
+}
+
+.dwui-bg-error-200 {
+    background-color: var(--dwui-error-200);
+}
+
+.dwui-bg-error-300 {
+    background-color: var(--dwui-error-300);
+}
+
+.dwui-bg-error-400 {
+    background-color: var(--dwui-error-400);
+}
+
+.dwui-bg-error-500 {
+    background-color: var(--dwui-error-500);
+}
+
+.dwui-bg-error-600 {
+    background-color: var(--dwui-error-600);
+}
+
+.dwui-bg-error-700 {
+    background-color: var(--dwui-error-700);
+}
+
+.dwui-bg-error-800 {
+    background-color: var(--dwui-error-800);
+}
+
+.dwui-bg-error-900 {
+    background-color: var(--dwui-error-900);
+}
+
+.dwui-bg-error-950 {
+    background-color: var(--dwui-error-950);
+}

@@ -129,7 +129,7 @@ dwgenerate_map!(
     "min-w",
     "min-width-",
     [
-         ("p-5", "5%"),
+        ("p-5", "5%"),
         ("p-10", "10%"),
         ("p-15", "15%"),
         ("p-20", "20%"),
@@ -281,7 +281,6 @@ dwgenerate_map!(
         ("max", "max-content"),
     ]
 );
-
 
 dwgenerate_map!(
     "min-h",

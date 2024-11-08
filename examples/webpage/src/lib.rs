@@ -38,6 +38,7 @@ fn main_view() -> Dom {
         &DWIND_COLORS["apple"],
         &DWIND_COLORS["woodsmoke"],
         &DWIND_COLORS["woodsmoke"],
+        &DWIND_COLORS["red"],
     )));
 
     stylesheet!(["body"], {

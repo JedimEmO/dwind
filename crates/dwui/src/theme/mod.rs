@@ -28,6 +28,7 @@ pub mod colors {
             primary: &BTreeMap<u32, String>,
             text_on_primary: &BTreeMap<u32, String>,
             bg_void: &BTreeMap<u32, String>,
+            error: &BTreeMap<u32, String>,
         ) -> Self {
             Self {
                 dwui_primary_50: primary.get(&50).unwrap().clone(),
@@ -65,6 +66,19 @@ pub mod colors {
                 dwui_void_800: bg_void.get(&800).unwrap().clone(),
                 dwui_void_900: bg_void.get(&900).unwrap().clone(),
                 dwui_void_950: bg_void.get(&950).unwrap().clone(),
+
+                // Error
+                dwui_error_50: error.get(&50).unwrap().clone(),
+                dwui_error_100: error.get(&100).unwrap().clone(),
+                dwui_error_200: error.get(&200).unwrap().clone(),
+                dwui_error_300: error.get(&300).unwrap().clone(),
+                dwui_error_400: error.get(&400).unwrap().clone(),
+                dwui_error_500: error.get(&500).unwrap().clone(),
+                dwui_error_600: error.get(&600).unwrap().clone(),
+                dwui_error_700: error.get(&700).unwrap().clone(),
+                dwui_error_800: error.get(&800).unwrap().clone(),
+                dwui_error_900: error.get(&900).unwrap().clone(),
+                dwui_error_950: error.get(&950).unwrap().clone(),
             }
         }
     }
@@ -74,12 +88,15 @@ pub mod colors {
             let primary = dwind::colors::DWIND_COLORS.get("bunker").unwrap();
             let void = dwind::colors::DWIND_COLORS.get("bunker").unwrap();
             let text_on_primary = dwind::colors::DWIND_COLORS.get("candlelight").unwrap();
+            let red = dwind::colors::DWIND_COLORS.get("red").unwrap();
 
-            Self::new(primary, text_on_primary, void)
+            Self::new(primary, text_on_primary, void, red)
         }
     }
 
     use dwind::border_color_generator;
+    use dwind::text_color_generator;
+
     dwgenerate_map!(
         "dwui-border-primary",
         "border-color-",
@@ -113,6 +130,42 @@ pub mod colors {
             ("800", "var(--dwui-void-800)"),
             ("900", "var(--dwui-void-900)"),
             ("950", "var(--dwui-void-950)")
+        ]
+    );
+
+    dwgenerate_map!(
+        "dwui-border-error",
+        "border-color-",
+        [
+            ("50", "var(--dwui-error-50)"),
+            ("100", "var(--dwui-error-100)"),
+            ("200", "var(--dwui-error-200)"),
+            ("300", "var(--dwui-error-300)"),
+            ("400", "var(--dwui-error-400)"),
+            ("500", "var(--dwui-error-500)"),
+            ("600", "var(--dwui-error-600)"),
+            ("700", "var(--dwui-error-700)"),
+            ("800", "var(--dwui-error-800)"),
+            ("900", "var(--dwui-error-900)"),
+            ("950", "var(--dwui-error-950)")
+        ]
+    );
+
+    dwgenerate_map!(
+        "dwui-text-error",
+        "text-color-",
+        [
+            ("50", "var(--dwui-error-50)"),
+            ("100", "var(--dwui-error-100)"),
+            ("200", "var(--dwui-error-200)"),
+            ("300", "var(--dwui-error-300)"),
+            ("400", "var(--dwui-error-400)"),
+            ("500", "var(--dwui-error-500)"),
+            ("600", "var(--dwui-error-600)"),
+            ("700", "var(--dwui-error-700)"),
+            ("800", "var(--dwui-error-800)"),
+            ("900", "var(--dwui-error-900)"),
+            ("950", "var(--dwui-error-950)")
         ]
     );
 }

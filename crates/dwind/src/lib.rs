@@ -12,8 +12,8 @@ pub mod prelude {
     pub use super::position::*;
     pub use super::sizing::*;
     pub use super::spacing::*;
-    pub use super::transition::*;
     pub use super::transforms::*;
+    pub use super::transition::*;
     pub use super::typography::*;
     pub use dwind_base::*;
 }

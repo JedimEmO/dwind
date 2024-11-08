@@ -1,5 +1,5 @@
-use std::str::FromStr;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
+use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ValidationResult {
@@ -15,7 +15,7 @@ impl ValidationResult {
 
 pub trait InputValueWrapper {
     fn set(&self, value: String) -> ValidationResult;
-    fn value_signal_cloned(&self) -> impl Signal<Item=String> + 'static;
+    fn value_signal_cloned(&self) -> impl Signal<Item = String> + 'static;
 }
 
 impl<T> InputValueWrapper for Mutable<T>
@@ -34,7 +34,7 @@ where
         }
     }
 
-    fn value_signal_cloned(&self) -> impl Signal<Item=String> + 'static {
+    fn value_signal_cloned(&self) -> impl Signal<Item = String> + 'static {
         self.signal_cloned().map(|v| v.to_string())
     }
 }

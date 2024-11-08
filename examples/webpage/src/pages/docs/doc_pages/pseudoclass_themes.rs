@@ -62,9 +62,10 @@ fn pseudo_class_theme() -> Dom {
     static SCHEME_CLASS: Lazy<String> = Lazy::new(|| {
         class! {
             .raw(ColorsCssVariables::new(
-                DWIND_COLORS.get("bunker").unwrap(),
+                DWIND_COLORS.get("picton-blue").unwrap(),
                 DWIND_COLORS.get("woodsmoke").unwrap(),
                 DWIND_COLORS.get("woodsmoke").unwrap(),
+                DWIND_COLORS.get("red").unwrap(),
             ).to_style_sheet_raw())
         }
     });
@@ -75,7 +76,9 @@ fn pseudo_class_theme() -> Dom {
                 ColorsCssVariables::new(
                     DWIND_COLORS.get("apple").unwrap(),
                     DWIND_COLORS.get("bunker").unwrap(),
-                    DWIND_COLORS.get("bunker").unwrap())
+                    DWIND_COLORS.get("bunker").unwrap(),
+                    DWIND_COLORS.get("purple").unwrap(),
+                )
                 .to_style_sheet_raw())
         }
     });

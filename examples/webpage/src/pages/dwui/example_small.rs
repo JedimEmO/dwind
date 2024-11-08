@@ -1,8 +1,8 @@
 use dominator::{text, Dom};
-use futures_signals::signal::Mutable;
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use dwui::prelude::*;
+use futures_signals::signal::Mutable;
 
 pub fn dwui_example_small() -> Dom {
     html!("div", {
@@ -52,10 +52,6 @@ fn example_card_border_buttons() -> Dom {
         .apply(|b| {
             dwclass!(b, "p-4 w-64 h-64 flex-initial flex flex-col gap-4")
             .children([
-                html!("h1", {
-                    .dwclass!("font-extrabold")
-                    .text("Bordered Buttons")
-                }),
                 button!({
                     .button_type(ButtonType::Border)
                     .content(Some(text("Primary Border")))
@@ -78,10 +74,21 @@ fn example_card_input() -> Dom {
         .scheme(ColorScheme::Void)
         .apply(move |b| {
             dwclass!(b, "p-4 w-64 h-64 flex-initial flex flex-col gap-4")
-                .child(text_input!({
-                    .value(value.clone())
-                    .label("Hi there".to_string())
-                }))
+                .children([
+                    text_input!({
+                        .value(value.clone())
+                        .label("Hi there".to_string())
+                    }),
+                    text_input!({
+                        .value(value.clone())
+                        .is_valid(ValidationResult::Invalid { message: "Always!!".to_string() })
+                        .label("Always invalid".to_string())
+                    }),
+                    text_input!({
+                        .input_type(TextInputType::Password)
+                        .label("Password".to_string())
+                    }),
+            ])
         })
     })
 }

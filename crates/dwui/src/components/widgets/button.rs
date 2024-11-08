@@ -2,7 +2,7 @@ use crate::theme::prelude::*;
 use dominator::{events, html, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwgenerate;
-use futures_signals::signal::{SignalExt};
+use futures_signals::signal::SignalExt;
 use futures_signals_component_macro::component;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
