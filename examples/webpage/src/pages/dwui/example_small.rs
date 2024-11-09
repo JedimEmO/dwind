@@ -28,7 +28,7 @@ fn example_card_buttons() -> Dom {
     card!({
         .scheme(ColorScheme::Void)
         .apply(|b| {
-            dwclass!(b, "p-4 w-64 h-80 flex-initial flex flex-col gap-4")
+            dwclass!(b, "p-4 w-64 h-96 flex-initial flex flex-col gap-4")
             .children([
                 html!("h1", {
                     .dwclass!("font-extrabold")
@@ -44,7 +44,7 @@ fn example_card_border_buttons() -> Dom {
     card!({
         .scheme(ColorScheme::Void)
         .apply(|b| {
-            dwclass!(b, "p-4 w-64 h-80 flex-initial flex flex-col gap-4")
+            dwclass!(b, "p-4 w-64 h-96 flex-initial flex flex-col gap-4")
             .children([
                 button!({
                     .content(Some(text("Primary Flat")))
@@ -75,25 +75,34 @@ fn example_card_input() -> Dom {
     card!({
         .scheme(ColorScheme::Void)
         .apply(move |b| {
-            dwclass!(b, "p-4 w-64 h-80 flex-initial flex flex-col gap-4")
-                .children([
-                    text_input!({
-                        .value(value.clone())
-                        .label("Hi there".to_string())
-                    }),
-                    text_input!({
-                        .value(value.clone())
-                        .is_valid(ValidationResult::Invalid { message: "Always!!".to_string() })
-                        .label("Always invalid".to_string())
-                    }),
-                    text_input!({
-                        .input_type(TextInputType::Password)
-                        .label("Password".to_string())
-                    }),
-                    slider!({
-                        .value(f32_value)
-                        .label("Some slider".to_string())
-                    })
+            dwclass!(b, "p-4 w-64 h-96 flex-initial flex flex-col gap-4")
+            .children([
+                text_input!({
+                    .value(value.clone())
+                    .label("Hi there".to_string())
+                }),
+                text_input!({
+                    .value(value.clone())
+                    .is_valid(ValidationResult::Invalid { message: "Always!!".to_string() })
+                    .label("Always invalid".to_string())
+                }),
+                text_input!({
+                    .input_type(TextInputType::Password)
+                    .label("Password".to_string())
+                }),
+                slider!({
+                    .value(f32_value)
+                    .label("Some slider".to_string())
+                }),
+                select!({
+                    .label("Some dropdown".to_string())
+                    .value(value.clone())
+                    .options(vec![
+                        ("a".to_string(), "Option A".to_string()),
+                        ("b".to_string(), "Option B".to_string()),
+                        ("c".to_string(), "Option C".to_string()),
+                    ])
+                })
             ])
         })
     })
