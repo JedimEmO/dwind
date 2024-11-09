@@ -301,6 +301,7 @@ dependencies = [
  "dwind-macros",
  "futures-signals",
  "futures-signals-component-macro",
+ "log",
  "once_cell",
  "serde",
  "serde_json",

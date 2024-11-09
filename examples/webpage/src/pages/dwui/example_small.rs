@@ -28,19 +28,13 @@ fn example_card_buttons() -> Dom {
     card!({
         .scheme(ColorScheme::Void)
         .apply(|b| {
-            dwclass!(b, "p-4 w-64 h-64 flex-initial flex flex-col gap-4")
+            dwclass!(b, "p-4 w-64 h-80 flex-initial flex flex-col gap-4")
             .children([
                 html!("h1", {
                     .dwclass!("font-extrabold")
                     .text("Flat Buttons")
                 }),
-                button!({
-                    .content(Some(text("Primary Flat")))
-                }),
-                button!({
-                    .disabled(true)
-                    .content(Some(text("Primary Flat Disabled")))
-                })
+
             ])
         })
     })
@@ -50,8 +44,15 @@ fn example_card_border_buttons() -> Dom {
     card!({
         .scheme(ColorScheme::Void)
         .apply(|b| {
-            dwclass!(b, "p-4 w-64 h-64 flex-initial flex flex-col gap-4")
+            dwclass!(b, "p-4 w-64 h-80 flex-initial flex flex-col gap-4")
             .children([
+                button!({
+                    .content(Some(text("Primary Flat")))
+                }),
+                button!({
+                    .disabled(true)
+                    .content(Some(text("Primary Flat Disabled")))
+                }),
                 button!({
                     .button_type(ButtonType::Border)
                     .content(Some(text("Primary Border")))
@@ -69,11 +70,12 @@ fn example_card_border_buttons() -> Dom {
 fn example_card_input() -> Dom {
     // let value = Mutable::new("Some string value".to_string());
     let value = Mutable::new("".to_string());
+    let f32_value = Mutable::new(25.);
 
     card!({
         .scheme(ColorScheme::Void)
         .apply(move |b| {
-            dwclass!(b, "p-4 w-64 h-64 flex-initial flex flex-col gap-4")
+            dwclass!(b, "p-4 w-64 h-80 flex-initial flex flex-col gap-4")
                 .children([
                     text_input!({
                         .value(value.clone())
@@ -88,6 +90,10 @@ fn example_card_input() -> Dom {
                         .input_type(TextInputType::Password)
                         .label("Password".to_string())
                     }),
+                    slider!({
+                        .value(f32_value)
+                        .label("Some slider".to_string())
+                    })
             ])
         })
     })

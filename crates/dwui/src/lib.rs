@@ -3,6 +3,7 @@ extern crate dwind_macros;
 
 pub mod components;
 pub mod theme;
+pub mod mixins;
 
 pub mod prelude {
     pub use super::components::containers::prelude::*;
