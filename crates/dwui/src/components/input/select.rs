@@ -1,5 +1,5 @@
 use dominator::{events, html, with_node, Dom};
-use futures_signals::signal::{always, Mutable};
+use futures_signals::signal::{always, Mutable, SignalExt};
 use futures_signals_component_macro::component;
 use crate::prelude::{InputValueWrapper, ValidationResult};
 use dwind::prelude::*;
@@ -28,6 +28,7 @@ struct Select<TValue: InputValueWrapper + 'static = Mutable<String>> {
 
 pub fn select(props: impl SelectPropsTrait + 'static) -> Dom {
     let SelectProps { value, options, label, is_valid, apply } = props.take();
+    let value_signal = value.value_signal_cloned().broadcast();
 
     html!("div", {
         .dwclass!("grid h-12")
@@ -35,9 +36,16 @@ pub fn select(props: impl SelectPropsTrait + 'static) -> Dom {
             html!("select" => HtmlSelectElement, {
                 .dwclass!("dwui-bg-void-950 is(.light *):dwui-bg-void-300 text-base h-12")
                 .dwclass!("grid-row-1 grid-col-1")
-                .children_signal_vec(options.map(|(key, value)| {
+                .children_signal_vec(options.map(move |(key, value)| {
                     html!("option", {
                         .attr("value", &key)
+                        .attr_signal("selected", value_signal.signal_cloned().map(move |v|{
+                            if  key == v {
+                                Some("selected")
+                            } else {
+                                None
+                            }
+                        }))
                         .text(&value)
                     })
                 }))
