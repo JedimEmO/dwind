@@ -18,8 +18,12 @@ struct Slider<TValue: InputValueWrapper + 'static = Mutable<String>> {
     min: f32,
 
     #[signal]
-    #[default(100.0)]
+    #[default(100.)]
     max: f32,
+
+    #[signal]
+    #[default(1.)]
+    step: f32,
 
     #[signal]
     #[default("".to_string())]
@@ -27,7 +31,7 @@ struct Slider<TValue: InputValueWrapper + 'static = Mutable<String>> {
 }
 
 pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
-    let SliderProps { value, min, max, label, apply } = props.take();
+    let SliderProps { value, min, max, step, label, apply } = props.take();
     let value_signal = value.value_signal_cloned();
 
     html!("div", {
@@ -41,6 +45,7 @@ pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
                 .attr_signal("value", value.value_signal_cloned())
                 .attr_signal("min", min.map(|v| v.to_string()))
                 .attr_signal("max", max.map(|v| v.to_string()))
+                .attr_signal("step", step.map(|v| v.to_string()))
                 .with_node!(slider_node => {
                     .event(move |_: events::Change| {
                         value.set(slider_node.value());
