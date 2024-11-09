@@ -12,6 +12,7 @@ futures-signals.workspace = true
 futures-signals-component-macro.workspace = true
 once_cell.workspace = true
 web-sys.workspace = true
+log = "0.4.22"
 
 [build-dependencies]
 dominator-css-bindgen = { path = "../dominator-css-bindgen" }
