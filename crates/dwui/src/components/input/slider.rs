@@ -40,7 +40,7 @@ pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
         .child(html!("div", {
             .dwclass!("flex flex-row grid-col-1 grid-row-1 w-full align-items-center")
             .child(html!("input" => HtmlInputElement, {
-                .dwclass!("h-12 grow")
+                .dwclass!("h-7 grow")
                 .attr("type", "range")
                 .attr_signal("value", value.value_signal_cloned())
                 .attr_signal("min", min.map(|v| v.to_string()))

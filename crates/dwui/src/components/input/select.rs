@@ -31,10 +31,10 @@ pub fn select(props: impl SelectPropsTrait + 'static) -> Dom {
     let value_signal = value.value_signal_cloned().broadcast();
 
     html!("div", {
-        .dwclass!("grid h-12")
+        .dwclass!("grid h-7")
         .children([
             html!("select" => HtmlSelectElement, {
-                .dwclass!("dwui-bg-void-950 is(.light *):dwui-bg-void-300 text-base h-12")
+                .dwclass!("dwui-bg-void-950 is(.light *):dwui-bg-void-300 text-base h-7")
                 .dwclass!("grid-row-1 grid-col-1")
                 .children_signal_vec(options.map(move |(key, value)| {
                     html!("option", {

@@ -45,7 +45,7 @@ pub fn button(props: impl ButtonPropsTrait + 'static) -> Dom {
         .dwclass_signal!("is(.light *):dwui-border-primary-200 is(.light *):hover:dwui-border-primary-300 border bg-unset", button_type.signal().map(|v| v == ButtonType::Border))
         .dwclass!("disabled:dwui-text-on-primary-500 disabled:hover:dwui-border-primary-800")
         .dwclass!("is(.light *):disabled:dwui-text-on-primary-600 is(.light *):disabled:hover:dwui-border-primary-200")
-        .dwclass!("w-full h-12 font-bold p-2 cursor-pointer rounded")
+        .dwclass!("w-full h-7 font-bold p-1 cursor-pointer rounded-full")
         .apply_if(apply.is_some(), move |b| {
             b.apply(apply.unwrap())
         })

@@ -51,7 +51,7 @@ pub fn labelled_rect_mixin(label: impl Signal<Item=String> + 'static, raise_labe
                     if v {
                         "-10px"
                     } else {
-                        "12px"
+                        "3px"
                     }
                 }))
                 .text_signal(label.signal_cloned())

@@ -89,7 +89,7 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
                 .dwclass!("p-l-2")
                 .dwclass!("grid-col-1 grid-row-1")
                 .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
-                .dwclass_signal!("h-12", is_valid.signal())
+                .dwclass_signal!("h-7", is_valid.signal())
                 .dwclass_signal!("h-7", not(is_valid.signal()))
                 .attr_signal("value", value.value_signal_cloned())
                 .attr_signal("type", input_type.map(|t| {
