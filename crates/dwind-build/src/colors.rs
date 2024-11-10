@@ -6,13 +6,13 @@ use std::path::Path;
 
 #[derive(Serialize, Deserialize)]
 pub struct Color {
-    name: String,
-    shades: HashMap<u32, String>,
+    pub name: String,
+    pub shades: HashMap<u32, String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct ColorFile {
-    colors: Vec<Color>,
+    pub colors: Vec<Color>,
 }
 
 pub fn render_color_json_file_to_rust_file(
