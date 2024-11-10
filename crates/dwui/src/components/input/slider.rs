@@ -47,7 +47,7 @@ pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
                 .attr_signal("max", max.map(|v| v.to_string()))
                 .attr_signal("step", step.map(|v| v.to_string()))
                 .with_node!(slider_node => {
-                    .event(move |_: events::Change| {
+                    .event(move |_: events::Input| {
                         value.set(slider_node.value());
                     })
                 })
