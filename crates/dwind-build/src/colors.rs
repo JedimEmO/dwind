@@ -5,13 +5,13 @@ use std::io::Write;
 use std::path::Path;
 
 #[derive(Serialize, Deserialize)]
-struct Color {
+pub struct Color {
     name: String,
     shades: HashMap<u32, String>,
 }
 
 #[derive(Serialize, Deserialize)]
-struct ColorFile {
+pub struct ColorFile {
     colors: Vec<Color>,
 }
 
