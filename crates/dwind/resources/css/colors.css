@@ -1,3 +1,27 @@
 .bg-unset {
     background-color: unset;
 }
+
+/*
+    gradients
+*/
+
+.linear-gradient-0 {
+    background: linear-gradient(0deg, var(--dw-gradient-from), var(--dw-gradient-to));
+}
+
+.linear-gradient-45 {
+    background: linear-gradient(45deg, var(--dw-gradient-from), var(--dw-gradient-to));
+}
+
+.linear-gradient-90 {
+    background: linear-gradient(90deg, var(--dw-gradient-from), var(--dw-gradient-to));
+}
+
+.linear-gradient-135 {
+    background: linear-gradient(135deg, var(--dw-gradient-from), var(--dw-gradient-to));
+}
+
+.linear-gradient-180 {
+    background: linear-gradient(180deg, var(--dw-gradient-from), var(--dw-gradient-to));
+}

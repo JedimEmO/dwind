@@ -1,24 +1,28 @@
+use crate::prelude::ValidationResult;
+use crate::theme::prelude::*;
 use dominator::{html, DomBuilder};
+use dwind::prelude::*;
 use futures_signals::map_ref;
+use futures_signals::signal::SignalExt;
 use futures_signals::signal::{not, Broadcaster, Signal};
 use web_sys::HtmlElement;
-use crate::prelude::ValidationResult;
-use futures_signals::signal::SignalExt;
-use crate::theme::prelude::*;
-use dwind::prelude::*;
 
-pub fn labelled_rect_mixin(label: impl Signal<Item=String> + 'static, raise_label: impl Signal<Item=bool> + 'static, validation_signal: impl Signal<Item=ValidationResult> + 'static) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
+pub fn labelled_rect_mixin(
+    label: impl Signal<Item = String> + 'static,
+    raise_label: impl Signal<Item = bool> + 'static,
+    validation_signal: impl Signal<Item = ValidationResult> + 'static,
+) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     |b| {
         let raise_label = raise_label.broadcast();
         let label = label.broadcast();
         let validation_signal = validation_signal.broadcast();
 
-        let is_valid = validation_signal.signal_ref(|validation| {
-            match validation {
+        let is_valid = validation_signal
+            .signal_ref(|validation| match validation {
                 ValidationResult::Valid => true,
                 ValidationResult::Invalid { message } => false,
-            }
-        }).broadcast();
+            })
+            .broadcast();
 
         let top_border_margin_signal = map_ref! {
             let raise = raise_label.signal(),

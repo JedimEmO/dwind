@@ -1,11 +1,11 @@
+use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
+use crate::prelude::{InputValueWrapper, ValidationResult};
+use crate::theme::prelude::*;
 use dominator::{events, html, with_node, Dom};
+use dwind::prelude::*;
+use futures_signals::signal::SignalExt;
 use futures_signals::signal::{always, Mutable};
 use futures_signals_component_macro::component;
-use crate::prelude::{InputValueWrapper, ValidationResult};
-use futures_signals::signal::SignalExt;
-use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
-use dwind::prelude::*;
-use crate::theme::prelude::*;
 use web_sys::HtmlInputElement;
 
 #[component(render_fn=slider)]
@@ -27,11 +27,18 @@ struct Slider<TValue: InputValueWrapper + 'static = Mutable<String>> {
 
     #[signal]
     #[default("".to_string())]
-    label: String
+    label: String,
 }
 
 pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
-    let SliderProps { value, min, max, step, label, apply } = props.take();
+    let SliderProps {
+        value,
+        min,
+        max,
+        step,
+        label,
+        apply,
+    } = props.take();
     let value_signal = value.value_signal_cloned();
 
     html!("div", {

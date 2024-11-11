@@ -1,4 +1,5 @@
 use crate::components::input::validation::InputValueWrapper;
+use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
 use crate::prelude::ValidationResult;
 use crate::theme::prelude::*;
 use dominator::{clone, events, html, with_node, Dom};
@@ -8,7 +9,6 @@ use futures_signals::signal::{and, not, or, Mutable, Signal, SignalExt};
 use futures_signals::signal_vec::SignalVecExt;
 use futures_signals_component_macro::component;
 use web_sys::HtmlInputElement;
-use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
 
 pub enum TextInputType {
     Text,
@@ -69,11 +69,12 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
                 ValidationResult::Valid
             }
         }
-    }.broadcast();
+    }
+    .broadcast();
 
-    let is_valid = validation_signal.signal_ref(|validation| {
-        validation.is_valid()
-    }).broadcast();
+    let is_valid = validation_signal
+        .signal_ref(|validation| validation.is_valid())
+        .broadcast();
 
     let raise_label = and(
         has_label,

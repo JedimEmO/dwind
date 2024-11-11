@@ -1,12 +1,12 @@
-use dominator::{events, html, with_node, Dom};
-use futures_signals::signal::{always, Mutable, SignalExt};
-use futures_signals_component_macro::component;
-use crate::prelude::{InputValueWrapper, ValidationResult};
-use dwind::prelude::*;
 use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
-use futures_signals::signal_vec::SignalVecExt;
-use web_sys::HtmlSelectElement;
+use crate::prelude::{InputValueWrapper, ValidationResult};
 use crate::theme::prelude::*;
+use dominator::{events, html, with_node, Dom};
+use dwind::prelude::*;
+use futures_signals::signal::{always, Mutable, SignalExt};
+use futures_signals::signal_vec::SignalVecExt;
+use futures_signals_component_macro::component;
+use web_sys::HtmlSelectElement;
 
 #[component(render_function=select)]
 struct Select<TValue: InputValueWrapper + 'static = Mutable<String>> {
@@ -23,11 +23,17 @@ struct Select<TValue: InputValueWrapper + 'static = Mutable<String>> {
 
     #[signal]
     #[default(ValidationResult::Valid)]
-    is_valid: ValidationResult
+    is_valid: ValidationResult,
 }
 
 pub fn select(props: impl SelectPropsTrait + 'static) -> Dom {
-    let SelectProps { value, options, label, is_valid, apply } = props.take();
+    let SelectProps {
+        value,
+        options,
+        label,
+        is_valid,
+        apply,
+    } = props.take();
     let value_signal = value.value_signal_cloned().broadcast();
 
     html!("div", {

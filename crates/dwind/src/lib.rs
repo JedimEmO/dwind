@@ -21,6 +21,16 @@ pub mod prelude {
 pub fn stylesheet() {
     modern_normalize_cssys::apply_modern_normalize_stylesheet();
     base::apply_base_stylesheet();
+    colors::apply_colors_stylesheet();
+
+    // let colors = colors::ColorsCssVariables {
+    //     dw_gradient_from: "white".to_string(),
+    //     dw_gradient_to: "black".to_string(),
+    // };
+    //
+    // stylesheet!(":root", {
+    //     .raw(colors.to_style_sheet_raw())
+    // });
 }
 
 pub mod base {
@@ -35,6 +45,7 @@ pub mod effects {
     include!(concat!(env!("OUT_DIR"), "/effects.rs"));
 }
 
+use dominator::stylesheet;
 pub use modules::borders;
 
 pub mod interactivity {

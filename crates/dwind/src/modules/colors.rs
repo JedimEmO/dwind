@@ -28,5 +28,19 @@ macro_rules! shadow_color_generator {
     };
 }
 
+#[macro_export]
+macro_rules! gradient_from_generator {
+    ($color:tt) => {
+        const_format::formatcp!("--dw-gradient-from: {};", $color)
+    };
+}
+
+#[macro_export]
+macro_rules! gradient_to_generator {
+    ($color:tt) => {
+        const_format::formatcp!("--dw-gradient-to: {};", $color)
+    };
+}
+
 include!(concat!(env!("OUT_DIR"), "/colors_generated.rs"));
 include!(concat!(env!("OUT_DIR"), "/colors.rs"));

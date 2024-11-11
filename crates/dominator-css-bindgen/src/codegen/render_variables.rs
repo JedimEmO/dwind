@@ -1,6 +1,7 @@
 use case::CaseExt;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
+use std::collections::{HashMap, HashSet};
 
 pub fn render_variable_definitions(module_name: &str, variable_names: Vec<String>) -> String {
     let variable_names = variable_names
@@ -22,6 +23,21 @@ fn render_struct_of_variable_names(module_name: &str, variable_names: Vec<String
         .iter()
         .filter_map(|name| name.strip_prefix("--").map(|v| v.to_string()))
         .collect::<Vec<String>>();
+
+    let pairs = variable_names
+        .iter()
+        .cloned()
+        .zip(rustified_variable_names.iter().cloned())
+        .collect::<Vec<_>>();
+
+    let mut rustified_variable_names: HashMap<String, String> = Default::default();
+
+    for pair in pairs.iter() {
+        rustified_variable_names.insert(pair.0.clone(), pair.1.clone());
+    }
+
+    let (variable_names, rustified_variable_names): (Vec<String>, Vec<String>) =
+        rustified_variable_names.into_iter().unzip();
 
     let css_variable_names = rustified_variable_names.iter().map(|name| {
         let rust_name = Ident::new(css_ident_to_rust(&name).as_str(), Span::call_site());

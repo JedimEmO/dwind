@@ -65,7 +65,7 @@ fn pseudo_class_theme() -> Dom {
                 DWIND_COLORS.get("picton-blue").unwrap(),
                 DWIND_COLORS.get("woodsmoke").unwrap(),
                 DWIND_COLORS.get("woodsmoke").unwrap(),
-                DWIND_COLORS.get("red").unwrap(),
+                DWIND_COLORS.get("blue").unwrap(),
             ).to_style_sheet_raw())
         }
     });
@@ -74,7 +74,7 @@ fn pseudo_class_theme() -> Dom {
         class! {
             .raw(
                 ColorsCssVariables::new(
-                    DWIND_COLORS.get("apple").unwrap(),
+                    DWIND_COLORS.get("purple").unwrap(),
                     DWIND_COLORS.get("bunker").unwrap(),
                     DWIND_COLORS.get("bunker").unwrap(),
                     DWIND_COLORS.get("purple").unwrap(),
