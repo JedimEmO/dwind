@@ -65,7 +65,7 @@ fn pseudo_class_theme() -> Dom {
                 DWIND_COLORS.get("picton-blue").unwrap(),
                 DWIND_COLORS.get("woodsmoke").unwrap(),
                 DWIND_COLORS.get("woodsmoke").unwrap(),
-                DWIND_COLORS.get("blue").unwrap(),
+                DWIND_COLORS.get("red").unwrap(),
             ).to_style_sheet_raw())
         }
     });
