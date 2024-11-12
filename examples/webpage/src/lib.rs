@@ -50,7 +50,7 @@ fn main_view() -> Dom {
     html!("div", {
         .dwclass!("font-sans @sm:text-woodsmoke-200")
         .dwclass!("text-woodsmoke-200")
-        .dwclass!("gradient-from-woodsmoke-800 gradient-to-bunker-950 linear-gradient-180")
+        .dwclass!("gradient-from-woodsmoke-600 gradient-to-bunker-950 linear-gradient-180")
         .child(header())
         .child(html!("div", {
             .dwclass!("m-x-auto flex max-w-lg")
