@@ -47,25 +47,25 @@ pub fn labelled_rect_mixin(
         };
 
         b.child(html!("label", {
-                .dwclass!("grid-col-1 grid-row-1 pointer-events-none transition-all m-l-4")
-                .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
-                .dwclass_signal!("text-sm", raise_label.signal())
-                .dwclass_signal!("text-base", not(raise_label.signal()))
-                .style_signal("margin-top", raise_label.signal().map(|v| {
-                    if v {
-                        "-10px"
-                    } else {
-                        "3px"
-                    }
-                }))
-                .text_signal(label.signal_cloned())
+            .dwclass!("grid-col-1 grid-row-1 pointer-events-none transition-all m-l-4")
+            .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
+            .dwclass_signal!("text-sm", raise_label.signal())
+            .dwclass_signal!("text-base", not(raise_label.signal()))
+            .style_signal("margin-top", raise_label.signal().map(|v| {
+                if v {
+                    "-10px"
+                } else {
+                    "3px"
+                }
             }))
-            .child(html!("div", {
-                .dwclass!("grid-col-1 grid-row-1 pointer-events-none border-l border-r border-b")
-                .dwclass_signal!("dwui-border-void-600 is(.light *):dwui-border-void-200", is_valid.signal())
-                .dwclass_signal!("dwui-border-error-600 is(.light *):dwui-border-error-700", not(is_valid.signal()))
-            }))
-            .child(html!("div", {
+            .text_signal(label.signal_cloned())
+        }))
+        .child(html!("div", {
+            .dwclass!("grid-col-1 grid-row-1 pointer-events-none border-l border-r border-b")
+            .dwclass_signal!("dwui-border-void-600 is(.light *):dwui-border-void-200", is_valid.signal())
+            .dwclass_signal!("dwui-border-error-600 is(.light *):dwui-border-error-700", not(is_valid.signal()))
+        }))
+        .child(html!("div", {
             .dwclass!("grid-col-1 grid-row-1 pointer-events-none w-2 border-t")
             .dwclass_signal!("dwui-border-void-600 is(.light *):dwui-border-void-200", is_valid.signal())
             .dwclass_signal!("dwui-border-error-500 is(.light *):dwui-border-error-700", not(is_valid.signal()))
@@ -76,17 +76,17 @@ pub fn labelled_rect_mixin(
             .dwclass_signal!("dwui-border-error-500 is(.light *):dwui-border-error-700", not(is_valid.signal()))
             .style_signal("margin-left", top_border_margin_signal)
         }))
-            .child_signal(validation_signal.signal_cloned().map(|validation| {
-                match validation {
-                    ValidationResult::Valid => None,
-                    ValidationResult::Invalid { message } => {
-                        Some(html!("div", {
-                    .dwclass!("grid-col-1 grid-row-2 pointer-events-none transition-all text-sm")
-                    .dwclass!("dwui-text-error-500 is(.light *):dwui-text-error-700")
-                    .text(&message)
-                }))
-                    }
+        .child_signal(validation_signal.signal_cloned().map(|validation| {
+            match validation {
+                ValidationResult::Valid => None,
+                ValidationResult::Invalid { message } => {
+                    Some(html!("div", {
+                        .dwclass!("grid-col-1 grid-row-2 pointer-events-none transition-all text-sm h-4")
+                        .dwclass!("dwui-text-error-500 is(.light *):dwui-text-error-700")
+                        .text(&message)
+                    }))
                 }
-            }))
+            }
+        }))
     }
 }

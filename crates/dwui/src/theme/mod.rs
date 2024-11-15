@@ -96,6 +96,8 @@ pub mod colors {
 
     use dwind::border_color_generator;
     use dwind::text_color_generator;
+    use dwind::gradient_from_generator;
+    use dwind::gradient_to_generator;
 
     dwgenerate_map!(
         "dwui-border-primary",
@@ -166,6 +168,80 @@ pub mod colors {
             ("800", "var(--dwui-error-800)"),
             ("900", "var(--dwui-error-900)"),
             ("950", "var(--dwui-error-950)")
+        ]
+    );
+
+    // gradients
+
+    dwgenerate_map!(
+        "dwui-gradient-from-primary",
+        "gradient-from-",
+        [
+            ("50", "var(--dwui-primary-50)"),
+            ("100", "var(--dwui-primary-100)"),
+            ("200", "var(--dwui-primary-200)"),
+            ("300", "var(--dwui-primary-300)"),
+            ("400", "var(--dwui-primary-400)"),
+            ("500", "var(--dwui-primary-500)"),
+            ("600", "var(--dwui-primary-600)"),
+            ("700", "var(--dwui-primary-700)"),
+            ("800", "var(--dwui-primary-800)"),
+            ("900", "var(--dwui-primary-900)"),
+            ("950", "var(--dwui-primary-950)")
+        ]
+    );
+
+    dwgenerate_map!(
+        "dwui-gradient-to-primary",
+        "gradient-to-",
+        [
+            ("50", "var(--dwui-primary-50)"),
+            ("100", "var(--dwui-primary-100)"),
+            ("200", "var(--dwui-primary-200)"),
+            ("300", "var(--dwui-primary-300)"),
+            ("400", "var(--dwui-primary-400)"),
+            ("500", "var(--dwui-primary-500)"),
+            ("600", "var(--dwui-primary-600)"),
+            ("700", "var(--dwui-primary-700)"),
+            ("800", "var(--dwui-primary-800)"),
+            ("900", "var(--dwui-primary-900)"),
+            ("950", "var(--dwui-primary-950)")
+        ]
+    );
+
+    dwgenerate_map!(
+        "dwui-gradient-from-void",
+        "gradient-from-",
+        [
+            ("50", "var(--dwui-void-50)"),
+            ("100", "var(--dwui-void-100)"),
+            ("200", "var(--dwui-void-200)"),
+            ("300", "var(--dwui-void-300)"),
+            ("400", "var(--dwui-void-400)"),
+            ("500", "var(--dwui-void-500)"),
+            ("600", "var(--dwui-void-600)"),
+            ("700", "var(--dwui-void-700)"),
+            ("800", "var(--dwui-void-800)"),
+            ("900", "var(--dwui-void-900)"),
+            ("950", "var(--dwui-void-950)")
+        ]
+    );
+
+    dwgenerate_map!(
+        "dwui-gradient-to-void",
+        "gradient-to-",
+        [
+            ("50", "var(--dwui-void-50)"),
+            ("100", "var(--dwui-void-100)"),
+            ("200", "var(--dwui-void-200)"),
+            ("300", "var(--dwui-void-300)"),
+            ("400", "var(--dwui-void-400)"),
+            ("500", "var(--dwui-void-500)"),
+            ("600", "var(--dwui-void-600)"),
+            ("700", "var(--dwui-void-700)"),
+            ("800", "var(--dwui-void-800)"),
+            ("900", "var(--dwui-void-900)"),
+            ("950", "var(--dwui-void-950)")
         ]
     );
 }

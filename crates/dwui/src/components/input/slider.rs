@@ -42,12 +42,12 @@ pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
     let value_signal = value.value_signal_cloned();
 
     html!("div", {
-        .dwclass!("dwui-bg-void-950 is(.light *):dwui-bg-void-300 text-base")
+        .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 text-base")
         .dwclass!("grid")
         .child(html!("div", {
             .dwclass!("flex flex-row grid-col-1 grid-row-1 w-full align-items-center")
             .child(html!("input" => HtmlInputElement, {
-                .dwclass!("h-7 grow")
+                .dwclass!("h-10 grow")
                 .attr("type", "range")
                 .attr_signal("value", value.value_signal_cloned())
                 .attr_signal("min", min.map(|v| v.to_string()))

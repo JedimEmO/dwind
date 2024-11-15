@@ -1,9 +1,10 @@
 use crate::theme::prelude::*;
-use dominator::{events, html, Dom};
+use dominator::{class, events, html, styles, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwgenerate;
 use futures_signals::signal::SignalExt;
 use futures_signals_component_macro::component;
+use once_cell::sync::Lazy;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum ButtonType {
@@ -38,14 +39,14 @@ pub fn button(props: impl ButtonPropsTrait + 'static) -> Dom {
     let button_type = button_type.broadcast();
 
     html!("button", {
-        .dwclass!("is(.light *):dwui-text-on-primary-800 dwui-text-on-primary-50")
-        .dwclass_signal!("dwui-bg-primary-800 hover:dwui-bg-primary-900", button_type.signal().map(|v| v == ButtonType::Flat))
-        .dwclass_signal!("is(.light *):dwui-bg-primary-400 is(.light *):hover:dwui-bg-primary-500", button_type.signal().map(|v| v == ButtonType::Flat))
+        .dwclass!("is(.light *):dwui-text-on-primary-900 dwui-text-on-primary-50 hover:brightness-90")
+        .dwclass_signal!("linear-gradient-90 dwui-gradient-from-primary-800 dwui-gradient-to-primary-900", button_type.signal().map(|v| v == ButtonType::Flat))
+        .dwclass_signal!("is(.light *):dwui-gradient-from-primary-400 is(.light *):dwui-gradient-to-primary-500", button_type.signal().map(|v| v == ButtonType::Flat))
         .dwclass_signal!("dwui-border-primary-700 hover:dwui-border-primary-800 border bg-unset", button_type.signal().map(|v| v == ButtonType::Border))
         .dwclass_signal!("is(.light *):dwui-border-primary-200 is(.light *):hover:dwui-border-primary-300 border bg-unset", button_type.signal().map(|v| v == ButtonType::Border))
         .dwclass!("disabled:dwui-text-on-primary-500 disabled:hover:dwui-border-primary-800")
         .dwclass!("is(.light *):disabled:dwui-text-on-primary-600 is(.light *):disabled:hover:dwui-border-primary-200")
-        .dwclass!("w-full h-7 font-bold p-1 cursor-pointer rounded-full")
+        .dwclass!("w-full h-10 font-bold p-1 cursor-pointer rounded-full")
         .apply_if(apply.is_some(), move |b| {
             b.apply(apply.unwrap())
         })

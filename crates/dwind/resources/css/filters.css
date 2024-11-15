@@ -1,0 +1,36 @@
+
+.brightness-0 {
+    filter: brightness(0);
+}
+
+.brightness-50 {
+    filter: brightness(0.5);
+}
+
+.brightness-75 {
+    filter: brightness(0.75);
+}
+
+.brightness-90 {
+    filter: brightness(0.9);
+}
+
+.brightness-100 {
+    filter: brightness(1);
+}
+
+.brightness-110 {
+    filter: brightness(1.1);
+}
+
+.brightness-125 {
+    filter: brightness(1.25);
+}
+
+.brightness-150 {
+    filter: brightness(1.5);
+}
+
+.brightness-200 {
+    filter: brightness(2);
+}
