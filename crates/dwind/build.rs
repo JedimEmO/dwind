@@ -11,6 +11,7 @@ fn main() {
         "resources/css/colors.css",
         "resources/css/effects.css",
         "resources/css/interactivity.css",
+        "resources/css/filters.css",
         "resources/css/flexbox_and_grid.css",
         "resources/css/layout.css",
         "resources/css/position.css",

@@ -6,6 +6,7 @@ pub mod prelude {
     pub use super::box_shadow::*;
     pub use super::colors::*;
     pub use super::effects::*;
+    pub use super::filters::*;
     pub use super::flexbox_and_grid::*;
     pub use super::interactivity::*;
     pub use super::layout::*;
@@ -58,6 +59,10 @@ pub mod layout {
 
 pub mod position {
     include!(concat!(env!("OUT_DIR"), "/position.rs"));
+}
+
+pub mod filters {
+    include!(concat!(env!("OUT_DIR"), "/filters.rs"));
 }
 
 pub mod flexbox_and_grid {
