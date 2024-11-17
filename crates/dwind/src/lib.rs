@@ -53,10 +53,6 @@ pub mod interactivity {
     include!(concat!(env!("OUT_DIR"), "/interactivity.rs"));
 }
 
-pub mod layout {
-    include!(concat!(env!("OUT_DIR"), "/layout.rs"));
-}
-
 pub mod position {
     include!(concat!(env!("OUT_DIR"), "/position.rs"));
 }
@@ -83,5 +79,6 @@ pub mod typography {
 
 pub use modules::backgrounds;
 pub use modules::colors;
+pub use modules::layout;
 pub use modules::sizing;
 pub use modules::spacing;

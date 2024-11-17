@@ -1,3 +1,6 @@
+.filter-none {
+    filter: none;
+}
 
 .brightness-0 {
     filter: brightness(0);
@@ -33,4 +36,88 @@
 
 .brightness-200 {
     filter: brightness(2);
+}
+
+/*
+    Blur
+ */
+
+.blur-none {
+    filter: ;
+}
+
+.blur-sm {
+    filter: blur(4px);
+}
+
+.blur {
+    filter: blur(8px);
+}
+
+.blur-md {
+    filter: blur(12px);
+}
+
+.blur-lg {
+    filter: blur(16px);
+}
+
+.blur-xl {
+    filter: blur(24px);
+}
+
+.blur-2xl {
+    filter: blur(40px);
+}
+
+.blur-3xl {
+    filter: blur(64px);
+}
+
+/*
+    Backdrop blur
+ */
+
+.backdrop-blur-none {
+    backdrop-filter: ;
+}
+
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+}
+
+.backdrop-blur {
+    backdrop-filter: blur(8px);
+}
+
+.backdrop-blur-md {
+    backdrop-filter: blur(12px);
+}
+
+.backdrop-blur-lg {
+    backdrop-filter: blur(16px);
+}
+
+.backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+}
+
+.backdrop-blur-2xl {
+    backdrop-filter: blur(40px);
+}
+
+.backdrop-blur-3xl {
+    backdrop-filter: blur(64px);
+}
+
+/*
+    Grayscale
+ */
+
+.grayscale-0 {
+    filter: grayscale(0);
+}
+
+.grayscale {
+    filter: grayscale(100%);
 }
