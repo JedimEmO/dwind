@@ -42,5 +42,19 @@ macro_rules! gradient_to_generator {
     };
 }
 
+#[macro_export]
+macro_rules! fill_generator {
+    ($color:tt) => {
+        const_format::formatcp!("fill: {};", $color)
+    };
+}
+
+#[macro_export]
+macro_rules! stroke_generator {
+    ($color:tt) => {
+        const_format::formatcp!("stroke: {};", $color)
+    };
+}
+
 include!(concat!(env!("OUT_DIR"), "/colors_generated.rs"));
 include!(concat!(env!("OUT_DIR"), "/colors.rs"));
