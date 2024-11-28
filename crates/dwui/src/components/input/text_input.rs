@@ -37,6 +37,9 @@ struct TextInput<
     #[signal]
     #[default(TextInputType::Text)]
     input_type: TextInputType,
+
+    #[default(false)]
+    claim_focus: bool
 }
 
 pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
@@ -46,7 +49,7 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
         label,
         mut on_submit,
         input_type,
-        apply,
+        claim_focus, apply,
     } = props.take();
 
     let label = label.broadcast();
@@ -92,7 +95,7 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
                 .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
                 .dwclass_signal!("h-10", is_valid.signal())
                 .dwclass_signal!("h-6", not(is_valid.signal()))
-                .attr_signal("value", value.value_signal_cloned())
+                .focused(claim_focus)
                 .attr_signal("type", input_type.map(|t| {
                     match t {
                         TextInputType::Text => { "text" }
@@ -100,6 +103,10 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
                     }
                 }))
                 .with_node!(element => {
+                    .future(value.value_signal_cloned().for_each(clone!(element => move |v| {
+                        element.set_value(&v);
+                        async move {}
+                    })))
                     .event(clone!(parsed_validation_result => move |_: events::Input| {
                         let result = value.set(element.value());
 

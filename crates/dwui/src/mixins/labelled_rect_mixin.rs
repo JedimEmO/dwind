@@ -55,7 +55,7 @@ pub fn labelled_rect_mixin(
                 if v {
                     "-10px"
                 } else {
-                    "3px"
+                    "8px"
                 }
             }))
             .text_signal(label.signal_cloned())
