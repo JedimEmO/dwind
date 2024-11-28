@@ -78,6 +78,7 @@ fn example_card_input() -> Dom {
             dwclass!(b, "p-4 w-64 h-96 flex-initial flex flex-col gap-4")
             .children([
                 text_input!({
+                    .claim_focus(true)
                     .value(value.clone())
                     .label("Hi there".to_string())
                 }),
@@ -85,6 +86,17 @@ fn example_card_input() -> Dom {
                     .value(value.clone())
                     .is_valid(ValidationResult::Invalid { message: "Always!!".to_string() })
                     .label("Always invalid".to_string())
+                }),
+                text_input!({
+                    .value(value.clone())
+                    .is_valid_signal(value.signal_ref(|v| {
+                        if v.to_lowercase() == "bananas" {
+                            ValidationResult::Valid
+                        } else {
+                            ValidationResult::Invalid { message: "Give me bananas!".to_string() }
+                        }
+                    }))
+                    .label("Accepts bananas".to_string())
                 }),
                 text_input!({
                     .input_type(TextInputType::Password)

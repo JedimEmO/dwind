@@ -12,15 +12,6 @@ rustup target add wasm32-unknown-unknown
 
 You now have two ways of running the application
 
-### rollup/npm
-
-You also need npm and node installed, see https://github.com/nvm-sh/nvm for installation instructions
-
-```shell
-npm install
-npm start
-```
-
 ### Trunk
 
 First install the trunk utility: https://trunkrs.dev/guide/getting-started/installation.html
