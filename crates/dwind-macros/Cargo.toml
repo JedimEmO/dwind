@@ -23,7 +23,6 @@ syn = { workspace = true, features = ["parsing", "proc-macro"] }
 [dev-dependencies]
 const_format.workspace = true
 dominator.workspace = true
-dominator-css-bindgen-test = { path = "../tests/dominator-css-bindgen-test" , version = "0.1.0"}
 futures-signals.workspace = true
 once_cell.workspace = true
 wasm-bindgen-test.workspace = true

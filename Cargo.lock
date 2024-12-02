@@ -278,7 +278,6 @@ version = "0.1.0"
 dependencies = [
  "const_format",
  "dominator",
- "dominator-css-bindgen-test",
  "dwind-base",
  "futures-signals",
  "nom",
