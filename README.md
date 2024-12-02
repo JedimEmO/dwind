@@ -1,6 +1,8 @@
-# dominator-css-bindgen
+# DWIND
 
-Experiment of generating dominator class! definitions from CSS files.
+Bringing tailwind-like syntax and utility classes to your DOMINATOR web application!
+
+This project provide utilities to 
 
 
 The example app is hosted on github pages here:

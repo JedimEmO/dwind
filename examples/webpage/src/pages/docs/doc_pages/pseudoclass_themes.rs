@@ -7,7 +7,7 @@ use dwind::prelude::*;
 use dwind_macros::dwclass;
 use dwui::prelude::*;
 use dwui::theme::prelude::ColorsCssVariables;
-use example_html_macro::example_html;
+use example_html_highlight_macro::example_html;
 use futures_signals::signal::{not, Mutable};
 use once_cell::sync::Lazy;
 

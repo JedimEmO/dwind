@@ -2,6 +2,10 @@
 name = "dwind-macros"
 version = "0.1.0"
 edition = "2021"
+homepage = "https://github.com/JedimEmO/dwind"
+repository = "https://github.com/JedimEmO/dwind"
+license-file = "LICENSE"
+keywords = ["web", "wasm", "css", "style"]
 
 [lib]
 proc-macro = true

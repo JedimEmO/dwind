@@ -6,7 +6,7 @@ use dwind::background_scratched_generator;
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use dwind_macros::dwgenerate;
-use example_html_macro::example_html;
+use example_html_highlight_macro::example_html;
 
 pub fn flex_page() -> Dom {
     html!("div", {

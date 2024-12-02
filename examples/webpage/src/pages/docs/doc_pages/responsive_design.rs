@@ -5,7 +5,7 @@ use dominator::{media_query, Dom};
 use dwind::prelude::media_queries::{breakpoint_active_signal, Breakpoint};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
-use example_html_macro::example_html;
+use example_html_highlight_macro::example_html;
 use futures_signals::signal::SignalExt;
 
 pub fn responsive_design() -> Dom {
