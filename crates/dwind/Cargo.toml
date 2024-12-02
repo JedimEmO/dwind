@@ -11,16 +11,16 @@ keywords = ["web", "wasm", "css", "style"]
 [dependencies]
 const_format.workspace = true
 dominator.workspace = true
-dominator-css-bindgen = { path = "../dominator-css-bindgen" }
-dwind-base = { path = "../dwind-base" }
-dwind-macros = { path = "../dwind-macros" }
+dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
+dwind-base = { path = "../dwind-base", version = "0.1.0" }
+dwind-macros = { path = "../dwind-macros", version = "0.1.0" }
 futures-signals.workspace = true
-modern-normalize-cssys = { path = "../modern-normalize-cssys" }
+modern-normalize-cssys = { path = "../modern-normalize-cssys", version = "0.1.0" }
 once_cell.workspace = true
 serde = { workspace = true, features = ["derive"] }
 
 [build-dependencies]
-dominator-css-bindgen = { path = "../dominator-css-bindgen" }
-dwind-build = { path = "../dwind-build" }
+dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
+dwind-build = { path = "../dwind-build", version = "0.1.0" }
 serde.workspace = true
 serde_json.workspace = true

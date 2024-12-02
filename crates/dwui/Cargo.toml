@@ -10,8 +10,8 @@ keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
 const_format.workspace = true
-dwind = { path = "../dwind" }
-dwind-macros = { path = "../dwind-macros" }
+dwind = { path = "../dwind", version = "0.1.0" }
+dwind-macros = { path = "../dwind-macros", version = "0.1.0" }
 dominator.workspace = true
 futures-signals.workspace = true
 futures-signals-component-macro.workspace = true
@@ -20,7 +20,7 @@ web-sys.workspace = true
 log.workspace = true
 
 [build-dependencies]
-dominator-css-bindgen = { path = "../dominator-css-bindgen" }
+dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
 serde_json.workspace = true
 serde.workspace = true
 

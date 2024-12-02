@@ -13,11 +13,11 @@ crate-type = ["cdylib"]
 
 [dependencies]
 const_format.workspace = true
-dwind-macros = { path = "../../crates/dwind-macros" }
-dwind = { path = "../../crates/dwind" }
-dwui = { path = "../../crates/dwui" }
+dwind-macros = { path = "../../crates/dwind-macros", version = "0.1.0" }
+dwind = { path = "../../crates/dwind", version = "0.1.0" }
+dwui = { path = "../../crates/dwui", version = "0.1.0" }
 dominator.workspace = true
-example-html-highlight-macro = { path = "../../crates/example-html-macro" }
+example-html-highlight-macro = { path = "../../crates/example-html-macro", version = "0.1.0"}
 futures.workspace = true
 futures-signals.workspace = true
 matchit.workspace = true
