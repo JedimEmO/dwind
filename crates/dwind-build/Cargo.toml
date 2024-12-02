@@ -2,6 +2,7 @@
 name = "dwind-build"
 version = "0.1.0"
 edition = "2021"
+description = "utility crate for building DWIND color swatches etc."
 homepage = "https://github.com/JedimEmO/dwind"
 repository = "https://github.com/JedimEmO/dwind"
 license = "MIT"

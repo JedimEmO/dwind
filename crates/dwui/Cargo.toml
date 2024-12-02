@@ -2,6 +2,7 @@
 name = "dwui"
 version = "0.1.0"
 edition = "2021"
+description = "UI Component library built on the DWIND style crate!"
 homepage = "https://github.com/JedimEmO/dwind"
 repository = "https://github.com/JedimEmO/dwind"
 license = "MIT"

@@ -2,6 +2,7 @@
 name = "dwind"
 version = "0.1.0"
 edition = "2021"
+description = "Style your DOMINATOR applications using a tailwind-like syntax and utility class collection!"
 homepage = "https://github.com/JedimEmO/dwind"
 repository = "https://github.com/JedimEmO/dwind"
 license = "MIT"

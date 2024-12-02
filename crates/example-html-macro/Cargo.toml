@@ -2,6 +2,7 @@
 name = "example-html-highlight-macro"
 version = "0.1.0"
 edition = "2021"
+description = "macro for embedding syntax highlighted copies of code in the binary"
 homepage = "https://github.com/JedimEmO/dwind"
 repository = "https://github.com/JedimEmO/dwind"
 license = "MIT"
