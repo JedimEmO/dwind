@@ -56,7 +56,6 @@ impl Parse for DwGenerateInput {
     }
 }
 
-#[derive(Debug)]
 pub struct StrLitPair {
     pub first: syn::LitStr,
     pub second: syn::LitStr,
@@ -75,7 +74,6 @@ impl Parse for StrLitPair {
     }
 }
 
-#[derive(Debug)]
 pub struct ArrayOfTuples {
     pub tuples: Punctuated<StrLitPair, Token![,]>,
 }
@@ -91,7 +89,6 @@ impl Parse for ArrayOfTuples {
     }
 }
 
-#[derive(Debug)]
 pub struct DwGenerateMapInput {
     pub base_output_ident: syn::LitStr,
     pub dwind_class_lit: syn::LitStr,
