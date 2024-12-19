@@ -10,7 +10,7 @@ keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
 const_format.workspace = true
-dwind = { path = "../dwind", version = "0.1.0" }
+dwind = { path = "../dwind", version = "0.2.0" }
 dwind-macros = { path = "../dwind-macros", version = "0.1.0" }
 dominator.workspace = true
 futures-signals.workspace = true
