@@ -15,13 +15,12 @@ use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
 use crate::router::make_app_router;
 use dominator::routing::go_to_url;
-use dominator::{events, Dom};
+use dominator::{body, events, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use dwui::theme::prelude::ColorsCssVariables;
 use futures_signals::signal::SignalExt;
 use std::sync::Arc;
-use wasm_bindgen::UnwrapThrowExt;
 use web_sys::window;
 
 #[cfg(not(test))]
@@ -29,7 +28,7 @@ use web_sys::window;
 async fn main() {
     wasm_log::init(Default::default());
 
-    dominator::append_dom(&dominator::body(), main_view());
+    dominator::replace_dom(&body().parent_node().unwrap(), &body(), main_view());
 }
 
 fn main_view() -> Dom {
@@ -41,16 +40,11 @@ fn main_view() -> Dom {
         &DWIND_COLORS["red"],
     )));
 
-    stylesheet!(["body"], {
-        // Use the generated DWIND_COLORS map if we need to programmatically access color values
-        .style("background-color", &DWIND_COLORS["woodsmoke"][&950])
-        .style("overflow-y", "scroll")
-    });
-
     html!("div", {
-        .dwclass!("font-sans @sm:text-woodsmoke-200")
-        .dwclass!("text-woodsmoke-200")
-        .dwclass!("gradient-from-woodsmoke-700 gradient-to-woodsmoke-950 linear-gradient-180")
+        .dwclass!("font-sans")
+        .dwclass!("text-woodsmoke-50 bg-woodsmoke-950")
+        // .dwclass!("linear-gradient-180 gradient-from-woodsmoke-800 gradient-to-woodsmoke-950")
+        .dwclass!("h-full overflow-y-scroll")
         .child(header())
         .child(html!("div", {
             .dwclass!("m-x-auto flex max-w-lg")
@@ -58,7 +52,6 @@ fn main_view() -> Dom {
             .child_signal(doc_sidebar(doc_sections(), || make_app_router().signal(), Arc::new(|v: DocPage| v.goto()), || {
                 html!("div", {
                     .dwclass!("m-l-4 m-r-0")
-                    .style("width", "94%")
                     .child_signal(doc_main_view(make_app_router().signal().map(Some)))
                 })
             }))
@@ -80,7 +73,7 @@ fn header() -> Dom {
                 .children([
                     html!("h3", {
                         .text("examples")
-                        .dwclass!("m-x-2 hover:text-picton-blue-400 hover:font-bold cursor-pointer")
+                        .dwclass!("m-x-2 text-picton-blue-400 hover:text-picton-blue-500 hover:font-bold cursor-pointer")
                         .event(|_: events::Click| {
                             go_to_url("#/examples")
                         })

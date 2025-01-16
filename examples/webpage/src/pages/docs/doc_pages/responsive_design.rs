@@ -1,7 +1,7 @@
 use crate::pages::docs::code_widget::code;
 use crate::pages::docs::doc_pages::doc_page::{doc_page_sub_header, doc_page_title};
 use crate::pages::docs::example_box::example_box;
-use dominator::{media_query, Dom};
+use dominator::{Dom};
 use dwind::prelude::media_queries::{breakpoint_active_signal, Breakpoint};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
@@ -10,7 +10,7 @@ use futures_signals::signal::SignalExt;
 
 pub fn responsive_design() -> Dom {
     html!("div", {
-        .dwclass!("w-full")
+        // .dwclass!("w-full")
         .child(doc_page_title("Responsive Design"))
         .text("Any modern web app must look good on on both small mobile devices, as well as on enormous desktop monitors.")
         .child(doc_page_sub_header("Breakpoints"))
@@ -27,7 +27,9 @@ fn breakpoint_example() -> Dom {
     html!("div", {
         .dwclass!("w-full @<sm:flex-col @sm:flex-row flex text-woodsmoke-950")
         .child(html!("div", {
-            .dwclass!("@sm:w-40 h-40 flex-initial bg-picton-blue-400 flex align-items-center justify-center @((max-width: 700px)):bg-candlelight-400")
+            .dwclass!("@sm:w-40 h-40 flex-initial @((max-width: 700px)):bg-candlelight-400")
+            .dwclass!("flex align-items-center justify-center")
+            .dwclass!("bg-picton-blue-400")
             .text_signal(breakpoint_active_signal(Breakpoint::Small).map(|active| {
                 if active {
                     "Horizontal"

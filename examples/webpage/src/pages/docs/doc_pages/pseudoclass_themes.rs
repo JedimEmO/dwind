@@ -35,7 +35,7 @@ pub fn pseudo_class_themes() -> Dom {
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn variants() -> Dom {
     html!("div", {
-        .dwclass!("flex flex-col gap-2")
+        .dwclass!("flex flex-col justify-center align-items-center gap-2 w-full")
         // Use the variant to apply style to the second child
         .dwclass!("[& > *]:nth-child(2):bg-candlelight-500")
         .dwclass!("[& > span > div:is(.foo)]:text-bunker-800")

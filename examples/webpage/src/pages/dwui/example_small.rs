@@ -15,31 +15,6 @@ pub fn dwui_example_small() -> Dom {
     })
 }
 
-fn example_card() -> Dom {
-    card!({
-        .scheme(ColorScheme::Primary)
-        .apply(|b| {
-            dwclass!(b, "w-64 h-64 flex-initial")
-        })
-    })
-}
-
-fn example_card_buttons() -> Dom {
-    card!({
-        .scheme(ColorScheme::Void)
-        .apply(|b| {
-            dwclass!(b, "p-4 w-64 h-96 flex-initial flex flex-col gap-4")
-            .children([
-                html!("h1", {
-                    .dwclass!("font-extrabold")
-                    .text("Flat Buttons")
-                }),
-
-            ])
-        })
-    })
-}
-
 fn example_card_border_buttons() -> Dom {
     card!({
         .scheme(ColorScheme::Void)

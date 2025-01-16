@@ -1,12 +1,15 @@
 use crate::pages::docs::doc_pages::doc_page::{doc_page_sub_header, doc_page_title};
 use crate::pages::docs::example_box::example_box;
-use dominator::{events, Dom};
+use crate::pages::docs::helper_components::table::example_table;
+use dominator::{events, text, Dom};
 use dwind::colors::DWIND_COLORS;
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
 use std::collections::BTreeMap;
+use example_html_highlight_macro::example_html;
+use crate::pages::docs::code_widget::code;
 
 pub fn colors_page() -> Dom {
     let selected_color = Mutable::new(None);
@@ -33,6 +36,9 @@ You can see the examples directory in the DWIND repository for more information 
         .child_signal(selected_color.signal_ref(|selected_color| {
             selected_color.as_ref().map(|selected_color| example_box(show_selected_color(selected_color), false))
         }))
+
+        .children(gradients())
+        .children(text_color())
     })
 }
 
@@ -57,7 +63,7 @@ pub fn show_selected_color(selected_color: &(String, u32)) -> Dom {
 }
 pub fn color_list(selected_color: Mutable<Option<(String, u32)>>) -> Dom {
     html!("table", {
-        .dwclass!("w-full")
+        .dwclass!("w-full text-woodsmoke-50")
         .style("min-width", "300px")
         .children(DWIND_COLORS.iter().map(|(color_name, shades)| {
             color_row(color_name, shades, selected_color.clone())
@@ -122,3 +128,132 @@ fn color_row(
         }))
     })
 }
+
+fn gradients() -> Vec<Dom> {
+    vec![
+        doc_page_sub_header("Gradients"),
+        html!("p", {
+            .text(r#"All shades of the DWIND color swatches have a corresponding
+            gradient-from-[color]-[shade] and gradient-to-[color]-[shade] class generated.
+            "#)
+        }),
+        example_table(
+            ["Class".to_string(), "Description".to_string()],
+            [
+                [
+                    "linear-gradient-0".to_string(),
+                    "Apply linear gradient, rotated 0 degrees".to_string(),
+                ],
+                [
+                    "linear-gradient-45".to_string(),
+                    "Apply linear gradient, rotated 45 degrees".to_string(),
+                ],
+                [
+                    "linear-gradient-90".to_string(),
+                    "Apply linear gradient, rotated 90 degrees".to_string(),
+                ],
+                [
+                    "linear-gradient-135".to_string(),
+                    "Apply linear gradient, rotated 135 degrees".to_string(),
+                ],
+                [
+                    "linear-gradient-180".to_string(),
+                    "Apply linear gradient, rotated 180 degrees".to_string(),
+                ],
+                [
+                    "gradient-from-[color]-[shade]".to_string(),
+                    "Apply linear gradient from color and shade".to_string(),
+                ],
+                [
+                    "gradient-to-[color]-[shade]".to_string(),
+                    "Apply linear gradient to color and shade".to_string(),
+                ],
+            ],
+        ),
+
+        example_box(gradient_examples(), false),
+        code(&GRADIENT_EXAMPLES_EXAMPLE_HTML_MAP)
+    ]
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn gradient_examples() -> Dom {
+    html!("div", {
+        .dwclass!("flex flex-col gap-4 align-items-center w-full")
+        .children([
+            html!("div", {
+                .dwclass!("w-p-90 h-20 rounded-md flex flex-col justify-center align-items-center")
+                .dwclass!("font-mono font-extrabold")
+                // Apply the gradient
+                .dwclass!("linear-gradient-0 gradient-from-purple-500 gradient-to-purple-900")
+                .child(text("linear-gradient-0 gradient-from-purple-500 gradient-to-purple-900"))
+            }),
+            html!("div", {
+                .dwclass!("w-p-90 h-20 rounded-md flex flex-col justify-center align-items-center")
+                .dwclass!("font-mono font-extrabold")
+                // Apply the gradient
+                .dwclass!("linear-gradient-45 gradient-from-purple-500 gradient-to-purple-900")
+                .child(text("linear-gradient-45 gradient-from-purple-500 gradient-to-purple-900"))
+            }),
+            html!("div", {
+                .dwclass!("w-p-90 h-20 rounded-md flex flex-col justify-center align-items-center")
+                .dwclass!("font-mono font-extrabold")
+                // Apply the gradient
+                .dwclass!("linear-gradient-90 gradient-from-purple-500 gradient-to-purple-900")
+                .child(text("linear-gradient-90 gradient-from-purple-500 gradient-to-purple-900"))
+            }),
+            html!("div", {
+                .dwclass!("w-p-90 h-20 rounded-md flex flex-col justify-center align-items-center")
+                .dwclass!("font-mono font-extrabold")
+                // Apply the gradient
+                .dwclass!("linear-gradient-180 gradient-from-red-500 gradient-to-picton-blue-900")
+                .child(text("linear-gradient-180 gradient-from-red-500 gradient-to-picton-blue-900"))
+            })
+        ])
+    })
+}
+
+
+// text color
+fn text_color() -> Vec<Dom> {
+    vec![
+        doc_page_sub_header("Text color"),
+        html!("p", {
+            .text(r#"All shades of the DWIND color swatches have a corresponding
+            text-[color]-[shade] class generated.
+            "#)
+        }),
+        example_table(
+            ["Class".to_string(), "Description".to_string()],
+            [
+                [
+                    "text-[color]-[shade]".to_string(),
+                    "Apply text color from color and shade".to_string(),
+                ],
+            ],
+        ),
+
+        example_box(text_color_example(), false),
+        code(&TEXT_COLOR_EXAMPLE_EXAMPLE_HTML_MAP)
+    ]
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn text_color_example() -> Dom {
+    html!("div", {
+        .dwclass!("flex flex-col gap-4 align-items-center w-full")
+        .children([
+            html!("div", {
+                .dwclass!("w-p-90 h-20 rounded-md flex flex-col justify-center align-items-center")
+                .dwclass!("font-mono font-extrabold")
+                .children([
+                    html!("div", {
+                        .dwclass!("text-red-300 hover:text-red-800")
+                        .text("text-red-300 hover:text-red-800")
+                    })
+                ])
+            })
+        ])
+    })
+}
+

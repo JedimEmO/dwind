@@ -6,6 +6,7 @@ pub mod doc_main;
 pub mod doc_pages;
 pub mod doc_sidebar;
 pub mod example_box;
+pub mod helper_components;
 
 #[derive(Clone)]
 pub struct DocSection {
