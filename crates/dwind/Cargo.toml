@@ -13,7 +13,7 @@ const_format.workspace = true
 dominator.workspace = true
 dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
 dwind-base = { path = "../dwind-base", version = "0.1.0" }
-dwind-macros = { path = "../dwind-macros", version = "0.1.0" }
+dwind-macros = { path = "../dwind-macros", version = "0.2.0" }
 futures-signals.workspace = true
 modern-normalize-cssys = { path = "../modern-normalize-cssys", version = "0.1.0" }
 once_cell.workspace = true
