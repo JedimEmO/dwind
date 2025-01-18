@@ -23,7 +23,7 @@ pub fn code(example_map: &BTreeMap<String, String>) -> Dom {
                 }))
             }))
             .child(html!("div",{
-                .dwclass!("overflow-x-auto overflow-y-scroll max-h-md transition-all")
+                .dwclass!("overflow-x-auto overflow-y-scroll max-h-md transition-all brightness-125")
                 .dwclass_signal!("max-h-0 overflow-y-hidden", not(expanded.signal()))
                 .dwclass_signal!("max-h-md overflow-y-scroll", expanded.signal())
                 .child(html!("code", {

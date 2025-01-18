@@ -40,7 +40,7 @@ pub fn select(props: impl SelectPropsTrait + 'static) -> Dom {
         .dwclass!("grid h-10")
         .children([
             html!("select" => HtmlSelectElement, {
-                .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 is(.light *):dwui-text-on-primary-800 text-base h-10")
+                .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 is(.light *):dwui-text-on-primary-800 text-base h-10 p-l-2")
                 .dwclass!("grid-row-1 grid-col-1")
                 .children_signal_vec(options.map(move |(key, value)| {
                     html!("option", {
@@ -63,5 +63,6 @@ pub fn select(props: impl SelectPropsTrait + 'static) -> Dom {
             })
         ])
         .apply(labelled_rect_mixin(label, always(true), is_valid))
+        .apply_if(apply.is_some(),|b| b.apply(apply.unwrap()))
     })
 }

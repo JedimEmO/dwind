@@ -4,7 +4,7 @@ use dominator::{html, DomBuilder};
 use dwind::prelude::*;
 use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
-use futures_signals::signal::{not, Broadcaster, Signal};
+use futures_signals::signal::{not, Signal};
 use web_sys::HtmlElement;
 
 pub fn labelled_rect_mixin(
@@ -20,7 +20,7 @@ pub fn labelled_rect_mixin(
         let is_valid = validation_signal
             .signal_ref(|validation| match validation {
                 ValidationResult::Valid => true,
-                ValidationResult::Invalid { message } => false,
+                ValidationResult::Invalid { .. } => false,
             })
             .broadcast();
 
@@ -31,17 +31,6 @@ pub fn labelled_rect_mixin(
                     "0px".to_string()
                 } else {
                     format!("{}px", label.len() as f32  * 9.)
-                }
-            }
-        };
-
-        let bottom_border_margin_signal = map_ref! {
-            let is_valid = is_valid.signal(),
-            let label = label.signal_cloned() => {
-                if *is_valid {
-                    "0px".to_string()
-                } else {
-                    format!("{}px", label.len() as f32  * 10.)
                 }
             }
         };

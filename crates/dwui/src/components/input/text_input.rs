@@ -5,8 +5,7 @@ use crate::theme::prelude::*;
 use dominator::{clone, events, html, with_node, Dom};
 use dwind::prelude::*;
 use futures_signals::map_ref;
-use futures_signals::signal::{and, not, or, Mutable, Signal, SignalExt};
-use futures_signals::signal_vec::SignalVecExt;
+use futures_signals::signal::{and, not, or, Mutable, SignalExt};
 use futures_signals_component_macro::component;
 use web_sys::HtmlInputElement;
 
@@ -130,5 +129,6 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
         ])
 
         .apply(labelled_rect_mixin(label.signal_cloned(), raise_label, validation_signal.signal_cloned()))
+        .apply_if(apply.is_some(),|b| b.apply(apply.unwrap()))
     })
 }

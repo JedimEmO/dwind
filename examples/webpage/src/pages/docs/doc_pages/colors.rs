@@ -46,7 +46,7 @@ pub fn show_selected_color(selected_color: &(String, u32)) -> Dom {
     let color_value = &DWIND_COLORS[&selected_color.0][&selected_color.1];
 
     html!("ul", {
-        .dwclass!("font-mono text-woodsmoke-400")
+        .dwclass!("font-mono text-woodsmoke-200")
         .child(html!("li", {
             .text(&format!("Color code: {color_value}"))
         }))
@@ -248,8 +248,8 @@ fn text_color_example() -> Dom {
                 .dwclass!("font-mono font-extrabold")
                 .children([
                     html!("div", {
-                        .dwclass!("text-red-300 hover:text-red-800")
-                        .text("text-red-300 hover:text-red-800")
+                        .dwclass!("text-picton-blue-200 hover:text-red-800")
+                        .text("text-picton-blue-200 hover:text-red-800")
                     })
                 ])
             })

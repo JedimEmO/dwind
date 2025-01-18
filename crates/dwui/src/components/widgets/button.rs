@@ -1,10 +1,8 @@
 use crate::theme::prelude::*;
-use dominator::{class, events, html, styles, Dom};
+use dominator::{events, html, Dom};
 use dwind::prelude::*;
-use dwind_macros::dwgenerate;
 use futures_signals::signal::SignalExt;
 use futures_signals_component_macro::component;
-use once_cell::sync::Lazy;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum ButtonType {

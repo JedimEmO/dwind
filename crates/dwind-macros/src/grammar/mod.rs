@@ -75,7 +75,7 @@ pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
     Ok(classes
         .into_iter()
         .map(|(variant, prefixes, class_name, generator_params)| {
-            let mut pseudo_classes: Vec<String> = prefixes
+            let pseudo_classes: Vec<String> = prefixes
                 .clone()
                 .into_iter()
                 .filter(|v| !v.contains('@'))
@@ -123,7 +123,7 @@ fn selectors(
 
 pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
     let (input, variant) = variant_selector(input)?;
-    let (input, mut prefixes) = many0(pseudo_selector)(input)?;
+    let (input, prefixes) = many0(pseudo_selector)(input)?;
     let (input, identifier) = css_identifier(input)?;
 
     let generator_params = if let Ok((_input, generator_params)) = generator_parameters(input) {
@@ -135,7 +135,7 @@ pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
         vec![]
     };
 
-    let mut pseudo_classes: Vec<String> = prefixes
+    let pseudo_classes: Vec<String> = prefixes
         .clone()
         .into_iter()
         .filter(|v| !v.contains('@'))

@@ -39,7 +39,6 @@ pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
         label,
         apply,
     } = props.take();
-    let value_signal = value.value_signal_cloned();
 
     let min = min.broadcast();
     let max = max.broadcast();
@@ -85,5 +84,6 @@ pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
             }))
         }))
         .apply(labelled_rect_mixin(label, always(true), always(ValidationResult::Valid)))
+        .apply_if(apply.is_some(),|b| b.apply(apply.unwrap()))
     })
 }

@@ -43,7 +43,6 @@ fn main_view() -> Dom {
     html!("div", {
         .dwclass!("font-sans")
         .dwclass!("text-woodsmoke-50 bg-woodsmoke-950")
-        // .dwclass!("linear-gradient-180 gradient-from-woodsmoke-800 gradient-to-woodsmoke-950")
         .dwclass!("h-full overflow-y-scroll")
         .child(header())
         .child(html!("div", {
@@ -73,21 +72,21 @@ fn header() -> Dom {
                 .children([
                     html!("h3", {
                         .text("examples")
-                        .dwclass!("m-x-2 text-picton-blue-400 hover:text-picton-blue-500 hover:font-bold cursor-pointer")
+                        .dwclass!("m-x-2 text-picton-blue-200 hover:text-picton-blue-500 hover:font-bold cursor-pointer")
                         .event(|_: events::Click| {
                             go_to_url("#/examples")
                         })
                     }),
                     html!("h3", {
                         .text("docs")
-                        .dwclass!("m-x-2 hover:text-picton-blue-400 hover:font-bold cursor-pointer")
+                        .dwclass!("m-x-2 hover:text-picton-blue-200 hover:font-bold cursor-pointer")
                         .event(|_: events::Click| {
                             window().unwrap().open_with_url_and_target("https://jedimemo.github.io/dwind/doc/dwind/index.html", "_blank").unwrap();
                         })
                     }),
                     html!("h3", {
                         .text("github")
-                        .dwclass!("m-x-2 hover:text-picton-blue-400 hover:font-bold cursor-pointer")
+                        .dwclass!("m-x-2 hover:text-picton-blue-200 hover:font-bold cursor-pointer")
                         .event(|_: events::Click| {
                             window().unwrap().open_with_url_and_target("https://github.com/JedimEmO/dwind", "_blank").unwrap();
                         })

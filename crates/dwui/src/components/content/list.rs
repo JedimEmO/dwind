@@ -20,7 +20,7 @@ struct List<TClickHandler: Fn(usize) = fn(usize) -> ()> {
     item_click_handler: TClickHandler,
 }
 
-dwgenerate!("li-item-text", "hover:text-woodsmoke-200");
+dwgenerate!("li-item-text", "hover:text-woodsmoke-50");
 dwgenerate!("li-item-border", "hover:border-woodsmoke-200");
 
 pub fn pretty_list(props: impl ListPropsTrait + 'static) -> Dom {
@@ -44,7 +44,7 @@ pub fn pretty_list(props: impl ListPropsTrait + 'static) -> Dom {
             }.broadcast();
 
             html!("li", {
-                .dwclass!("li-item-border li-item-text border-l h-6 border-woodsmoke-600 text-woodsmoke-400 cursor-pointer")
+                .dwclass!("li-item-border li-item-text border-l h-6 border-woodsmoke-600 text-woodsmoke-200 cursor-pointer")
                 .style("padding-left", "10px")
                 .child(item)
                 .dwclass_signal!("text-picton-blue-400", selected_signal.signal())

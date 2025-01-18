@@ -1,5 +1,6 @@
 [build]
 target = "public/trunk_index.html"
+minify = "always"
 
 [serve]
 port=8811

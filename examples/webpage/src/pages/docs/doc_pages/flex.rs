@@ -48,8 +48,8 @@ fn flex_example_initial() -> Dom {
                         .apply(|b| {
                             match v {
                                 0 => dwclass!(b, "w-14 bg-apple-900 flex-none"),
-                                1 => dwclass!(b, "w-p-15 @md:w-64 bg-apple-600 flex-initial"),
-                                _ => dwclass!(b, "w-p-10 @md:w-32 bg-apple-600 flex-initial"),
+                                1 => dwclass!(b, "w-p-15 @md:w-64 bg-apple-700 flex-initial"),
+                                _ => dwclass!(b, "w-p-10 @md:w-32 bg-apple-700 flex-initial"),
                             }
                         })
                         .dwclass!("h-full")

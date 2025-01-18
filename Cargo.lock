@@ -219,7 +219,6 @@ dependencies = [
  "once_cell",
  "wasm-bindgen",
  "wasm-bindgen-futures",
- "wasm-bindgen-test",
  "wasm-log",
  "web-sys",
 ]
@@ -241,7 +240,7 @@ dependencies = [
 
 [[package]]
 name = "dwind"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "const_format",
  "dominator",
@@ -290,7 +289,7 @@ dependencies = [
 
 [[package]]
 name = "dwui"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "const_format",
  "dominator",
@@ -299,11 +298,8 @@ dependencies = [
  "dwind-macros",
  "futures-signals",
  "futures-signals-component-macro",
- "log",
  "once_cell",
  "serde",
- "serde_json",
- "wasm-bindgen-test",
  "web-sys",
 ]
 
