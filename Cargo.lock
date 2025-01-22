@@ -241,7 +241,7 @@ dependencies = [
 
 [[package]]
 name = "dwind"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "const_format",
  "dominator",
@@ -290,7 +290,7 @@ dependencies = [
 
 [[package]]
 name = "dwui"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "const_format",
  "dominator",
