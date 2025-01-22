@@ -34,7 +34,14 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
     let classes = parse_class_string(classes.value().as_str()).unwrap();
     let classes = render_classes(classes);
 
-    let classes = classes.into_iter().map(|(class, breakpoint)| {
+    let (generator_classes, normal_classes): (Vec<_>, Vec<_>) = classes.into_iter().map(|class| {
+        match class {
+            (tokens, breakpoint, false) => (None, Some((tokens, breakpoint))),
+            (tokens, breakpoint, true) => (Some((tokens, breakpoint)), None),
+        }
+    }).unzip();
+
+    let classes = normal_classes.into_iter().filter_map(|v| v).map(|(class, breakpoint)| {
         if let Some(breakpoint) = breakpoint {
             let bp = breakpoint.breakpoint;
 
@@ -71,8 +78,66 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
         }
     });
 
+    let gen_classes = generator_classes.into_iter().filter_map(|v| v).map(|(class_tokens, breakpoint)| {
+        if let Some(breakpoint) = breakpoint {
+            let bp = breakpoint.breakpoint;
+
+            let apply = if breakpoint.is_media_query {
+                let Breakpoint::MediaQuery(mq) = bp  else { unreachable!() };
+
+                quote! {
+                    .class_signal(&*foobar, dominator::media_query(#mq))
+                }
+            } else {
+                let bp_value = match bp {
+                    Breakpoint::VerySmall => quote! { dwind::prelude::media_queries::Breakpoint::VerySmall },
+                    Breakpoint::Small => quote! { dwind::prelude::media_queries::Breakpoint::Small },
+                    Breakpoint::Medium => quote! { dwind::prelude::media_queries::Breakpoint::Medium },
+                    Breakpoint::Large => quote! { dwind::prelude::media_queries::Breakpoint::Large },
+                    Breakpoint::VeryLarge => quote! { dwind::prelude::media_queries::Breakpoint::VeryLarge },
+                    _ => { panic!("media query breakpoint not supported here")}
+                };
+
+                if let Some(_modifier) = breakpoint.modifier {
+                    quote! {
+                        .class_signal(&*foobar, dwind::prelude::media_queries::breakpoint_less_than_signal(#bp_value))
+                    }
+                } else {
+                    quote! {
+                        .class_signal(&*foobar, dwind::prelude::media_queries::breakpoint_active_signal(#bp_value))
+                    }
+                }
+            };
+
+            quote! {
+               let #self_ident = {
+                    #[doc(hidden)]
+                    pub static foobar: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {
+                        #class_tokens
+                    });
+
+                    #self_ident . #apply
+                };
+            }
+        } else {
+            quote! {
+               let #self_ident = {
+                    #[doc(hidden)]
+                    pub static foobar: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {
+                        #class_tokens
+                    });
+
+                    #self_ident . class(&*foobar)
+                };
+            }
+        }
+    });
+
     quote! {
-        #self_ident #(#classes)*
+        {
+            #(#gen_classes)*
+            #self_ident #(#classes)*
+        }
     }
     .into()
 }
@@ -104,14 +169,38 @@ pub fn dwclass_signal(input: TokenStream) -> TokenStream {
     let classes = parse_class_string(classes.value().as_str()).unwrap();
     let classes = render_classes(classes);
 
-    let classes = classes.into_iter().map(|(class, _breakpoint)| {
+    let (generator_classes, normal_classes): (Vec<_>, Vec<_>) = classes.into_iter().map(|class| {
+        match class {
+            (tokens, breakpoint, false) => (None, Some((tokens, breakpoint))),
+            (tokens, breakpoint, true) => (Some((tokens, breakpoint)), None),
+        }
+    }).unzip();
+
+
+    let classes = normal_classes.into_iter().filter_map(|v| v).map(|(class, _breakpoint)| {
         quote! {
             .class_signal(#class, #signal)
         }
     });
 
+    let gen_classes = generator_classes.into_iter().filter_map(|v| v).map(|(class_tokens, _breakpoint)| {
+        quote! {
+           let #self_ident = {
+                #[doc(hidden)]
+                pub static foobar: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {
+                    #class_tokens
+                });
+
+                #self_ident . class_signal(&*foobar, #signal)
+            };
+        }
+    });
+
     quote! {
-        #self_ident #(#classes)*
+        {
+            #(#gen_classes)*
+            #self_ident #(#classes)*
+        }
     }
     .into()
 }

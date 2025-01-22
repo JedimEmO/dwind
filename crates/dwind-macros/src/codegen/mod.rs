@@ -10,7 +10,7 @@ use quote::quote;
 
 pub fn render_classes(
     classes: Vec<DwindClassSelector>,
-) -> Vec<(TokenStream, Option<BreakpointInfo>)> {
+) -> Vec<(TokenStream, Option<BreakpointInfo>, bool)> {
     classes
         .into_iter()
         .map(render_dwind_class)
@@ -53,17 +53,17 @@ pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector
     }
 }
 
-pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<BreakpointInfo>) {
+pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<BreakpointInfo>, bool) {
     let breakpoint = class.get_breakpoint();
 
     if class.is_generator() {
-        return (render_generator(class), breakpoint);
+        return (render_generator(class), breakpoint, true);
     }
 
     if class.pseudo_classes.is_empty() && class.variant.is_none() {
         let class_ident = Ident::new(&class.class_name.to_uppercase(), Span::call_site());
 
-        (quote! { &* #class_ident }, breakpoint)
+        (quote! { &* #class_ident }, breakpoint, false)
     } else {
         let pseudo_selector = if class.pseudo_classes.is_empty() {
             class.variant.unwrap_or("".to_string())
@@ -92,6 +92,7 @@ pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<Bre
                 }
             },
             breakpoint,
+            true
         )
     }
 }

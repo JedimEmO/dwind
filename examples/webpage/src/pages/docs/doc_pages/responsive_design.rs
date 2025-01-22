@@ -38,9 +38,9 @@ fn breakpoint_example() -> Dom {
     html!("div", {
         .dwclass!("w-full @<sm:flex-col @sm:flex-row flex text-woodsmoke-950")
         .child(html!("div", {
+            .dwclass!("bg-picton-blue-400")
             .dwclass!("@sm:w-40 h-40 flex-initial @((max-width: 700px)):bg-candlelight-400")
             .dwclass!("flex align-items-center justify-center")
-            .dwclass!("bg-picton-blue-400")
             .text_signal(breakpoint_active_signal(Breakpoint::Small).map(|active| {
                 if active {
                     "Horizontal"

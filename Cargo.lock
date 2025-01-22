@@ -214,6 +214,7 @@ dependencies = [
  "example-html-highlight-macro",
  "futures",
  "futures-signals",
+ "gloo-timers",
  "log",
  "matchit",
  "once_cell",
@@ -273,7 +274,7 @@ dependencies = [
 
 [[package]]
 name = "dwind-macros"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "const_format",
  "dominator",
@@ -495,6 +496,18 @@ checksum = "68b107f8abed8105e4182de63845afcc7b69c098b7852a813ea7462a320992fc"
 dependencies = [
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "gloo-timers"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbb143cf96099802033e0d4f4963b19fd2e0b728bcf076cd9cf7f6634f092994"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "js-sys",
+ "wasm-bindgen",
 ]
 
 [[package]]

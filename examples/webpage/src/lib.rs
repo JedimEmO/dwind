@@ -17,10 +17,14 @@ use crate::router::make_app_router;
 use dominator::routing::go_to_url;
 use dominator::{body, events, Dom};
 use dwind::prelude::*;
-use dwind_macros::dwclass;
+use dwind_macros::{dwclass, dwclass_signal};
 use dwui::theme::prelude::ColorsCssVariables;
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::{always, SignalExt};
 use std::sync::Arc;
+use std::time::Duration;
+use futures_signals::signal_vec::{MutableVec, SignalVecExt};
+use gloo_timers::future::sleep;
+use wasm_bindgen_futures::spawn_local;
 use web_sys::window;
 
 #[cfg(not(test))]
@@ -29,8 +33,42 @@ async fn main() {
     wasm_log::init(Default::default());
 
     dominator::replace_dom(&body().parent_node().unwrap(), &body(), main_view());
+    // dominator::replace_dom(&body().parent_node().unwrap(), &body(), memleaktest());
 }
 
+fn memleaktest() -> Dom {
+    let data = MutableVec::new_with_values((0..100).collect());
+
+    // Create a cloned reference to pass into the async task
+    let data_clone = data.clone();
+
+    // Spawn an async task that will update the vector periodically
+    spawn_local(async move {
+        let mut count = 0;
+        loop {
+            // Generate new values (you can modify this pattern)
+            let new_values: Vec<i32> = (count..count+100).collect();
+
+            // Replace the content of the mutable vec
+            data_clone.lock_mut().replace(new_values);
+
+            // Sleep for 100ms
+            sleep(Duration::from_millis(100)).await;
+
+            count += 1;
+        }
+    });
+
+    html!("div", {
+         .children_signal_vec(data.signal_vec().map(|v| {
+            html!("div", {
+                .dwclass!("hover:text-red-500 @sm:text-red-500 is(.light *):bg-red-500 @((max-width: 500px)):bg-candlelight-400)")
+                // .dwclass_signal!("hover:text-red-500 @sm:text-red-500 is(.light *):bg-red-500", always(true))
+                .text(&format!("{v}"))
+             })
+         }))
+     })
+}
 fn main_view() -> Dom {
     dwind::stylesheet();
     dwui::theme::apply_style_sheet(Some(ColorsCssVariables::new(
