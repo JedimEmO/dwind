@@ -1,5 +1,5 @@
 [build]
-target = "public/trunk_index.html"
+target = "public/index.html"
 minify = "always"
 
 [serve]

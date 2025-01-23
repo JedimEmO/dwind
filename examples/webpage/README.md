@@ -10,7 +10,7 @@ After installing those, add the `wasm32-unknown-unknown` target:
 rustup target add wasm32-unknown-unknown
 ```
 
-You now have two ways of running the application
+To run the application
 
 ### Trunk
 
