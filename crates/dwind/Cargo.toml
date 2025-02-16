@@ -1,6 +1,6 @@
 [package]
 name = "dwind"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 description = "Style your DOMINATOR applications using a tailwind-like syntax and utility class collection!"
 homepage = "https://github.com/JedimEmO/dwind"
@@ -13,7 +13,7 @@ const_format.workspace = true
 dominator.workspace = true
 dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
 dwind-base = { path = "../dwind-base", version = "0.1.0" }
-dwind-macros = { path = "../dwind-macros", version = "0.2.1" }
+dwind-macros = { path = "../dwind-macros", version = "0.2.2" }
 futures-signals.workspace = true
 modern-normalize-cssys = { path = "../modern-normalize-cssys", version = "0.1.0" }
 once_cell.workspace = true
