@@ -7,7 +7,7 @@ use futures_signals_component_macro::component;
 use std::sync::Arc;
 
 #[component(render_fn = pretty_list)]
-struct List<TClickHandler: Fn(usize) = fn(usize) -> ()> {
+struct List {
     #[signal_vec]
     #[default(vec ! [])]
     items: Dom,
@@ -16,20 +16,21 @@ struct List<TClickHandler: Fn(usize) = fn(usize) -> ()> {
     #[default(None)]
     selected_index: Option<usize>,
 
-    #[default(|_|{})]
-    item_click_handler: TClickHandler,
+    #[default(Box::new(|_|{}))]
+    item_click_handler: dyn Fn(usize) + 'static,
 }
 
 dwgenerate!("li-item-text", "hover:text-woodsmoke-50");
 dwgenerate!("li-item-border", "hover:border-woodsmoke-200");
 
-pub fn pretty_list(props: impl ListPropsTrait + 'static) -> Dom {
+pub fn pretty_list(props: ListProps) -> Dom {
     let ListProps {
         items,
         selected_index,
         item_click_handler,
         apply,
-    } = props.take();
+    } = props;
+
     let item_click_handler = Arc::new(item_click_handler);
     let selected_index = selected_index.broadcast();
 

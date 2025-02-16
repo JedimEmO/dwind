@@ -1,4 +1,4 @@
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal::{BoxSignal, LocalBoxSignal, Mutable, Signal, SignalExt};
 use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -15,12 +15,12 @@ impl ValidationResult {
 
 pub trait InputValueWrapper {
     fn set(&self, value: String) -> ValidationResult;
-    fn value_signal_cloned(&self) -> impl Signal<Item = String> + 'static;
+    fn value_signal_cloned(&self) -> LocalBoxSignal<'static, String>;
 }
 
 impl<T> InputValueWrapper for Mutable<T>
 where
-    T: Clone + ToString + FromStr + 'static,
+    T: Clone + ToString + FromStr + Send + 'static,
 {
     fn set(&self, value: String) -> ValidationResult {
         if let Ok(v) = T::from_str(&value) {
@@ -34,7 +34,7 @@ where
         }
     }
 
-    fn value_signal_cloned(&self) -> impl Signal<Item = String> + 'static {
-        self.signal_cloned().map(|v| v.to_string())
+    fn value_signal_cloned(&self) -> LocalBoxSignal<'static, String> {
+        self.signal_cloned().map(|v| v.to_string()).boxed_local()
     }
 }

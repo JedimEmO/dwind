@@ -11,12 +11,12 @@ pub enum ButtonType {
 }
 
 #[component(render_fn = button)]
-struct Button<THandler: Fn(events::Click) -> () = fn(events::Click) -> ()> {
+struct Button {
     #[signal]
     #[default(None)]
     content: Option<Dom>,
-    #[default(| _: events::Click | {})]
-    on_click: THandler,
+    #[default(Box::new(| _: events::Click | {}))]
+    on_click: dyn Fn(events::Click) -> () + Send + 'static,
     #[signal]
     #[default(false)]
     disabled: bool,
@@ -25,14 +25,14 @@ struct Button<THandler: Fn(events::Click) -> () = fn(events::Click) -> ()> {
     button_type: ButtonType,
 }
 
-pub fn button(props: impl ButtonPropsTrait + 'static) -> Dom {
+pub fn button(props: ButtonProps) -> Dom {
     let ButtonProps {
         content,
         on_click,
         disabled,
         button_type,
         apply,
-    } = props.take();
+    } = props;
 
     let button_type = button_type.broadcast();
 

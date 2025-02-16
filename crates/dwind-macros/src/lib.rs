@@ -8,6 +8,10 @@ use crate::macro_inputs::DwindInputSignal;
 use dwind_base::media_queries::Breakpoint;
 use macro_inputs::{DwGenerateInput, DwGenerateMapInput, DwindInput};
 use proc_macro::TokenStream;
+use std::future::Future;
+use std::pin::Pin;
+use std::rc::Rc;
+use std::task::{Context, Poll};
 use quote::quote;
 
 /// Use dwind-macros macros on your DOMINATOR component
@@ -40,6 +44,11 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
             (tokens, breakpoint, true) => (Some((tokens, breakpoint)), None),
         }
     }).unzip();
+
+    let v = Rc::new(Some(""));
+
+    v.as_ref().as_ref().map(|v| {});
+
 
     let classes = normal_classes.into_iter().filter_map(|v| v).map(|(class, breakpoint)| {
         if let Some(breakpoint) = breakpoint {

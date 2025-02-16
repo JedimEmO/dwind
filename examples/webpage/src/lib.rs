@@ -19,13 +19,32 @@ use dominator::{body, events, Dom};
 use dwind::prelude::*;
 use dwind_macros::{dwclass, dwclass_signal};
 use dwui::theme::prelude::ColorsCssVariables;
-use futures_signals::signal::{always, SignalExt};
-use std::sync::Arc;
-use std::time::Duration;
-use futures_signals::signal_vec::{MutableVec, SignalVecExt};
+use futures_signals::signal::{always, Mutable, Signal, SignalExt};
+use futures_signals::signal_vec::{MutableVec, SignalVec, SignalVecExt};
 use gloo_timers::future::sleep;
+use std::future::Future;
+use std::pin::Pin;
+use std::sync::Arc;
+use std::task::{Context, Poll};
+use std::time::Duration;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::window;
+
+fn child(count: impl Signal<Item=u32>) -> impl Signal<Item = Dom> {
+    count.map(|count| html!("div", { .text(&format!("{count}")) }))
+}
+
+fn container(data: impl SignalVec<Item = u32> + 'static) -> Dom {
+    let counter = Mutable::new(0);
+
+    let children = data.map_signal(clone!(counter => move |v| {
+        child(counter.signal())
+    }));
+
+    html!("div", {
+        .children_signal_vec(children)
+    })
+}
 
 #[cfg(not(test))]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
@@ -42,12 +61,14 @@ fn memleaktest() -> Dom {
     // Create a cloned reference to pass into the async task
     let data_clone = data.clone();
 
+    // Generate new values (you can modify this pattern)
+
     // Spawn an async task that will update the vector periodically
     spawn_local(async move {
         let mut count = 0;
+
         loop {
-            // Generate new values (you can modify this pattern)
-            let new_values: Vec<i32> = (count..count+100).collect();
+            let new_values: Vec<i32> = (count..count + 100).collect();
 
             // Replace the content of the mutable vec
             data_clone.lock_mut().replace(new_values);
@@ -60,14 +81,14 @@ fn memleaktest() -> Dom {
     });
 
     html!("div", {
-         .children_signal_vec(data.signal_vec().map(|v| {
-            html!("div", {
-                .dwclass!("hover:text-red-500 @sm:text-red-500 is(.light *):bg-red-500 @((max-width: 500px)):bg-candlelight-400)")
-                // .dwclass_signal!("hover:text-red-500 @sm:text-red-500 is(.light *):bg-red-500", always(true))
-                .text(&format!("{v}"))
-             })
-         }))
-     })
+        .children_signal_vec(data.signal_vec().map(|v| {
+           html!("div", {
+               .dwclass!("hover:text-red-500 @sm:text-red-500 is(.light *):bg-red-500")
+               // .dwclass_signal!("hover:text-red-500 @sm:text-red-500 is(.light *):bg-red-500", always(true))
+               .text(&format!("{v}"))
+            })
+        }))
+    })
 }
 fn main_view() -> Dom {
     dwind::stylesheet();

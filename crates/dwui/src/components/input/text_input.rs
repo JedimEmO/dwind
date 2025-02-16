@@ -15,12 +15,9 @@ pub enum TextInputType {
 }
 
 #[component(render_fn=text_input)]
-struct TextInput<
-    TValue: InputValueWrapper + 'static = Mutable<String>,
-    TOnSubmit: (FnMut() -> ()) + 'static = fn() -> (),
-> {
-    #[default(Mutable::new("".to_string()))]
-    value: TValue,
+struct TextInput {
+    #[default(Box::new(Mutable::new("".to_string())))]
+    value: dyn InputValueWrapper + Send + 'static,
 
     #[signal]
     #[default(ValidationResult::Valid)]
@@ -30,8 +27,8 @@ struct TextInput<
     #[default("".to_string())]
     label: String,
 
-    #[default(|| {})]
-    on_submit: TOnSubmit,
+    #[default(Box::new(|| {}))]
+    on_submit: dyn (FnMut() -> ()) + Send + 'static,
 
     #[signal]
     #[default(TextInputType::Text)]
@@ -41,7 +38,7 @@ struct TextInput<
     claim_focus: bool
 }
 
-pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
+pub fn text_input(props: TextInputProps) -> Dom {
     let TextInputProps {
         value,
         is_valid,
@@ -49,7 +46,7 @@ pub fn text_input(props: impl TextInputPropsTrait + 'static) -> Dom {
         mut on_submit,
         input_type,
         claim_focus, apply,
-    } = props.take();
+    } = props;
 
     let label = label.broadcast();
 
