@@ -296,7 +296,7 @@ dependencies = [
 
 [[package]]
 name = "dwui"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "const_format",
  "dominator",
@@ -430,8 +430,9 @@ dependencies = [
 
 [[package]]
 name = "futures-signals-component-macro"
-version = "0.3.0"
-source = "git+https://github.com/JedimEmO/futures-signals-component-macro.git?branch=convert-to-dyn-remove-generics#126804d8181b5bdb850f531b1a3b1fa3616e20b4"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f880902471275d8da2913632c5e794e6bee9e846bf29fddec1cbd7e3c105675c"
 dependencies = [
  "convert_case",
  "dominator",

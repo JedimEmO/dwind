@@ -16,7 +16,7 @@ struct Button {
     #[default(None)]
     content: Option<Dom>,
     #[default(Box::new(| _: events::Click | {}))]
-    on_click: dyn Fn(events::Click) -> () + Send + 'static,
+    on_click: dyn Fn(events::Click) -> () + 'static,
     #[signal]
     #[default(false)]
     disabled: bool,

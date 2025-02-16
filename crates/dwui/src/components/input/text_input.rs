@@ -17,7 +17,7 @@ pub enum TextInputType {
 #[component(render_fn=text_input)]
 struct TextInput {
     #[default(Box::new(Mutable::new("".to_string())))]
-    value: dyn InputValueWrapper + Send + 'static,
+    value: dyn InputValueWrapper + 'static,
 
     #[signal]
     #[default(ValidationResult::Valid)]
@@ -28,7 +28,7 @@ struct TextInput {
     label: String,
 
     #[default(Box::new(|| {}))]
-    on_submit: dyn (FnMut() -> ()) + Send + 'static,
+    on_submit: dyn (FnMut() -> ()) + 'static,
 
     #[signal]
     #[default(TextInputType::Text)]

@@ -20,7 +20,7 @@ pub trait InputValueWrapper {
 
 impl<T> InputValueWrapper for Mutable<T>
 where
-    T: Clone + ToString + FromStr + Send + 'static,
+    T: Clone + ToString + FromStr + 'static,
 {
     fn set(&self, value: String) -> ValidationResult {
         if let Ok(v) = T::from_str(&value) {

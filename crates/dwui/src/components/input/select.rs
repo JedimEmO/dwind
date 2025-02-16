@@ -11,7 +11,7 @@ use web_sys::HtmlSelectElement;
 #[component(render_function=select)]
 struct Select {
     #[default(Box::new(Mutable::new("".to_string())))]
-    value: dyn InputValueWrapper + Send + 'static,
+    value: dyn InputValueWrapper + 'static,
 
     #[signal_vec]
     #[default(vec![])]

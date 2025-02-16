@@ -12,7 +12,7 @@ use web_sys::HtmlInputElement;
 #[component(render_fn=slider)]
 struct Slider {
     #[default(Box::new(Mutable::new("".to_string())))]
-    value: dyn InputValueWrapper + Send + 'static,
+    value: dyn InputValueWrapper + 'static,
 
     #[signal]
     #[default(0.)]
