@@ -95,9 +95,9 @@ pub mod colors {
     }
 
     use dwind::border_color_generator;
-    use dwind::text_color_generator;
     use dwind::gradient_from_generator;
     use dwind::gradient_to_generator;
+    use dwind::text_color_generator;
 
     dwgenerate_map!(
         "dwui-border-primary",

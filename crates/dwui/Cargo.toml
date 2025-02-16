@@ -1,6 +1,6 @@
 [package]
 name = "dwui"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2021"
 description = "UI Component library built on the DWIND style crate!"
 homepage = "https://github.com/JedimEmO/dwind"

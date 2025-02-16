@@ -9,6 +9,10 @@ use dwind_base::media_queries::Breakpoint;
 use macro_inputs::{DwGenerateInput, DwGenerateMapInput, DwindInput};
 use proc_macro::TokenStream;
 use quote::quote;
+use std::future::Future;
+use std::pin::Pin;
+use std::rc::Rc;
+use std::task::{Context, Poll};
 
 /// Use dwind-macros macros on your DOMINATOR component
 ///
@@ -34,12 +38,17 @@ pub fn dwclass(input: TokenStream) -> TokenStream {
     let classes = parse_class_string(classes.value().as_str()).unwrap();
     let classes = render_classes(classes);
 
-    let (generator_classes, normal_classes): (Vec<_>, Vec<_>) = classes.into_iter().map(|class| {
-        match class {
+    let (generator_classes, normal_classes): (Vec<_>, Vec<_>) = classes
+        .into_iter()
+        .map(|class| match class {
             (tokens, breakpoint, false) => (None, Some((tokens, breakpoint))),
             (tokens, breakpoint, true) => (Some((tokens, breakpoint)), None),
-        }
-    }).unzip();
+        })
+        .unzip();
+
+    let v = Rc::new(Some(""));
+
+    v.as_ref().as_ref().map(|v| {});
 
     let classes = normal_classes.into_iter().filter_map(|v| v).map(|(class, breakpoint)| {
         if let Some(breakpoint) = breakpoint {
@@ -169,19 +178,22 @@ pub fn dwclass_signal(input: TokenStream) -> TokenStream {
     let classes = parse_class_string(classes.value().as_str()).unwrap();
     let classes = render_classes(classes);
 
-    let (generator_classes, normal_classes): (Vec<_>, Vec<_>) = classes.into_iter().map(|class| {
-        match class {
+    let (generator_classes, normal_classes): (Vec<_>, Vec<_>) = classes
+        .into_iter()
+        .map(|class| match class {
             (tokens, breakpoint, false) => (None, Some((tokens, breakpoint))),
             (tokens, breakpoint, true) => (Some((tokens, breakpoint)), None),
-        }
-    }).unzip();
+        })
+        .unzip();
 
-
-    let classes = normal_classes.into_iter().filter_map(|v| v).map(|(class, _breakpoint)| {
-        quote! {
-            .class_signal(#class, #signal)
-        }
-    });
+    let classes = normal_classes
+        .into_iter()
+        .filter_map(|v| v)
+        .map(|(class, _breakpoint)| {
+            quote! {
+                .class_signal(#class, #signal)
+            }
+        });
 
     let gen_classes = generator_classes.into_iter().filter_map(|v| v).map(|(class_tokens, _breakpoint)| {
         quote! {

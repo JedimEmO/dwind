@@ -9,9 +9,9 @@ use futures_signals_component_macro::component;
 use web_sys::HtmlSelectElement;
 
 #[component(render_function=select)]
-struct Select<TValue: InputValueWrapper + 'static = Mutable<String>> {
-    #[default(Mutable::new("".to_string()))]
-    value: TValue,
+struct Select {
+    #[default(Box::new(Mutable::new("".to_string())))]
+    value: dyn InputValueWrapper + 'static,
 
     #[signal_vec]
     #[default(vec![])]
@@ -26,14 +26,14 @@ struct Select<TValue: InputValueWrapper + 'static = Mutable<String>> {
     is_valid: ValidationResult,
 }
 
-pub fn select(props: impl SelectPropsTrait + 'static) -> Dom {
+pub fn select(props: SelectProps) -> Dom {
     let SelectProps {
         value,
         options,
         label,
         is_valid,
         apply,
-    } = props.take();
+    } = props;
     let value_signal = value.value_signal_cloned().broadcast();
 
     html!("div", {

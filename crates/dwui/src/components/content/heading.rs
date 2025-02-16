@@ -40,12 +40,12 @@ struct Heading {
     text_size: TextSize,
 }
 
-pub fn heading(props: impl HeadingPropsTrait + 'static) -> Dom {
+pub fn heading(props: HeadingProps) -> Dom {
     let HeadingProps {
         content,
         text_size: size,
         apply,
-    } = props.take();
+    } = props;
 
     let size = size.broadcast();
     html!("div", {

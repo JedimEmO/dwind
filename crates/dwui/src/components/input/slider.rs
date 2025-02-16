@@ -6,12 +6,13 @@ use dwind::prelude::*;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal::{always, Mutable};
 use futures_signals_component_macro::component;
+use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
 #[component(render_fn=slider)]
-struct Slider<TValue: InputValueWrapper + Clone + 'static = Mutable<String>> {
-    #[default(Mutable::new("".to_string()))]
-    value: TValue,
+struct Slider {
+    #[default(Box::new(Mutable::new("".to_string())))]
+    value: dyn InputValueWrapper + 'static,
 
     #[signal]
     #[default(0.)]
@@ -30,7 +31,7 @@ struct Slider<TValue: InputValueWrapper + Clone + 'static = Mutable<String>> {
     label: String,
 }
 
-pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
+pub fn slider(props: SliderProps) -> Dom {
     let SliderProps {
         value,
         min,
@@ -38,7 +39,9 @@ pub fn slider(props: impl SliderPropsTrait + 'static) -> Dom {
         step,
         label,
         apply,
-    } = props.take();
+    } = props;
+
+    let value = Rc::new(value);
 
     let min = min.broadcast();
     let max = max.broadcast();

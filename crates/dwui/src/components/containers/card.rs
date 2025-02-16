@@ -22,12 +22,12 @@ struct Card {
     scheme: ColorScheme,
 }
 
-pub fn card(props: impl CardPropsTrait + 'static) -> Dom {
+pub fn card(props: CardProps) -> Dom {
     let CardProps {
         content,
         scheme,
         apply,
-    } = props.take();
+    } = props;
 
     let scheme = scheme.broadcast();
 
