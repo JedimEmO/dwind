@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
 use crate::prelude::{InputValueWrapper, ValidationResult};
 use crate::theme::prelude::*;
@@ -7,6 +6,7 @@ use dwind::prelude::*;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal::{always, Mutable};
 use futures_signals_component_macro::component;
+use std::rc::Rc;
 use web_sys::HtmlInputElement;
 
 #[component(render_fn=slider)]

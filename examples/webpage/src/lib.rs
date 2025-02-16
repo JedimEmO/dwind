@@ -30,7 +30,7 @@ use std::time::Duration;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::window;
 
-fn child(count: impl Signal<Item=u32>) -> impl Signal<Item = Dom> {
+fn child(count: impl Signal<Item = u32>) -> impl Signal<Item = Dom> {
     count.map(|count| html!("div", { .text(&format!("{count}")) }))
 }
 

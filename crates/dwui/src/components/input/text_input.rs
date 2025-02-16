@@ -35,7 +35,7 @@ struct TextInput {
     input_type: TextInputType,
 
     #[default(false)]
-    claim_focus: bool
+    claim_focus: bool,
 }
 
 pub fn text_input(props: TextInputProps) -> Dom {
@@ -45,7 +45,8 @@ pub fn text_input(props: TextInputProps) -> Dom {
         label,
         mut on_submit,
         input_type,
-        claim_focus, apply,
+        claim_focus,
+        apply,
     } = props;
 
     let label = label.broadcast();

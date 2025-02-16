@@ -53,7 +53,9 @@ pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector
     }
 }
 
-pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<BreakpointInfo>, bool) {
+pub fn render_dwind_class(
+    class: DwindClassSelector,
+) -> (TokenStream, Option<BreakpointInfo>, bool) {
     let breakpoint = class.get_breakpoint();
 
     if class.is_generator() {
@@ -92,7 +94,7 @@ pub fn render_dwind_class(class: DwindClassSelector) -> (TokenStream, Option<Bre
                 }
             },
             breakpoint,
-            true
+            true,
         )
     }
 }

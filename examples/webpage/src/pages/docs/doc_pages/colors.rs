@@ -1,3 +1,4 @@
+use crate::pages::docs::code_widget::code;
 use crate::pages::docs::doc_pages::doc_page::{doc_page_sub_header, doc_page_title};
 use crate::pages::docs::example_box::example_box;
 use crate::pages::docs::helper_components::table::example_table;
@@ -5,11 +6,10 @@ use dominator::{events, text, Dom};
 use dwind::colors::DWIND_COLORS;
 use dwind::prelude::*;
 use dwind_macros::dwclass;
+use example_html_highlight_macro::example_html;
 use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
 use std::collections::BTreeMap;
-use example_html_highlight_macro::example_html;
-use crate::pages::docs::code_widget::code;
 
 pub fn colors_page() -> Dom {
     let selected_color = Mutable::new(None);
@@ -170,9 +170,8 @@ fn gradients() -> Vec<Dom> {
                 ],
             ],
         ),
-
         example_box(gradient_examples(), false),
-        code(&GRADIENT_EXAMPLES_EXAMPLE_HTML_MAP)
+        code(&GRADIENT_EXAMPLES_EXAMPLE_HTML_MAP),
     ]
 }
 
@@ -213,7 +212,6 @@ fn gradient_examples() -> Dom {
     })
 }
 
-
 // text color
 fn text_color() -> Vec<Dom> {
     vec![
@@ -225,16 +223,13 @@ fn text_color() -> Vec<Dom> {
         }),
         example_table(
             ["Class".to_string(), "Description".to_string()],
-            [
-                [
-                    "text-[color]-[shade]".to_string(),
-                    "Apply text color from color and shade".to_string(),
-                ],
-            ],
+            [[
+                "text-[color]-[shade]".to_string(),
+                "Apply text color from color and shade".to_string(),
+            ]],
         ),
-
         example_box(text_color_example(), false),
-        code(&TEXT_COLOR_EXAMPLE_EXAMPLE_HTML_MAP)
+        code(&TEXT_COLOR_EXAMPLE_EXAMPLE_HTML_MAP),
     ]
 }
 
@@ -256,4 +251,3 @@ fn text_color_example() -> Dom {
         ])
     })
 }
-
