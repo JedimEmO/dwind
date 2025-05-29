@@ -279,6 +279,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dwind-design-tokens"
+version = "0.1.0"
+dependencies = [
+ "nom",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dwind-macros"
 version = "0.2.2"
 dependencies = [

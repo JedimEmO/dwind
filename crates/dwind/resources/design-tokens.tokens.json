@@ -1,0 +1,39 @@
+{
+  "test": {
+    "a": {
+      "$value": "5px",
+      "$type": "dimension",
+      "$description": ""
+    },
+    "b": {
+      "$value": "{a}*3",
+      "$type": "dimension",
+      "$description": ""
+    },
+    "primary": {
+      "$value": "rgb(193, 51, 51)",
+      "$type": "color",
+      "$description": ""
+    },
+    "medium": {
+      "$value": "12px",
+      "$type": "borderRadius",
+      "$description": ""
+    },
+    "rounded-md": {
+      "$value": "{medium}+12",
+      "$type": "borderRadius",
+      "$description": ""
+    }
+  },
+  "$themes": [],
+  "$metadata": {
+    "tokenSetOrder": [
+      "test"
+    ],
+    "activeThemes": [],
+    "activeSets": [
+      "test"
+    ]
+  }
+}
