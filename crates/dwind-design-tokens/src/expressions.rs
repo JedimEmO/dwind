@@ -77,6 +77,77 @@ impl Expr {
             }
         }
     }
+
+    /// Evaluate this expression given a context of resolved token values
+    pub fn evaluate(&self, context: &std::collections::HashMap<String, String>) -> TokenResult<String> {
+        match self {
+            Expr::Reference(name) => {
+                context.get(name)
+                    .cloned()
+                    .ok_or_else(|| TokenError::ExpressionParsing(format!("Undefined reference: {}", name)))
+            }
+            Expr::Literal(value) => {
+                // For dimension/border-radius tokens, we need to preserve the unit
+                // Try to format as integer if it's a whole number, otherwise as float
+                if value.fract() == 0.0 {
+                    Ok(format!("{}px", *value as i64))
+                } else {
+                    Ok(format!("{}px", value))
+                }
+            }
+            Expr::BinaryOp { op, left, right } => {
+                let left_val = left.evaluate(context)?;
+                let right_val = right.evaluate(context)?;
+                
+                // Parse numeric values from CSS values (e.g., "12px" -> 12.0)
+                let left_num = parse_css_value(&left_val)?;
+                let right_num = parse_css_value(&right_val)?;
+                
+                let result = match op {
+                    BinaryOperator::Add => left_num + right_num,
+                    BinaryOperator::Sub => left_num - right_num,
+                    BinaryOperator::Mul => left_num * right_num,
+                    BinaryOperator::Div => {
+                        if right_num == 0.0 {
+                            return Err(TokenError::ExpressionParsing("Division by zero".to_string()));
+                        }
+                        left_num / right_num
+                    }
+                };
+                
+                // Format result back to CSS value
+                if result.fract() == 0.0 {
+                    Ok(format!("{}px", result as i64))
+                } else {
+                    Ok(format!("{}px", result))
+                }
+            }
+        }
+    }
+}
+
+/// Parse a CSS value to extract the numeric part
+/// Supports values like "12px", "1.5em", "100%", or plain numbers
+fn parse_css_value(value: &str) -> TokenResult<f64> {
+    let trimmed = value.trim();
+    
+    // Try to parse as plain number first
+    if let Ok(num) = trimmed.parse::<f64>() {
+        return Ok(num);
+    }
+    
+    // Extract numeric part from CSS values
+    let numeric_part = trimmed
+        .chars()
+        .take_while(|c| c.is_numeric() || *c == '.' || *c == '-')
+        .collect::<String>();
+    
+    if numeric_part.is_empty() {
+        return Err(TokenError::ExpressionParsing(format!("Cannot parse numeric value from: {}", value)));
+    }
+    
+    numeric_part.parse::<f64>()
+        .map_err(|_| TokenError::ExpressionParsing(format!("Invalid numeric value: {}", numeric_part)))
 }
 
 // Nom parser functions
@@ -259,5 +330,45 @@ mod tests {
         let expr = Expr::parse("{a} + {b} * {c}").unwrap();
         let refs = expr.get_references();
         assert_eq!(refs, vec!["a", "b", "c"]);
+    }
+
+    #[test]
+    fn test_parse_css_value() {
+        assert_eq!(parse_css_value("12px").unwrap(), 12.0);
+        assert_eq!(parse_css_value("1.5em").unwrap(), 1.5);
+        assert_eq!(parse_css_value("100%").unwrap(), 100.0);
+        assert_eq!(parse_css_value("42").unwrap(), 42.0);
+        assert_eq!(parse_css_value("-5px").unwrap(), -5.0);
+    }
+
+    #[test]
+    fn test_evaluate_literal() {
+        let expr = Expr::parse("12").unwrap();
+        let context = std::collections::HashMap::new();
+        assert_eq!(expr.evaluate(&context).unwrap(), "12px");
+    }
+
+    #[test]
+    fn test_evaluate_reference() {
+        let expr = Expr::parse("{base}").unwrap();
+        let mut context = std::collections::HashMap::new();
+        context.insert("base".to_string(), "16px".to_string());
+        assert_eq!(expr.evaluate(&context).unwrap(), "16px");
+    }
+
+    #[test]
+    fn test_evaluate_addition() {
+        let expr = Expr::parse("{base} + 4").unwrap();
+        let mut context = std::collections::HashMap::new();
+        context.insert("base".to_string(), "16px".to_string());
+        assert_eq!(expr.evaluate(&context).unwrap(), "20px");
+    }
+
+    #[test]
+    fn test_evaluate_multiplication() {
+        let expr = Expr::parse("{base} * 2").unwrap();
+        let mut context = std::collections::HashMap::new();
+        context.insert("base".to_string(), "8px".to_string());
+        assert_eq!(expr.evaluate(&context).unwrap(), "16px");
     }
 }
