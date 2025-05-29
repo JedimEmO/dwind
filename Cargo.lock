@@ -274,6 +274,7 @@ dependencies = [
 name = "dwind-build"
 version = "0.1.0"
 dependencies = [
+ "dwind-design-tokens",
  "serde",
  "serde_json",
 ]

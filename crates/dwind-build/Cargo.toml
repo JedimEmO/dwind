@@ -9,6 +9,6 @@ license = "MIT"
 keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
-
+dwind-design-tokens = { path = "../dwind-design-tokens" }
 serde.workspace = true
 serde_json.workspace = true

@@ -3,7 +3,7 @@ use dwind_macros::dwgenerate_map;
 #[macro_export]
 macro_rules! bg_color_generator {
     ($color:tt) => {
-        const_format::formatcp!("background: {};", $color)
+        const_format::formatcp!("background: \"{}\";", $color)
     };
 }
 
