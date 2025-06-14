@@ -45,15 +45,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     "##;
 
     println!("Parsing design tokens...");
-    
+
     // Parse the tokens
     let token_file = parse_tokens(json)?;
-    println!("✅ Successfully parsed {} token sets", token_file.sets.len());
+    println!(
+        "✅ Successfully parsed {} token sets",
+        token_file.sets.len()
+    );
 
     // Validate the tokens
     let validation_report = validate_token_file(&token_file)?;
     println!("✅ Validation completed: {}", validation_report.summary());
-    
+
     if !validation_report.is_valid() {
         println!("❌ Validation failed!");
         for error in &validation_report.errors {
@@ -78,11 +81,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Test specific token access
     println!("\n🔍 Testing token access:");
-    
+
     if let Some(token_a) = token_file.find_token("test.a") {
         println!("  test.a: {:?}", token_a.value);
     }
-    
+
     if let Some(token_b) = token_file.find_token("test.b") {
         println!("  test.b: {:?}", token_b.value);
         if let TokenValue::Expression(expr) = &token_b.value {

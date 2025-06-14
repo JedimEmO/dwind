@@ -1,6 +1,6 @@
+use dwind_build::design_tokens::render_design_token_colors_to_rust_file;
 use std::path::Path;
 use std::{env, fs};
-use dwind_build::design_tokens::render_design_token_colors_to_rust_file;
 
 fn main() {
     let out = dominator_css_bindgen::css::generate_rust_bindings_from_file("resources/simple.css")
@@ -22,9 +22,10 @@ fn main() {
         fs::write(
             Path::new(&out_dir).join("design_token_colors_generated.rs"),
             "// No design token colors generated\n",
-        ).unwrap();
+        )
+        .unwrap();
     }
-    
+
     println!("cargo::rerun-if-changed=build.rs");
     println!("cargo::rerun-if-changed=resources/simple.css");
     println!("cargo::rerun-if-changed=resources/design-tokens.tokens.json");

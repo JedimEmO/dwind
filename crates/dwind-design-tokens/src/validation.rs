@@ -27,16 +27,19 @@ impl ValidationContext {
 
     fn push_token(&mut self, path: &str) -> TokenResult<()> {
         if self.validation_stack.contains(&path.to_string()) {
-            let cycle_start = self.validation_stack.iter()
+            let cycle_start = self
+                .validation_stack
+                .iter()
                 .position(|p| p == path)
                 .unwrap();
             let cycle = &self.validation_stack[cycle_start..];
-            let cycle_chain = cycle.iter()
+            let cycle_chain = cycle
+                .iter()
                 .chain(std::iter::once(&path.to_string()))
                 .cloned()
                 .collect::<Vec<_>>()
                 .join(" -> ");
-                
+
             return Err(TokenError::CircularReference(format!(
                 "Circular reference detected: {}. This creates an infinite dependency loop.",
                 cycle_chain
@@ -168,13 +171,15 @@ impl ValidationReport {
 
     /// Check if the validation passed (no errors)
     pub fn is_valid(&self) -> bool {
-        self.errors.is_empty() && self.circular_references.is_empty() && self.missing_references.is_empty()
+        self.errors.is_empty()
+            && self.circular_references.is_empty()
+            && self.missing_references.is_empty()
     }
 
     /// Get a summary of the validation results
     pub fn summary(&self) -> String {
         let mut parts = Vec::new();
-        
+
         if !self.errors.is_empty() {
             parts.push(format!("{} errors", self.errors.len()));
         }
@@ -182,10 +187,16 @@ impl ValidationReport {
             parts.push(format!("{} warnings", self.warnings.len()));
         }
         if !self.circular_references.is_empty() {
-            parts.push(format!("{} circular references", self.circular_references.len()));
+            parts.push(format!(
+                "{} circular references",
+                self.circular_references.len()
+            ));
         }
         if !self.missing_references.is_empty() {
-            parts.push(format!("{} missing references", self.missing_references.len()));
+            parts.push(format!(
+                "{} missing references",
+                self.missing_references.len()
+            ));
         }
         if !self.type_mismatches.is_empty() {
             parts.push(format!("{} type mismatches", self.type_mismatches.len()));
@@ -245,7 +256,10 @@ fn validate_design_token(
         }
         (TokenValue::Literal(value), TokenType::BorderRadius) => {
             if !is_valid_dimension(value) {
-                report.add_error(format!("Invalid border radius value '{}' at {}", value, path));
+                report.add_error(format!(
+                    "Invalid border radius value '{}' at {}",
+                    value, path
+                ));
             }
         }
         (TokenValue::Literal(value), TokenType::Color) => {
@@ -283,7 +297,7 @@ fn validate_all_references(
         if token.has_references() {
             // Clear the validation stack for each top-level validation
             context.validation_stack.clear();
-            
+
             // Perform recursive validation for circular dependencies
             context.validate_token_references_recursively(&token_path, file, report)?;
         }
@@ -316,7 +330,9 @@ fn is_valid_dimension(value: &str) -> bool {
         return true;
     }
 
-    let units = ["px", "em", "rem", "%", "vh", "vw", "pt", "pc", "in", "cm", "mm"];
+    let units = [
+        "px", "em", "rem", "%", "vh", "vw", "pt", "pc", "in", "cm", "mm",
+    ];
     units.iter().any(|unit| value.ends_with(unit))
 }
 
@@ -350,8 +366,18 @@ fn is_valid_color(value: &str) -> bool {
 
     // Named colors (basic set)
     let named_colors = [
-        "red", "green", "blue", "white", "black", "transparent",
-        "yellow", "orange", "purple", "pink", "gray", "grey",
+        "red",
+        "green",
+        "blue",
+        "white",
+        "black",
+        "transparent",
+        "yellow",
+        "orange",
+        "purple",
+        "pink",
+        "gray",
+        "grey",
     ];
     named_colors.contains(&value)
 }
@@ -568,10 +594,12 @@ mod tests {
         assert!(!report.circular_references.is_empty());
         // Should detect the circular reference in the chain a -> b -> c -> d -> a
         let circular_ref = &report.circular_references[0];
-        assert!(circular_ref.contains("test.a") &&
-                circular_ref.contains("test.b") &&
-                circular_ref.contains("test.c") &&
-                circular_ref.contains("test.d"));
+        assert!(
+            circular_ref.contains("test.a")
+                && circular_ref.contains("test.b")
+                && circular_ref.contains("test.c")
+                && circular_ref.contains("test.d")
+        );
     }
 
     #[test]

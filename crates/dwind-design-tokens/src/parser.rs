@@ -7,10 +7,10 @@ use std::path::Path;
 /// Parse a design token file from JSON string
 pub fn parse_tokens(json: &str) -> TokenResult<DesignTokenFile> {
     let mut file: DesignTokenFile = serde_json::from_str(json)?;
-    
+
     // Post-process to convert expression strings to Expression variants
     process_token_file(&mut file)?;
-    
+
     Ok(file)
 }
 
@@ -32,7 +32,7 @@ fn process_token_file(file: &mut DesignTokenFile) -> TokenResult<()> {
 /// Recursively process token nodes to detect and parse expressions
 fn process_token_node(node: &mut crate::types::TokenNode) -> TokenResult<()> {
     use crate::types::TokenNode;
-    
+
     match node {
         TokenNode::Token(token) => {
             // Check if the value is a string that looks like an expression
@@ -50,7 +50,7 @@ fn process_token_node(node: &mut crate::types::TokenNode) -> TokenResult<()> {
             }
         }
     }
-    
+
     Ok(())
 }
 
@@ -60,26 +60,26 @@ fn is_expression(value: &str) -> bool {
     if value.contains('{') && value.contains('}') {
         return true;
     }
-    
+
     // Check for arithmetic operators with potential references
     // This is a simple heuristic - we could make it more sophisticated
-    let has_operators = value.contains('+') || value.contains('-') || value.contains('*') || value.contains('/');
+    let has_operators =
+        value.contains('+') || value.contains('-') || value.contains('*') || value.contains('/');
     let has_numbers = value.chars().any(|c| c.is_ascii_digit());
-    
+
     // If it has operators and numbers, it might be an expression
     // But we need to be careful not to catch CSS values like "rgb(255, 0, 0)"
     if has_operators && has_numbers && !value.starts_with("rgb") && !value.starts_with("hsl") {
         return true;
     }
-    
+
     false
 }
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{TokenType, DesignToken};
+    use crate::types::{DesignToken, TokenType};
 
     #[test]
     fn test_is_expression() {
@@ -113,11 +113,11 @@ mod tests {
 
         let result = parse_tokens(json);
         assert!(result.is_ok());
-        
+
         let file = result.unwrap();
         let token = file.find_token("test.a").unwrap();
         assert_eq!(token.token_type, TokenType::Dimension);
-        
+
         if let TokenValue::Literal(value) = &token.value {
             assert_eq!(value, "5px");
         } else {
@@ -152,14 +152,14 @@ mod tests {
 
         let result = parse_tokens(json);
         assert!(result.is_ok());
-        
+
         let file = result.unwrap();
         let token_a = file.find_token("test.a").unwrap();
         let token_b = file.find_token("test.b").unwrap();
-        
+
         assert!(!token_a.has_references());
         assert!(token_b.has_references());
-        
+
         let refs = token_b.get_references();
         assert_eq!(refs, vec!["a"]);
     }
@@ -188,7 +188,7 @@ mod tests {
 
         let result = parse_tokens(json);
         assert!(result.is_ok());
-        
+
         let file = result.unwrap();
         let token = file.find_token("colors.primary.500").unwrap();
         assert_eq!(token.token_type, TokenType::Color);
@@ -226,10 +226,10 @@ mod tests {
 
         let result = parse_tokens(json);
         assert!(result.is_ok());
-        
+
         let file = result.unwrap();
         let references = file.get_all_references();
-        
+
         assert_eq!(references.len(), 2);
         assert_eq!(references.get("test.b").unwrap(), &vec!["a"]);
         assert_eq!(references.get("test.c").unwrap(), &vec!["a", "b"]);

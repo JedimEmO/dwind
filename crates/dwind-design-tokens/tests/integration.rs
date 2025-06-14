@@ -48,7 +48,7 @@ fn test_parse_example_tokens() {
     assert!(result.is_ok(), "Failed to parse tokens: {:?}", result.err());
 
     let token_file = result.unwrap();
-    
+
     // Test finding tokens
     let token_a = token_file.find_token("test.a").unwrap();
     assert_eq!(token_a.token_type, TokenType::Dimension);
@@ -57,7 +57,7 @@ fn test_parse_example_tokens() {
     let token_b = token_file.find_token("test.b").unwrap();
     assert_eq!(token_b.token_type, TokenType::Dimension);
     assert!(token_b.has_references());
-    
+
     let refs = token_b.get_references();
     assert_eq!(refs, vec!["a"]);
 
@@ -116,7 +116,7 @@ fn test_complex_expressions() {
 
     let complex_token = token_file.find_token("math.complex").unwrap();
     assert!(complex_token.has_references());
-    
+
     let multi_ref_token = token_file.find_token("math.multi_ref").unwrap();
     let refs = multi_ref_token.get_references();
     assert_eq!(refs.len(), 2);
@@ -211,7 +211,7 @@ fn test_validation_errors() {
 
     let token_file = parse_tokens(json).unwrap();
     let validation_report = validate_token_file(&token_file).unwrap();
-    
+
     assert!(!validation_report.is_valid());
     assert!(!validation_report.errors.is_empty());
     assert!(!validation_report.missing_references.is_empty());
@@ -259,21 +259,21 @@ fn test_circular_reference_detection() {
 
     let token_file = parse_tokens(json).unwrap();
     let validation_report = validate_token_file(&token_file).unwrap();
-    
+
     // Should detect circular references but not affect valid tokens
     assert!(!validation_report.is_valid());
     assert!(!validation_report.circular_references.is_empty());
-    
+
     // The circular reference should involve all three circular tokens
     let circular_ref = &validation_report.circular_references[0];
     assert!(circular_ref.contains("circular_a"));
     assert!(circular_ref.contains("circular_b"));
     assert!(circular_ref.contains("circular_c"));
-    
+
     // Valid tokens should still be accessible
     let base_token = token_file.find_token("spacing.base").unwrap();
     assert!(!base_token.has_references());
-    
+
     let valid_ref_token = token_file.find_token("spacing.valid_ref").unwrap();
     assert!(valid_ref_token.has_references());
     assert_eq!(valid_ref_token.get_references(), vec!["base"]);

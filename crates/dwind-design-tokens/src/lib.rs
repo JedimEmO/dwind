@@ -145,7 +145,7 @@ mod integration_tests {
 
         // Validate the tokens
         let validation_report = validate_token_file(&token_file).expect("Validation failed");
-        
+
         if !validation_report.is_valid() {
             println!("Validation issues: {}", validation_report.summary());
             for error in &validation_report.errors {
@@ -155,7 +155,7 @@ mod integration_tests {
                 println!("Missing reference: {}", missing);
             }
         }
-        
+
         assert!(validation_report.is_valid(), "Validation should pass");
 
         // Test token access
@@ -262,7 +262,7 @@ mod integration_tests {
 
         let token_file = parse_tokens(json).expect("Failed to parse tokens");
         let validation_report = validate_token_file(&token_file).expect("Validation failed");
-        
+
         assert!(!validation_report.is_valid());
         assert!(!validation_report.errors.is_empty());
         assert!(!validation_report.missing_references.is_empty());

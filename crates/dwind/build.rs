@@ -40,7 +40,6 @@ fn main() {
         "resources/colors.json",
         Path::new(&out_dir).join("colors_generated.rs"),
     );
-    
 
     println!("cargo::rerun-if-changed=build.rs");
     println!("cargo::rerun-if-changed=resources/colors.json");

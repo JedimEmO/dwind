@@ -1,5 +1,6 @@
 use crate::pages::docs::doc_pages::colors::colors_page;
 use crate::pages::docs::doc_pages::flex::flex_page;
+use crate::pages::docs::doc_pages::grid::grid_page;
 use crate::pages::docs::doc_pages::pseudoclass_themes::pseudo_class_themes;
 use crate::pages::docs::doc_pages::responsive_design::responsive_design;
 use crate::pages::docs::DocPage;
@@ -14,6 +15,7 @@ pub fn doc_main_view(
     current_doc.map(|doc| {
         doc.map(|doc| match doc {
             DocPage::Flex => flex_page(),
+            DocPage::Grid => grid_page(),
             DocPage::Colors => colors_page(),
             DocPage::Responsiveness => responsive_design(),
             DocPage::Pseudoclasses => pseudo_class_themes(),

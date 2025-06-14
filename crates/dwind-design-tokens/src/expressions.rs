@@ -79,13 +79,14 @@ impl Expr {
     }
 
     /// Evaluate this expression given a context of resolved token values
-    pub fn evaluate(&self, context: &std::collections::HashMap<String, String>) -> TokenResult<String> {
+    pub fn evaluate(
+        &self,
+        context: &std::collections::HashMap<String, String>,
+    ) -> TokenResult<String> {
         match self {
-            Expr::Reference(name) => {
-                context.get(name)
-                    .cloned()
-                    .ok_or_else(|| TokenError::ExpressionParsing(format!("Undefined reference: {}", name)))
-            }
+            Expr::Reference(name) => context.get(name).cloned().ok_or_else(|| {
+                TokenError::ExpressionParsing(format!("Undefined reference: {}", name))
+            }),
             Expr::Literal(value) => {
                 // For dimension/border-radius tokens, we need to preserve the unit
                 // Try to format as integer if it's a whole number, otherwise as float
@@ -98,23 +99,25 @@ impl Expr {
             Expr::BinaryOp { op, left, right } => {
                 let left_val = left.evaluate(context)?;
                 let right_val = right.evaluate(context)?;
-                
+
                 // Parse numeric values from CSS values (e.g., "12px" -> 12.0)
                 let left_num = parse_css_value(&left_val)?;
                 let right_num = parse_css_value(&right_val)?;
-                
+
                 let result = match op {
                     BinaryOperator::Add => left_num + right_num,
                     BinaryOperator::Sub => left_num - right_num,
                     BinaryOperator::Mul => left_num * right_num,
                     BinaryOperator::Div => {
                         if right_num == 0.0 {
-                            return Err(TokenError::ExpressionParsing("Division by zero".to_string()));
+                            return Err(TokenError::ExpressionParsing(
+                                "Division by zero".to_string(),
+                            ));
                         }
                         left_num / right_num
                     }
                 };
-                
+
                 // Format result back to CSS value
                 if result.fract() == 0.0 {
                     Ok(format!("{}px", result as i64))
@@ -130,24 +133,28 @@ impl Expr {
 /// Supports values like "12px", "1.5em", "100%", or plain numbers
 fn parse_css_value(value: &str) -> TokenResult<f64> {
     let trimmed = value.trim();
-    
+
     // Try to parse as plain number first
     if let Ok(num) = trimmed.parse::<f64>() {
         return Ok(num);
     }
-    
+
     // Extract numeric part from CSS values
     let numeric_part = trimmed
         .chars()
         .take_while(|c| c.is_numeric() || *c == '.' || *c == '-')
         .collect::<String>();
-    
+
     if numeric_part.is_empty() {
-        return Err(TokenError::ExpressionParsing(format!("Cannot parse numeric value from: {}", value)));
+        return Err(TokenError::ExpressionParsing(format!(
+            "Cannot parse numeric value from: {}",
+            value
+        )));
     }
-    
-    numeric_part.parse::<f64>()
-        .map_err(|_| TokenError::ExpressionParsing(format!("Invalid numeric value: {}", numeric_part)))
+
+    numeric_part.parse::<f64>().map_err(|_| {
+        TokenError::ExpressionParsing(format!("Invalid numeric value: {}", numeric_part))
+    })
 }
 
 // Nom parser functions
@@ -203,11 +210,7 @@ fn parse_multiplicative(input: &str) -> IResult<&str, Expr> {
 fn parse_primary(input: &str) -> IResult<&str, Expr> {
     delimited(
         multispace0,
-        alt((
-            parse_parenthesized,
-            parse_reference,
-            parse_literal,
-        )),
+        alt((parse_parenthesized, parse_reference, parse_literal)),
         multispace0,
     )(input)
 }

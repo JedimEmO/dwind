@@ -16,7 +16,7 @@ mod tests {
 
         println!("{rust_file}");
 
-        println!("{}",TEXT_TEST_PRIMARY_RAW);
+        println!("{}", TEXT_TEST_PRIMARY_RAW);
         // just check that it exists
         //let multiline = &super::WITHPSEUDO_HOVER_ACTIVE;
     }
