@@ -52,6 +52,10 @@ pub fn make_app_router() -> AppRouter<DocPage> {
         .unwrap_throw();
 
     router
+        .insert("#/docs/grid", Box::new(|_| Ok(DocPage::Grid)))
+        .unwrap_throw();
+
+    router
         .insert(
             "#/docs/responsive-design",
             Box::new(|_| Ok(DocPage::Responsiveness)),

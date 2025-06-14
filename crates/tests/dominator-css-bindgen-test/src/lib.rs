@@ -1,7 +1,13 @@
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
+pub mod tokens {
+    include!(concat!(env!("OUT_DIR"), "/design_tokens_generated.rs"));
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::tokens::TEXT_TEST_PRIMARY_RAW;
+
     #[test]
     fn sanity_check() {
         let rust_file =
@@ -10,6 +16,7 @@ mod tests {
 
         println!("{rust_file}");
 
+        println!("{}", TEXT_TEST_PRIMARY_RAW);
         // just check that it exists
         //let multiline = &super::WITHPSEUDO_HOVER_ACTIVE;
     }

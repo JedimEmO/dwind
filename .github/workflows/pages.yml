@@ -49,13 +49,12 @@ jobs:
           # Rust toolchain name.
           toolchain: stable
           target: wasm32-unknown-unknown
-      - uses: jetli/trunk-action@v0.5.0
+      - uses: actions/setup-node@v4
         with:
-          # Optional version of trunk to install(eg. 'v0.19.1', 'latest')
-          version: 'latest'
+          node-version: '24.x'
       - name: Install and Build 🔧
         working-directory: examples/webpage
-        run: trunk build --release --public-url="/dwind/examples"
+        run: npm ci && npm run build
       - name: Docs
         run: cargo doc --no-deps
       - name: Populate docs

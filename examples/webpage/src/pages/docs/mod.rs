@@ -21,6 +21,7 @@ pub enum DocPage {
     Pseudoclasses,
     // Flex
     Flex,
+    Grid,
     Justify,
     Align,
 
@@ -36,6 +37,7 @@ impl DocPage {
         match self {
             DocPage::Colors => go_to_url("#/docs/colors"),
             DocPage::Flex => go_to_url("#/docs/flex"),
+            DocPage::Grid => go_to_url("#/docs/grid"),
             DocPage::Justify => {}
             DocPage::Align => {}
             DocPage::Border => {}
@@ -58,6 +60,7 @@ impl Display for DocPage {
         match self {
             DocPage::Colors => write!(f, "Colors"),
             DocPage::Flex => write!(f, "Flex"),
+            DocPage::Grid => write!(f, "Grid"),
             DocPage::Justify => write!(f, "Justify"),
             DocPage::Align => write!(f, "Align"),
             DocPage::Border => write!(f, "Border"),
@@ -82,7 +85,10 @@ pub fn doc_sections() -> Vec<DocSection> {
         },
         DocSection {
             title: "Flex and Grid".to_string(),
-            docs: vec![DocPage::Flex /*, DocPage::Justify, DocPage::Align*/],
+            docs: vec![
+                DocPage::Flex,
+                DocPage::Grid, /*, DocPage::Justify, DocPage::Align*/
+            ],
         },
         /*DocSection {
             title: "Borders".to_string(),

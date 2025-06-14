@@ -11,3 +11,4 @@ once_cell.workspace = true
 
 [build-dependencies]
 dominator-css-bindgen = { path = "../../dominator-css-bindgen", version = "0.1.0" }
+dwind-build = { path = "../../dwind-build", version = "0.2.0" }
