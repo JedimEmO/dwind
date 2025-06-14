@@ -38,11 +38,6 @@ pub mod base {
     include!(concat!(env!("OUT_DIR"), "/base.rs"));
 }
 
-pub mod tokens {
-    use crate::bg_color_generator;
-    include!(concat!(env!("OUT_DIR"), "/design_tokens_generated.rs"));
-}
-
 pub mod box_shadow {
     include!(concat!(env!("OUT_DIR"), "/box_shadow.rs"));
 }

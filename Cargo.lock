@@ -205,6 +205,7 @@ version = "0.1.0"
 dependencies = [
  "dominator",
  "dominator-css-bindgen",
+ "dwind-build",
  "once_cell",
 ]
 
@@ -247,7 +248,7 @@ dependencies = [
 
 [[package]]
 name = "dwind"
-version = "0.3.2"
+version = "0.4.0"
 dependencies = [
  "const_format",
  "dominator",
@@ -272,7 +273,7 @@ dependencies = [
 
 [[package]]
 name = "dwind-build"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dwind-design-tokens",
  "serde",
@@ -307,7 +308,7 @@ dependencies = [
 
 [[package]]
 name = "dwui"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "const_format",
  "dominator",

@@ -12,12 +12,12 @@ rustup target add wasm32-unknown-unknown
 
 To run the application
 
-### Trunk
+### NPM
 
-First install the trunk utility: https://trunkrs.dev/guide/getting-started/installation.html
+You need NPM
 
 then do
 
 ```shell
-trunk serve --open
+npm run watch
 ```

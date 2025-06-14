@@ -1,9 +1,0 @@
-[build]
-target = "public/index.html"
-minify = "always"
-
-[serve]
-port=8811
-
-[clean]
-cargo = true

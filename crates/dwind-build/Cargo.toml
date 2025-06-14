@@ -1,6 +1,6 @@
 [package]
 name = "dwind-build"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "utility crate for building DWIND color swatches etc."
 homepage = "https://github.com/JedimEmO/dwind"
