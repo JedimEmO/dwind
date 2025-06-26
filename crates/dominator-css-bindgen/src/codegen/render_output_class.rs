@@ -52,7 +52,16 @@ fn render_output_style_sheet(output_style_sheet: OutputStyleSheet) -> TokenStrea
         })
         .unzip();
 
-    let moz = moz.into_iter().filter_map(|v| v).collect::<Vec<_>>();
+    let moz = moz
+        .into_iter()
+        .filter_map(|v| {
+            if v.as_ref().is_some_and(|s| s == "::-moz-focus-inner") {
+                None
+            } else {
+                v
+            }
+        })
+        .collect::<Vec<_>>();
     let non_moz = non_moz.into_iter().filter_map(|v| v).collect::<Vec<_>>();
 
     let moz = if !moz.is_empty() {
