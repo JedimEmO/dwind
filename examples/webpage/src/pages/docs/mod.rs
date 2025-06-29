@@ -29,6 +29,10 @@ pub enum DocPage {
     Rounding,
     Color,
     Style,
+
+    // Examples
+    Examples,
+    DwuiExamples,
 }
 
 impl DocPage {
@@ -44,6 +48,8 @@ impl DocPage {
             DocPage::Style => {}
             DocPage::Responsiveness => go_to_url("#/docs/responsive-design"),
             DocPage::Pseudoclasses => go_to_url("#/docs/pseudoclasses"),
+            DocPage::Examples => go_to_url("#/examples"),
+            DocPage::DwuiExamples => go_to_url("#/dwui-examples"),
         }
     }
 }
@@ -66,6 +72,8 @@ impl Display for DocPage {
             DocPage::Style => write!(f, "Style"),
             DocPage::Responsiveness => write!(f, "Responsiveness"),
             DocPage::Pseudoclasses => write!(f, "Pseudoclasses"),
+            DocPage::Examples => write!(f, "Examples"),
+            DocPage::DwuiExamples => write!(f, "DWUI Examples"),
         }
     }
 }

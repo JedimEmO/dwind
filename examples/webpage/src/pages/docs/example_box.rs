@@ -20,7 +20,7 @@ pub fn example_box(child: Dom, resizeable: bool) -> Dom {
             .child(html!("div", {
                 .dwclass!("rounded-lg")
                 .dwclass!("border border-woodsmoke-800")
-                .dwclass!("flex align-items-center p-5")
+                .dwclass!("flex justify-center align-items-center p-5")
                 .dwclass_signal!("pointer-events-none", dragging.signal())
                 .style_signal("width", width.signal().map(|v| format!("{v}%")))
                 .child(child)
