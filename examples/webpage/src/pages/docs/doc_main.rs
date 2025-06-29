@@ -1,4 +1,6 @@
 use crate::pages::docs::doc_pages::colors::colors_page;
+use crate::pages::docs::doc_pages::dwui_examples::dwui_examples_page;
+use crate::pages::docs::doc_pages::examples::examples_page;
 use crate::pages::docs::doc_pages::flex::flex_page;
 use crate::pages::docs::doc_pages::pseudoclass_themes::pseudo_class_themes;
 use crate::pages::docs::doc_pages::responsive_design::responsive_design;
@@ -17,6 +19,8 @@ pub fn doc_main_view(
             DocPage::Colors => colors_page(),
             DocPage::Responsiveness => responsive_design(),
             DocPage::Pseudoclasses => pseudo_class_themes(),
+            DocPage::Examples => examples_page(),
+            DocPage::DwuiExamples => dwui_examples_page(),
             _ => html!("div", {
                 .dwclass!("w-full")
                 .text("todo")

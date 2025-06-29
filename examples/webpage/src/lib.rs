@@ -137,6 +137,13 @@ fn header() -> Dom {
                         })
                     }),
                     html!("h3", {
+                        .text("dwui")
+                        .dwclass!("m-x-2 text-picton-blue-200 hover:text-picton-blue-500 hover:font-bold cursor-pointer")
+                        .event(|_: events::Click| {
+                            go_to_url("#/dwui-examples")
+                        })
+                    }),
+                    html!("h3", {
                         .text("docs")
                         .dwclass!("m-x-2 hover:text-picton-blue-200 hover:font-bold cursor-pointer")
                         .event(|_: events::Click| {

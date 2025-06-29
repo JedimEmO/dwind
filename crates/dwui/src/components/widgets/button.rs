@@ -44,14 +44,14 @@ pub fn button(props: ButtonProps) -> Dom {
         .dwclass_signal!("is(.light *):dwui-border-primary-200 is(.light *):hover:dwui-border-primary-300 border bg-unset", button_type.signal().map(|v| v == ButtonType::Border))
         .dwclass!("disabled:dwui-text-on-primary-500 disabled:hover:dwui-border-primary-800")
         .dwclass!("is(.light *):disabled:dwui-text-on-primary-600 is(.light *):disabled:hover:dwui-border-primary-200")
-        .dwclass!("w-full h-10 font-bold p-1 cursor-pointer rounded-full")
+        .dwclass!("w-full h-10 font-bold p-1 cursor-pointer rounded-full pointer-events-auto")
         .apply_if(apply.is_some(), move |b| {
             b.apply(apply.unwrap())
         })
         .attr_signal("disabled", disabled.map(|v| if v { Some("disabled") } else { None }))
         .child_signal(content)
         .event(move |e: events::Click| {
-            on_click(e);
+            (on_click)(e);
         })
     })
 }
