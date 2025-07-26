@@ -42,6 +42,13 @@ pub fn render_color_json_file_to_rust_file(
         let _ = colors_out_file
             .write(render_color(color, "gradient-to", "gradient-to-").as_bytes())
             .unwrap();
+        let _ = colors_out_file
+            .write(render_color(color, "from", "gradient-from-").as_bytes())
+            .unwrap();
+
+        let _ = colors_out_file
+            .write(render_color(color, "to", "gradient-to-").as_bytes())
+            .unwrap();
 
         let _ = colors_out_file
             .write(render_color(color, "fill", "fill-").as_bytes())
@@ -49,6 +56,10 @@ pub fn render_color_json_file_to_rust_file(
 
         let _ = colors_out_file
             .write(render_color(color, "stroke", "stroke-").as_bytes())
+            .unwrap();
+
+        let _ = colors_out_file
+            .write(render_color(color, "ring", "ring-").as_bytes())
             .unwrap();
     }
 

@@ -14,21 +14,6 @@
     position: sticky;
 }
 
-.left-0 {
-    left: 0;
-}
-
-.right-0 {
-    right: 0;
-}
-
-.top-0 {
-    top: 0;
-}
-
-.bottom-0 {
-    bottom: 0;
-}
 
 .order-1 {
     order: 1;
@@ -88,4 +73,32 @@
 
 .order-none {
     order: 0;
+}
+
+.z-0 {
+    z-index: 0;
+}
+
+.z-10 {
+    z-index: 10;
+}
+
+.z-20 {
+    z-index: 20;
+}
+
+.z-30 {
+    z-index: 30;
+}
+
+.z-40 {
+    z-index: 40;
+}
+
+.z-50 {
+    z-index: 50;
+}
+
+.z-auto {
+    z-index: auto;
 }

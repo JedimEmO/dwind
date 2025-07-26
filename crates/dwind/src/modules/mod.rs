@@ -1,3 +1,4 @@
+pub mod animations;
 pub mod backgrounds;
 pub mod borders;
 pub mod colors;

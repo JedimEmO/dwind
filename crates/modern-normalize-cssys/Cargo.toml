@@ -1,6 +1,6 @@
 [package]
 name = "modern-normalize-cssys"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 description = "rust bindings for modern-normalize for the DWIND crate"
 homepage = "https://github.com/JedimEmO/dwind"
@@ -10,12 +10,12 @@ keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
 dominator = { workspace = true }
-dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.1" }
+dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.2.0" }
 once_cell = { workspace = true }
 web-sys = { workspace = true }
 
 [build-dependencies]
-dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.1" }
+dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.2.0" }
 
 [dev-dependencies]
 wasm-bindgen-test = { workspace = true }

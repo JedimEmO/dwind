@@ -1,6 +1,5 @@
 use crate::css::parse_css::{ParsedCssFile, ParsedSelector};
 use cssparser::{CowRcStr, ToCss, Token};
-use quote::quote;
 use std::collections::HashMap;
 
 /// Represent a simple output class and its pseudo classes

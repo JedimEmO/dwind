@@ -38,6 +38,27 @@
     border-left-width: 2px;
 }
 
+/* Border color utilities */
+.border-inherit {
+    border-color: inherit;
+}
+
+.border-current {
+    border-color: currentColor;
+}
+
+.border-transparent {
+    border-color: transparent;
+}
+
+.border-black {
+    border-color: rgb(0 0 0);
+}
+
+.border-white {
+    border-color: rgb(255 255 255);
+}
+
 /*
 rounding
  */

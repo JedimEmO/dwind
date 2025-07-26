@@ -56,5 +56,12 @@ macro_rules! stroke_generator {
     };
 }
 
+#[macro_export]
+macro_rules! ring_generator {
+    ($color:tt) => {
+        const_format::formatcp!("--dw-ring-color: {};", $color)
+    };
+}
+
 include!(concat!(env!("OUT_DIR"), "/colors_generated.rs"));
 include!(concat!(env!("OUT_DIR"), "/colors.rs"));
