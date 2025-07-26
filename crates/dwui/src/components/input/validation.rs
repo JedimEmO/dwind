@@ -1,4 +1,4 @@
-use futures_signals::signal::{BoxSignal, LocalBoxSignal, Mutable, Signal, SignalExt};
+use futures_signals::signal::{LocalBoxSignal, Mutable, SignalExt};
 use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq)]

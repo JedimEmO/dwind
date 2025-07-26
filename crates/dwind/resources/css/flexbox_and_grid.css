@@ -254,6 +254,14 @@
     flex-shrink: 0;
 }
 
+.flex-shrink {
+    flex-shrink: 1;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
 /*
 Grid related classes
 */
@@ -974,7 +982,6 @@ Grid related classes
     grid-row-end: auto;
 }
 
-
 /*
     Grid col/row
  */
@@ -1033,4 +1040,3 @@ Grid related classes
 .grid-col-7 {
     grid-column: 7;
 }
-

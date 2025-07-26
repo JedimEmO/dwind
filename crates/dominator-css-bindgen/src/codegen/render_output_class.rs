@@ -88,6 +88,8 @@ pub fn render_output_class(output_class: OutputClass) -> TokenStream {
         .identity
         .to_string()
         .replace("-", "_")
+        .replace(".", "_")
+        .replace("/", "_")
         .to_uppercase();
 
     let name_lower = name.to_lowercase();

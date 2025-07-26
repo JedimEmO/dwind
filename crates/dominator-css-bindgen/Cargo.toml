@@ -1,6 +1,6 @@
 [package]
 name = "dominator-css-bindgen"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 description = "generate DOMINATOR rust bindings to use from your dwind based application"
 homepage = "https://github.com/JedimEmO/dwind"

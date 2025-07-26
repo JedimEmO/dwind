@@ -30,3 +30,31 @@
 .shadow-none {
     box-shadow: none;
 }
+
+.ring-0 {
+    box-shadow: var(--dw-ring-inset) 0 0 0 calc(0px + var(--dw-ring-offset-width)) var(--dw-ring-color);
+}
+
+.ring-1 {
+    box-shadow: var(--dw-ring-inset) 0 0 0 calc(1px + var(--dw-ring-offset-width)) var(--dw-ring-color);
+}
+
+.ring-2 {
+    box-shadow: var(--dw-ring-inset) 0 0 0 calc(2px + var(--dw-ring-offset-width)) var(--dw-ring-color);
+}
+
+.ring {
+    box-shadow: var(--dw-ring-inset) 0 0 0 calc(3px + var(--dw-ring-offset-width)) var(--dw-ring-color);
+}
+
+.ring-4 {
+    box-shadow: var(--dw-ring-inset) 0 0 0 calc(4px + var(--dw-ring-offset-width)) var(--dw-ring-color);
+}
+
+.ring-8 {
+    box-shadow: var(--dw-ring-inset) 0 0 0 calc(8px + var(--dw-ring-offset-width)) var(--dw-ring-color);
+}
+
+.ring-inset {
+    --dw-ring-inset: inset;
+}

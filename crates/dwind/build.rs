@@ -19,6 +19,7 @@ fn main() {
         "resources/css/typography.css",
         "resources/css/transforms.css",
         "resources/css/transition.css",
+        "resources/css/animations.css",
     ];
 
     let out_dir = env::var_os("OUT_DIR").unwrap();

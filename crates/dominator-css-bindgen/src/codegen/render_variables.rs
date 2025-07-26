@@ -1,7 +1,7 @@
 use case::CaseExt;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 pub fn render_variable_definitions(module_name: &str, variable_names: Vec<String>) -> String {
     let variable_names = variable_names
@@ -74,6 +74,7 @@ fn render_struct_of_variable_names(module_name: &str, variable_names: Vec<String
         impl #struct_ident {
             pub fn to_style_sheet_raw(self) -> String {
                 let mut out: Vec<String> = vec![];
+                out.clear();
 
                 #(#raw_string_exprs)*
 
@@ -84,5 +85,5 @@ fn render_struct_of_variable_names(module_name: &str, variable_names: Vec<String
 }
 
 pub fn css_ident_to_rust(ident: &str) -> String {
-    ident.replace("-", "_")
+    ident.replace("-", "_").replace(".", "_").replace("/", "_")
 }

@@ -6,7 +6,6 @@ use nom::combinator::opt;
 use nom::multi::{many0, separated_list1};
 use nom::sequence::{delimited, terminated};
 use nom::IResult;
-use std::env::var;
 
 use crate::codegen::BreakpointInfo;
 

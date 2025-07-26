@@ -1,6 +1,7 @@
 mod modules;
 
 pub mod prelude {
+    pub use super::animations::*;
     pub use super::base::*;
     pub use super::borders::*;
     pub use super::box_shadow::*;
@@ -46,7 +47,6 @@ pub mod effects {
     include!(concat!(env!("OUT_DIR"), "/effects.rs"));
 }
 
-use dominator::stylesheet;
 pub use modules::borders;
 
 pub mod interactivity {
@@ -77,6 +77,7 @@ pub mod typography {
     include!(concat!(env!("OUT_DIR"), "/typography.rs"));
 }
 
+pub use modules::animations;
 pub use modules::backgrounds;
 pub use modules::colors;
 pub use modules::layout;

@@ -25,3 +25,43 @@
 .linear-gradient-180 {
     background: linear-gradient(180deg, var(--dw-gradient-from), var(--dw-gradient-to));
 }
+
+/*
+    Tailwind-style gradient directions
+*/
+
+.bg-none {
+    background-image: none;
+}
+
+.bg-gradient-to-t {
+    background-image: linear-gradient(to top, var(--dw-gradient-stops));
+}
+
+.bg-gradient-to-tr {
+    background-image: linear-gradient(to top right, var(--dw-gradient-stops));
+}
+
+.bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--dw-gradient-stops));
+}
+
+.bg-gradient-to-br {
+    background-image: linear-gradient(to bottom right, var(--dw-gradient-stops));
+}
+
+.bg-gradient-to-b {
+    background-image: linear-gradient(to bottom, var(--dw-gradient-stops));
+}
+
+.bg-gradient-to-bl {
+    background-image: linear-gradient(to bottom left, var(--dw-gradient-stops));
+}
+
+.bg-gradient-to-l {
+    background-image: linear-gradient(to left, var(--dw-gradient-stops));
+}
+
+.bg-gradient-to-tl {
+    background-image: linear-gradient(to top left, var(--dw-gradient-stops));
+}

@@ -63,7 +63,10 @@ pub fn render_dwind_class(
     }
 
     if class.pseudo_classes.is_empty() && class.variant.is_none() {
-        let class_ident = Ident::new(&class.class_name.to_uppercase(), Span::call_site());
+        let class_ident = Ident::new(
+            &class_name_to_struct_identifier(&class.class_name).to_uppercase(),
+            Span::call_site(),
+        );
 
         (quote! { &* #class_ident }, breakpoint, false)
     } else {

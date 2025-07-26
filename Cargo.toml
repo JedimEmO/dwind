@@ -1,10 +1,10 @@
 [workspace]
-
 resolver = "2"
 members = [
     "crates/dominator-css-bindgen",
     "crates/dwind",
-    "crates/dwind-base", "crates/dwind-build",
+    "crates/dwind-base",
+    "crates/dwind-build",
     "crates/dwind-macros",
     "crates/dwui",
     "crates/example-html-macro",
@@ -23,7 +23,7 @@ futures-signals = "0.3"
 futures-signals-component-macro = { version = "0.4.0", features = [
     "dominator",
 ] }
-gloo-timers = { version = "0.3.0", features = ["futures"]}
+gloo-timers = { version = "0.3.0", features = ["futures"] }
 log = "0.4"
 matchit = "0.8"
 nom = "7.1"
@@ -50,5 +50,5 @@ web-sys = { version = "0.3", features = [
     "Navigator",
     "Url",
     "Window",
-    "HtmlSelectElement"
+    "HtmlSelectElement",
 ] }

@@ -1,6 +1,6 @@
 [package]
 name = "dwind-macros"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "Macros used by the dwind crate for applying dominator classes to components using a custom language"
 homepage = "https://github.com/JedimEmO/dwind"

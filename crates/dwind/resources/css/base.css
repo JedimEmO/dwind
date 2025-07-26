@@ -1,5 +1,9 @@
 :root {
     color-scheme: dark;
+    --dw-ring-inset: ;
+    --dw-ring-offset-width: 0px;
+    --dw-ring-color: rgb(59 130 246 / 0.5);
+    --dw-gradient-stops: var(--dw-gradient-from), var(--dw-gradient-to);
 }
 
 html {
