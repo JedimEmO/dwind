@@ -52,44 +52,8 @@ async fn main() {
     wasm_log::init(Default::default());
 
     dominator::replace_dom(&body().parent_node().unwrap(), &body(), main_view());
-    // dominator::replace_dom(&body().parent_node().unwrap(), &body(), memleaktest());
 }
 
-fn memleaktest() -> Dom {
-    let data = MutableVec::new_with_values((0..100).collect());
-
-    // Create a cloned reference to pass into the async task
-    let data_clone = data.clone();
-
-    // Generate new values (you can modify this pattern)
-
-    // Spawn an async task that will update the vector periodically
-    spawn_local(async move {
-        let mut count = 0;
-
-        loop {
-            let new_values: Vec<i32> = (count..count + 100).collect();
-
-            // Replace the content of the mutable vec
-            data_clone.lock_mut().replace(new_values);
-
-            // Sleep for 100ms
-            sleep(Duration::from_millis(100)).await;
-
-            count += 1;
-        }
-    });
-
-    html!("div", {
-        .children_signal_vec(data.signal_vec().map(|v| {
-           html!("div", {
-               .dwclass!("hover:text-red-500 @sm:text-red-500 is(.light *):bg-red-500")
-               // .dwclass_signal!("hover:text-red-500 @sm:text-red-500 is(.light *):bg-red-500", always(true))
-               .text(&format!("{v}"))
-            })
-        }))
-    })
-}
 fn main_view() -> Dom {
     dwind::stylesheet();
     dwui::theme::apply_style_sheet(Some(ColorsCssVariables::new(
@@ -105,7 +69,7 @@ fn main_view() -> Dom {
         .dwclass!("h-full overflow-y-scroll")
         .child(header())
         .child(html!("div", {
-            .dwclass!("m-x-auto flex max-w-lg")
+            .dwclass!("m-x-auto flex max-w-5xl")
             .style("margin-top", "4px")
             .child_signal(doc_sidebar(doc_sections(), || make_app_router().signal(), Arc::new(|v: DocPage| v.goto()), || {
                 html!("div", {
