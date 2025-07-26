@@ -15,14 +15,15 @@ members = [
 
 [workspace.dependencies]
 case = "1.0"
-cssparser = "0.34"
 const_format = "0.2"
+cssparser = "0.34"
 dominator = "0.5"
 futures = "0.3"
 futures-signals = "0.3"
 futures-signals-component-macro = { version = "0.4.0", features = [
     "dominator",
 ] }
+gloo-timers = { version = "0.3.0", features = ["futures"]}
 log = "0.4"
 matchit = "0.8"
 nom = "7.1"

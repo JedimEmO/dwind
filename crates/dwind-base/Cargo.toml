@@ -9,5 +9,5 @@ license = "MIT"
 keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
-dominator.workspace = true
-futures-signals.workspace = true
+dominator = { workspace = true}
+futures-signals = { workspace = true}
