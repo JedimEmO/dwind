@@ -9,13 +9,13 @@ license = "MIT"
 keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
-dominator.workspace = true
+dominator = { workspace = true}
 dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
-once_cell.workspace = true
-web-sys.workspace = true
+once_cell = { workspace = true}
+web-sys = { workspace = true}
 
 [build-dependencies]
 dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
 
 [dev-dependencies]
-wasm-bindgen-test.workspace = true
+wasm-bindgen-test = { workspace = true}

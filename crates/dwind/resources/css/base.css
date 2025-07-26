@@ -1,8 +1,3 @@
-
-.sticky {
-    position: sticky;
-}
-
 :root {
     color-scheme: dark;
 }
@@ -18,10 +13,11 @@ body {
     min-height: 100%;
 }
 
-ul,li {
+ul,
+li {
     padding: 0;
     margin: 0;
-    list-style: none    ;
+    list-style: none;
 }
 
 *,
@@ -57,7 +53,9 @@ pre {
     margin: 0;
 }
 
-*, :after, :before {
+*,
+:after,
+:before {
     box-sizing: border-box;
     border: 0 solid #e5e7eb;
 }

@@ -169,14 +169,14 @@ fn is_extended_alphanumeric(chars: Vec<char>) -> impl Fn(char) -> bool {
 }
 
 fn css_identifier(input: &str) -> IResult<&str, &str> {
-    let parser = take_while1(is_extended_alphanumeric(vec!['_', '-']));
+    let parser = take_while1(is_extended_alphanumeric(vec!['_', '-', '.', '/']));
 
     parser(input)
 }
 
 fn color(input: &str) -> IResult<&str, &str> {
     let parser = take_while1(is_extended_alphanumeric(vec![
-        '#', '%', '_', '-', '@', '(', ')',
+        '#', '%', '_', '-', '@', '(', ')', '.', '/',
     ]));
 
     parser(input)
@@ -308,7 +308,30 @@ mod test {
                 variant: None,
             }]
         );
+
+        assert_eq!(
+            parse_class_string("foo/0.25").unwrap(),
+            vec![DwindClassSelector {
+                class_name: "foo/0.25".to_string(),
+                pseudo_classes: vec![],
+                conditionals: vec![],
+                generator_params: vec![],
+                variant: None,
+            }]
+        );
+
+        assert_eq!(
+            parse_class_string("foo[1/2]").unwrap(),
+            vec![DwindClassSelector {
+                class_name: "foo".to_string(),
+                pseudo_classes: vec![],
+                conditionals: vec![],
+                generator_params: vec!["1/2".to_string()],
+                variant: None,
+            }]
+        );
     }
+
     #[test]
     fn verify_generator_parser() {
         assert_eq!(
@@ -347,6 +370,7 @@ mod test {
         assert_eq!(css_identifier("foo").unwrap().1, "foo".to_string());
         assert_eq!(css_identifier("foo-bar").unwrap().1, "foo-bar".to_string());
         assert_eq!(css_identifier("foo_baz").unwrap().1, "foo_baz".to_string());
+        assert_eq!(css_identifier("foo/0.2").unwrap().1, "foo/0.2".to_string());
     }
 
     #[test]

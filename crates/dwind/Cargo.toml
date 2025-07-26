@@ -1,6 +1,6 @@
 [package]
 name = "dwind"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 description = "Style your DOMINATOR applications using a tailwind-like syntax and utility class collection!"
 homepage = "https://github.com/JedimEmO/dwind"
@@ -9,18 +9,18 @@ license = "MIT"
 keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
-const_format.workspace = true
-dominator.workspace = true
+const_format = { workspace = true}
+dominator = { workspace = true}
 dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
 dwind-base = { path = "../dwind-base", version = "0.1.0" }
-dwind-macros = { path = "../dwind-macros", version = "0.2.2" }
-futures-signals.workspace = true
-modern-normalize-cssys = { path = "../modern-normalize-cssys", version = "0.2" }
-once_cell.workspace = true
+dwind-macros = { path = "../dwind-macros", version = "0.3.0" }
+futures-signals = { workspace = true}
+modern-normalize-cssys = { path = "../modern-normalize-cssys", version = "0.2.0" }
+once_cell = { workspace = true}
 serde = { workspace = true, features = ["derive"] }
 
 [build-dependencies]
 dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
 dwind-build = { path = "../dwind-build", version = "0.1.0" }
-serde.workspace = true
-serde_json.workspace = true
+serde = { workspace = true}
+serde_json = { workspace = true}
