@@ -6,8 +6,8 @@ publish = false
 
 [dependencies]
 dominator = { workspace = true}
-dominator-css-bindgen = { path = "../../dominator-css-bindgen", version = "0.1.0" }
+dominator-css-bindgen = { path = "../../dominator-css-bindgen", version = "0.1.1" }
 once_cell = { workspace = true}
 
 [build-dependencies]
-dominator-css-bindgen = { path = "../../dominator-css-bindgen", version = "0.1.0" }
+dominator-css-bindgen = { path = "../../dominator-css-bindgen", version = "0.1.1" }

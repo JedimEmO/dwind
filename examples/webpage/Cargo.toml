@@ -16,8 +16,8 @@ const_format = { workspace = true}
 dominator = { workspace = true}
 dwind = { path = "../../crates/dwind", version = "0.5.0" }
 dwind-macros = { path = "../../crates/dwind-macros", version = "0.3.0" }
-dwui = { path = "../../crates/dwui", version = "0.6.0" }
-example-html-highlight-macro = { path = "../../crates/example-html-macro", version = "0.1.0" }
+dwui = { path = "../../crates/dwui", version = "0.7.0" }
+example-html-highlight-macro = { path = "../../crates/example-html-macro", version = "0.1.1" }
 futures = { workspace = true}
 futures-signals = { workspace = true}
 gloo-timers = { workspace = true, features = ["futures"]}

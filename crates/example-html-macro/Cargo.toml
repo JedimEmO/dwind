@@ -1,6 +1,6 @@
 [package]
 name = "example-html-highlight-macro"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "macro for embedding syntax highlighted copies of code in the binary"
 homepage = "https://github.com/JedimEmO/dwind"
@@ -12,8 +12,8 @@ keywords = ["web", "wasm", "css", "style"]
 proc-macro = true
 
 [dependencies]
-prettyplease = { workspace = true}
-proc-macro2 = { workspace = true}
-quote = { workspace = true}
-syn = { workspace = true}
-syntect = { workspace = true}
+prettyplease = { workspace = true }
+proc-macro2 = { workspace = true }
+quote = { workspace = true }
+syn = { workspace = true }
+syntect = { workspace = true }

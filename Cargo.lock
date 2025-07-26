@@ -189,7 +189,7 @@ dependencies = [
 
 [[package]]
 name = "dominator-css-bindgen"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "case",
  "cssparser",
@@ -264,7 +264,7 @@ dependencies = [
 
 [[package]]
 name = "dwind-base"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "dominator",
  "futures-signals",
@@ -272,7 +272,7 @@ dependencies = [
 
 [[package]]
 name = "dwind-build"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -296,7 +296,7 @@ dependencies = [
 
 [[package]]
 name = "dwui"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "const_format",
  "dominator",
@@ -318,7 +318,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "example-html-highlight-macro"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "prettyplease",
  "proc-macro2",
@@ -606,7 +606,7 @@ dependencies = [
 
 [[package]]
 name = "modern-normalize-cssys"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "dominator",
  "dominator-css-bindgen",

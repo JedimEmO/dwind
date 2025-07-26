@@ -1,6 +1,6 @@
 [package]
 name = "dwind-build"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "utility crate for building DWIND color swatches etc."
 homepage = "https://github.com/JedimEmO/dwind"
@@ -9,5 +9,5 @@ license = "MIT"
 keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
-serde = { workspace = true}
-serde_json = { workspace = true}
+serde = { workspace = true }
+serde_json = { workspace = true }

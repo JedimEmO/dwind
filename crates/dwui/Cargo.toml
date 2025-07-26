@@ -19,5 +19,5 @@ once_cell = { workspace = true }
 web-sys = { workspace = true }
 
 [build-dependencies]
-dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.0" }
+dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.1.1" }
 serde = { workspace = true }

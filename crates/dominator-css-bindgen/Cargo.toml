@@ -1,6 +1,6 @@
 [package]
 name = "dominator-css-bindgen"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "generate DOMINATOR rust bindings to use from your dwind based application"
 homepage = "https://github.com/JedimEmO/dwind"
@@ -9,9 +9,9 @@ license = "MIT"
 keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
-case = { workspace = true}
-cssparser = { workspace = true}
-nom = { workspace = true}
-proc-macro2 = { workspace = true}
-quote = { workspace = true}
-thiserror = { workspace = true}
+case = { workspace = true }
+cssparser = { workspace = true }
+nom = { workspace = true }
+proc-macro2 = { workspace = true }
+quote = { workspace = true }
+thiserror = { workspace = true }

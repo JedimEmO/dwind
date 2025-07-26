@@ -1,6 +1,6 @@
 [package]
 name = "dwind-base"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "DWIND base library used by the dwind generated code"
 homepage = "https://github.com/JedimEmO/dwind"
@@ -9,5 +9,5 @@ license = "MIT"
 keywords = ["web", "wasm", "css", "style"]
 
 [dependencies]
-dominator = { workspace = true}
-futures-signals = { workspace = true}
+dominator = { workspace = true }
+futures-signals = { workspace = true }
