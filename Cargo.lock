@@ -247,7 +247,7 @@ dependencies = [
 
 [[package]]
 name = "dwind"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "const_format",
  "dominator",
@@ -272,7 +272,7 @@ dependencies = [
 
 [[package]]
 name = "dwind-build"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -296,7 +296,7 @@ dependencies = [
 
 [[package]]
 name = "dwui"
-version = "0.7.1"
+version = "0.7.2"
 dependencies = [
  "const_format",
  "dominator",

@@ -1,6 +1,6 @@
 [package]
 name = "dwind"
-version = "0.6.0"
+version = "0.6.1"
 edition = "2021"
 description = "Style your DOMINATOR applications using a tailwind-like syntax and utility class collection!"
 homepage = "https://github.com/JedimEmO/dwind"
@@ -21,6 +21,6 @@ serde = { workspace = true, features = ["derive"] }
 
 [build-dependencies]
 dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.2.0" }
-dwind-build = { path = "../dwind-build", version = "0.2.0" }
+dwind-build = { path = "../dwind-build", version = "0.3.0" }
 serde = { workspace = true }
 serde_json = { workspace = true }

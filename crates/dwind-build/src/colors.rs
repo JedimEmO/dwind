@@ -70,7 +70,7 @@ pub fn render_color_json_file_to_rust_file(
 
 // render a once cell with a hash map of all the colors
 fn render_dwind_colors(colors: &ColorFile) -> String {
-    let colors = colors
+    let colors_string = colors
         .colors
         .iter()
         .map(|color| {
@@ -89,13 +89,41 @@ fn render_dwind_colors(colors: &ColorFile) -> String {
         .collect::<Vec<_>>()
         .join(",\n");
 
-    format!(
-        r#"pub static DWIND_COLORS: once_cell::sync::Lazy<std::collections::BTreeMap<String, std::collections::BTreeMap<u32, String>>> = once_cell::sync::Lazy::new(|| {{
+    let color_constants = get_color_constants(colors);
+
+    let dwind_colors = format!(
+        r#"#[deprecated]
+pub static DWIND_COLORS: once_cell::sync::Lazy<std::collections::BTreeMap<String, std::collections::BTreeMap<u32, String>>> = once_cell::sync::Lazy::new(|| {{
     std::collections::BTreeMap::from([
-    {colors}
+    {colors_string}
 ])
 }});"#
-    )
+    );
+
+    format!("{dwind_colors}\npub mod codes {{\n{color_constants}\n}}")
+}
+
+fn get_color_constants(colors: &ColorFile) -> String {
+    colors
+        .colors
+        .iter()
+        .map(|color| {
+            color
+                .shades
+                .iter()
+                .map(|(intensity, value)| {
+                    format!(
+                        "pub const {}_{}: &str = \"{}\";\n",
+                        color.name.to_uppercase().replace("-", "_"),
+                        intensity,
+                        value
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("\n")
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn render_color(color: &Color, prefix: &str, generator: &str) -> String {
