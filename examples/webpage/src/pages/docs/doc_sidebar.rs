@@ -32,7 +32,7 @@ where
         .map(clone!(show_menu => move |at_least_medium| {
             if at_least_medium {
                 html!("div", {
-                    .dwclass!("flex flex-row")
+                    .dwclass!("flex flex-row w-full")
                     .child(doc_sidebar_inline(doc_sections.clone(), selected_doc(), goto.clone()))
                     .child(main())
                 })

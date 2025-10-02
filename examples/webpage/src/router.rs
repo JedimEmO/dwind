@@ -66,6 +66,10 @@ pub fn make_app_router() -> AppRouter<DocPage> {
         .unwrap_throw();
 
     router
+        .insert("#/docs/animation", Box::new(|_| Ok(DocPage::Animation)))
+        .unwrap_throw();
+
+    router
         .insert("#/examples", Box::new(|_| Ok(DocPage::Examples)))
         .unwrap_throw();
 

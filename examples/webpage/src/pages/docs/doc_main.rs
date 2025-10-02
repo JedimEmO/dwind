@@ -1,3 +1,4 @@
+use crate::pages::docs::doc_pages::animations::animation_page;
 use crate::pages::docs::doc_pages::colors::colors_page;
 use crate::pages::docs::doc_pages::dwui_examples::dwui_examples_page;
 use crate::pages::docs::doc_pages::examples::examples_page;
@@ -21,6 +22,7 @@ pub fn doc_main_view(
             DocPage::Pseudoclasses => pseudo_class_themes(),
             DocPage::Examples => examples_page(),
             DocPage::DwuiExamples => dwui_examples_page(),
+            DocPage::Animation => animation_page(),
             _ => html!("div", {
                 .dwclass!("w-full")
                 .text("todo")

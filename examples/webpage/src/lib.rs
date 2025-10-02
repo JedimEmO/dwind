@@ -17,34 +17,13 @@ use crate::router::make_app_router;
 use dominator::routing::go_to_url;
 use dominator::{body, events, Dom};
 use dwind::prelude::*;
-use dwind_macros::{dwclass, dwclass_signal};
+use dwind_macros::dwclass;
 use dwui::theme::prelude::ColorsCssVariables;
-use futures_signals::signal::{always, Mutable, Signal, SignalExt};
-use futures_signals::signal_vec::{MutableVec, SignalVec, SignalVecExt};
-use gloo_timers::future::sleep;
+use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use std::future::Future;
-use std::pin::Pin;
 use std::sync::Arc;
-use std::task::{Context, Poll};
-use std::time::Duration;
-use wasm_bindgen_futures::spawn_local;
 use web_sys::window;
-
-fn child(count: impl Signal<Item = u32>) -> impl Signal<Item = Dom> {
-    count.map(|count| html!("div", { .text(&format!("{count}")) }))
-}
-
-fn container(data: impl SignalVec<Item = u32> + 'static) -> Dom {
-    let counter = Mutable::new(0);
-
-    let children = data.map_signal(clone!(counter => move |v| {
-        child(counter.signal())
-    }));
-
-    html!("div", {
-        .children_signal_vec(children)
-    })
-}
 
 #[cfg(not(test))]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]

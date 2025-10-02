@@ -24,6 +24,7 @@ pub fn stylesheet() {
     modern_normalize_cssys::apply_modern_normalize_stylesheet();
     base::apply_base_stylesheet();
     colors::apply_colors_stylesheet();
+    animations::append_animation_keyframe_style();
 
     // let colors = colors::ColorsCssVariables {
     //     dw_gradient_from: "white".to_string(),

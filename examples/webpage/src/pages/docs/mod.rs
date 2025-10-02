@@ -16,6 +16,7 @@ pub struct DocSection {
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum DocPage {
+    Animation,
     Colors,
     Responsiveness,
     Pseudoclasses,
@@ -50,6 +51,7 @@ impl DocPage {
             DocPage::Pseudoclasses => go_to_url("#/docs/pseudoclasses"),
             DocPage::Examples => go_to_url("#/examples"),
             DocPage::DwuiExamples => go_to_url("#/dwui-examples"),
+            &DocPage::Animation => go_to_url("#/docs/animation"),
         }
     }
 }
@@ -74,6 +76,7 @@ impl Display for DocPage {
             DocPage::Pseudoclasses => write!(f, "Pseudoclasses"),
             DocPage::Examples => write!(f, "Examples"),
             DocPage::DwuiExamples => write!(f, "DWUI Examples"),
+            DocPage::Animation => write!(f, "Animation"),
         }
     }
 }
@@ -83,6 +86,7 @@ pub fn doc_sections() -> Vec<DocSection> {
         DocSection {
             title: "General".to_string(),
             docs: vec![
+                DocPage::Animation,
                 DocPage::Colors,
                 DocPage::Responsiveness,
                 DocPage::Pseudoclasses,
