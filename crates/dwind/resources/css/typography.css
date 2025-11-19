@@ -199,3 +199,21 @@
 .bg-white {
     background-color: rgb(255 255 255);
 }
+
+/*
+    overflow
+*/
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-ellipsis {
+    text-overflow: ellipsis;
+}
+
+.text-clip {
+    text-overflow: clip;
+}
