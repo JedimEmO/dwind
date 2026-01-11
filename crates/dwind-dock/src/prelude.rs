@@ -7,7 +7,7 @@
 // Layout types
 pub use crate::layout::{
     generate_node_id, DockLayout, DockNode, FloatingPanel, NodeId, SplitDirection, Tab,
-    TabContainer, TabId,
+    TabContainer, TabId, LAYOUT_VERSION,
 };
 
 // Drop zone types

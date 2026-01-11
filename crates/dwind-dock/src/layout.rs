@@ -311,19 +311,36 @@ impl FloatingPanel {
     }
 }
 
+/// Current layout format version.
+pub const LAYOUT_VERSION: u32 = 1;
+
 /// The complete dock layout state.
+///
+/// This struct is serializable for layout persistence. The `version` field
+/// enables future format migrations.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct DockLayout {
+    /// Layout format version for future compatibility.
+    ///
+    /// Current version is 1. This field is used for migration when
+    /// deserializing older layouts.
+    #[serde(default = "default_version")]
+    pub version: u32,
     /// The root of the docked layout tree. None if all panels are floating.
     pub root: Option<DockNode>,
     /// Floating panels not docked to the main tree.
     pub floating: Vec<FloatingPanel>,
 }
 
+fn default_version() -> u32 {
+    LAYOUT_VERSION
+}
+
 impl DockLayout {
     /// Create a new layout with a root node.
     pub fn new(root: DockNode) -> Self {
         Self {
+            version: LAYOUT_VERSION,
             root: Some(root),
             floating: Vec::new(),
         }
@@ -331,7 +348,10 @@ impl DockLayout {
 
     /// Create an empty layout.
     pub fn empty() -> Self {
-        Self::default()
+        Self {
+            version: LAYOUT_VERSION,
+            ..Self::default()
+        }
     }
 
     /// Find a node by ID in the docked tree or floating panels.

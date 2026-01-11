@@ -80,6 +80,31 @@ dock_area (root container)
 
 ## Important Patterns
 
+### DockState is Cheaply Cloneable
+
+`DockState` uses `Arc` internally for all its fields. This means you can clone it freely without wrapping it in `Arc` yourself:
+
+```rust
+// Good - just clone directly
+let state = DockState::new(layout, |_| {});
+let state2 = state.clone(); // Cheap, just Arc::clone internally
+
+// Unnecessary - don't wrap in Arc
+let state = Arc::new(DockState::new(layout, |_| {})); // Not needed!
+```
+
+### RefCell for Hover State
+
+The `DockState` uses `RefCell<Option<DropZone>>` for `pending_drop_zone` instead of `Mutable`. This is a deliberate architectural choice:
+
+**Why RefCell instead of Mutable?**
+- During drag operations, the mouse hovers over many drop zones rapidly
+- Using `Mutable` would trigger signal updates and potentially re-renders on every hover
+- `RefCell` allows synchronous read/write without signal updates
+- The drop zone is only read once when the mouse is released (`end_drag()`)
+
+**Trade-off:** This mixes signal-based reactivity with interior mutability, which can be confusing. However, the performance benefit (no signal updates during hover) outweighs the architectural impurity.
+
 ### Reactive Re-rendering
 
 The `dock_area` component uses `child_signal()` with `layout_signal()`:
@@ -212,7 +237,9 @@ Note: Node IDs are serialized but may conflict with runtime-generated IDs. For p
 
 ## Styling
 
-The default theme uses dwind utility classes (gray-800, gray-900, etc.). Customize via `DockTheme` or override with the `apply` prop on components.
+**Note:** Theme support is not yet fully implemented. The `DockTheme` struct is accepted by `DockAreaProps` for API stability, but currently does not affect rendering. All styling is hardcoded using dwind utility classes (gray-800, gray-900, etc.).
+
+To customize styling now, use the `apply` prop on components to override default styles.
 
 ## Dependencies
 

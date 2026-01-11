@@ -20,21 +20,30 @@ pub type TabContentRenderer = Arc<dyn Fn(&TabId) -> Dom + Send + Sync>;
 /// Props for the dock area component.
 pub struct DockAreaProps {
     /// The dock state manager.
+    ///
+    /// `DockState` is cheaply cloneable (uses `Arc` internally), so you don't
+    /// need to wrap it in `Arc` yourself.
     pub state: DockState,
     /// Function to render content for a tab.
     pub tab_content: TabContentRenderer,
     /// Optional theme customization.
+    ///
+    /// Note: Theme support is not yet fully implemented. This field is accepted
+    /// for API stability but currently does not affect rendering.
     pub theme: DockTheme,
     /// Optional builder function for customizing the root element.
     pub apply: Option<Box<dyn FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>>,
 }
 
 /// Render the dock area - the root container for the dock system.
+///
+/// Note: The `theme` parameter is currently accepted but not fully implemented.
+/// Styling is currently hardcoded. Full theme support is planned for a future release.
 pub fn dock_area(props: DockAreaProps) -> Dom {
     let DockAreaProps {
         state,
         tab_content,
-        theme: _theme,
+        theme: _theme, // TODO: Implement theme support - currently styling is hardcoded
         apply,
     } = props;
 

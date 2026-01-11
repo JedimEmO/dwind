@@ -11,8 +11,9 @@
 //!
 //! ## Example
 //!
-//! ```ignore
+//! ```rust,no_run
 //! use dwind_dock::prelude::*;
+//! use dominator::html;
 //! use std::sync::Arc;
 //!
 //! // Create initial layout
@@ -24,8 +25,8 @@
 //!     )
 //! );
 //!
-//! // Create state with persistence callback
-//! let state = DockState::new(layout, |layout| {
+//! // Create state - DockState is cheaply cloneable (no Arc needed)
+//! let state = DockState::new(layout, |_layout| {
 //!     // Save layout to localStorage, etc.
 //! });
 //!
@@ -41,7 +42,7 @@
 //! dock_area(DockAreaProps {
 //!     state,
 //!     tab_content,
-//!     theme: Default::default(),
+//!     theme: DockTheme::default(),
 //!     apply: None,
 //! });
 //! ```

@@ -1,4 +1,7 @@
 //! State management for the dock system.
+//!
+//! The [`DockState`] is the central state manager that coordinates layout changes,
+//! drag-and-drop operations, and notifies listeners of updates.
 
 use crate::drop_zone::{DockSide, DropZone};
 use crate::layout::{
@@ -27,7 +30,34 @@ pub type OnLayoutChange = Arc<dyn Fn(&DockLayout) + Send + Sync>;
 
 /// Central state manager for the dock system.
 ///
-/// This manages the layout tree, drag state, and notifies listeners of changes.
+/// `DockState` manages the layout tree, drag operations, and notifies listeners
+/// of layout changes. It is the primary interface for interacting with the dock
+/// system programmatically.
+///
+/// # Cloning
+///
+/// `DockState` is cheaply cloneable because it uses `Arc` internally. You don't
+/// need to wrap it in `Arc` yourself - just clone it directly when passing to
+/// multiple components or callbacks.
+///
+/// # Example
+///
+/// ```ignore
+/// let state = DockState::new(layout, |layout| {
+///     // Persist layout changes
+/// });
+///
+/// // Clone freely - this is cheap
+/// let state2 = state.clone();
+/// ```
+///
+/// # Architecture Note
+///
+/// The `pending_drop_zone` field uses `RefCell` instead of `Mutable` to avoid
+/// triggering signal updates on every mouse hover during drag operations. This
+/// is a deliberate trade-off: hover state changes frequently but doesn't need
+/// to trigger re-renders, while the actual drop operation reads this value
+/// synchronously when the mouse is released.
 #[derive(Clone)]
 pub struct DockState {
     /// The layout tree.
@@ -35,7 +65,9 @@ pub struct DockState {
     /// Current drag operation (if any).
     drag_state: Arc<Mutable<Option<DragState>>>,
     /// Pending drop zone (set by drop zone on hover, read on mouseup).
-    /// Uses RefCell to avoid signal updates on hover.
+    ///
+    /// Uses RefCell instead of Mutable to avoid signal updates on hover.
+    /// This is intentional - see struct-level docs for rationale.
     pending_drop_zone: Arc<RefCell<Option<DropZone>>>,
     /// Callback when layout changes.
     on_layout_change: OnLayoutChange,
@@ -43,6 +75,18 @@ pub struct DockState {
 
 impl DockState {
     /// Create a new dock state with an initial layout.
+    ///
+    /// The `on_layout_change` callback is invoked whenever the layout changes,
+    /// allowing you to persist the layout (e.g., to localStorage).
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let state = DockState::new(layout, |layout| {
+    ///     let json = serde_json::to_string(layout).unwrap();
+    ///     // Save to localStorage
+    /// });
+    /// ```
     pub fn new(
         initial_layout: DockLayout,
         on_layout_change: impl Fn(&DockLayout) + Send + Sync + 'static,
@@ -56,6 +100,8 @@ impl DockState {
     }
 
     /// Create a new dock state without a change callback.
+    ///
+    /// Useful for testing or when you don't need to persist layout changes.
     pub fn new_without_callback(initial_layout: DockLayout) -> Self {
         Self::new(initial_layout, |_| {})
     }
@@ -63,26 +109,44 @@ impl DockState {
     // --- Signals ---
 
     /// Get a signal for the entire layout.
+    ///
+    /// This signal emits the full `DockLayout` whenever any part of it changes.
+    /// Use this for reactive rendering of the dock tree.
+    ///
+    /// Note: This triggers a full re-render on any change. For large layouts,
+    /// consider whether you need the full layout or just specific parts.
     pub fn layout_signal(&self) -> impl Signal<Item = DockLayout> {
         self.layout.signal_cloned()
     }
 
     /// Get a signal for the current drag state.
+    ///
+    /// Emits `Some(DragState)` during a drag operation, `None` otherwise.
+    /// Useful for rendering drag overlays and visual feedback.
     pub fn drag_signal(&self) -> impl Signal<Item = Option<DragState>> {
         self.drag_state.signal_cloned()
     }
 
     /// Get a signal indicating if a drag is in progress.
+    ///
+    /// More efficient than `drag_signal()` when you only need to know
+    /// whether dragging is happening, not the drag details.
     pub fn is_dragging_signal(&self) -> impl Signal<Item = bool> {
         self.drag_state.signal_ref(|s| s.is_some())
     }
 
-    /// Get the current layout (snapshot).
+    /// Get the current layout as a snapshot.
+    ///
+    /// This clones the current layout state. For reactive updates,
+    /// use `layout_signal()` instead.
     pub fn layout(&self) -> DockLayout {
         self.layout.get_cloned()
     }
 
-    /// Replace the entire layout (for workspace switching).
+    /// Replace the entire layout.
+    ///
+    /// Use this for workspace switching or restoring a saved layout.
+    /// Triggers the `on_layout_change` callback.
     pub fn set_layout(&self, new_layout: DockLayout) {
         self.layout.set(new_layout.clone());
         (self.on_layout_change)(&new_layout);
@@ -91,6 +155,9 @@ impl DockState {
     // --- Drag Operations ---
 
     /// Start dragging a tab.
+    ///
+    /// Called when a tab drag begins. The `x` and `y` are the initial
+    /// mouse coordinates for positioning the drag overlay.
     pub fn start_drag(&self, tab: Tab, source_node_id: NodeId, x: f64, y: f64) {
         self.drag_state.set(Some(DragState {
             tab,
@@ -100,20 +167,30 @@ impl DockState {
         }));
     }
 
-    /// Update drag position only (zone is managed separately via set_hovered_zone).
+    /// Update the drag position during a drag operation.
+    ///
+    /// Called on mouse move to update the drag overlay position.
+    /// Does nothing if no drag is in progress.
     pub fn update_drag(&self, x: f64, y: f64) {
-        self.drag_state.lock_mut().as_mut().map(|state| {
+        if let Some(state) = self.drag_state.lock_mut().as_mut() {
             state.mouse_x = x;
             state.mouse_y = y;
-        });
+        }
     }
 
-    /// Set the pending drop zone (called by drop zone on hover).
+    /// Set the pending drop zone.
+    ///
+    /// Called by drop zone indicators on mouse enter/leave to register
+    /// where a drop would occur. This uses `RefCell` internally to avoid
+    /// signal updates on every hover.
     pub fn set_pending_drop_zone(&self, zone: Option<DropZone>) {
         *self.pending_drop_zone.borrow_mut() = zone;
     }
 
-    /// Complete the drag operation, applying the drop if over a valid zone.
+    /// Complete the drag operation.
+    ///
+    /// If a pending drop zone is set, the tab is moved to that zone.
+    /// Otherwise, the drag is cancelled with no effect.
     pub fn end_drag(&self) {
         let drag = self.drag_state.replace(None);
         let pending_zone = self.pending_drop_zone.borrow_mut().take();
@@ -125,19 +202,27 @@ impl DockState {
         }
     }
 
-    /// Cancel the drag operation without applying.
+    /// Cancel the drag operation without applying any changes.
+    ///
+    /// Clears both the drag state and any pending drop zone to prevent
+    /// stale drop zones from being applied on subsequent drags.
     pub fn cancel_drag(&self) {
         self.drag_state.set(None);
+        self.pending_drop_zone.borrow_mut().take();
     }
 
-    /// Check if a drag is in progress.
+    /// Check if a drag is currently in progress.
+    ///
+    /// For reactive UI updates, prefer `is_dragging_signal()`.
     pub fn is_dragging(&self) -> bool {
         self.drag_state.lock_ref().is_some()
     }
 
     // --- Layout Operations ---
 
-    /// Set the active tab for a node.
+    /// Set the active tab for a node by index.
+    ///
+    /// The index is clamped to valid range. Triggers `on_layout_change`.
     pub fn set_active_tab(&self, node_id: NodeId, tab_index: usize) {
         let mut layout = self.layout.lock_mut();
         if let Some(root) = &mut layout.root {
@@ -157,6 +242,9 @@ impl DockState {
     }
 
     /// Update the split ratio for a split node.
+    ///
+    /// The ratio is clamped to the range 0.1 to 0.9 to ensure both
+    /// children remain visible. Triggers `on_layout_change`.
     pub fn set_split_ratio(&self, node_id: NodeId, ratio: f64) {
         let mut layout = self.layout.lock_mut();
         let ratio = ratio.clamp(0.1, 0.9);
@@ -187,15 +275,22 @@ impl DockState {
         }
     }
 
-    /// Close a tab.
+    /// Close a tab by ID.
+    ///
+    /// Removes the tab from the specified node. If the node becomes empty,
+    /// it is automatically removed and its parent split is cleaned up.
+    /// Triggers `on_layout_change`.
     pub fn close_tab(&self, node_id: NodeId, tab_id: &TabId) {
         let mut layout = self.layout.lock_mut();
-        Self::remove_tab_from_layout(&mut *layout, node_id, tab_id);
-        Self::cleanup_empty_nodes(&mut *layout);
+        Self::remove_tab_from_layout(&mut layout, node_id, tab_id);
+        Self::cleanup_empty_nodes(&mut layout);
         (self.on_layout_change)(&layout);
     }
 
-    /// Move a floating panel.
+    /// Move a floating panel to new coordinates.
+    ///
+    /// The coordinates are in pixels relative to the dock area.
+    /// Triggers `on_layout_change`.
     pub fn move_floating_panel(&self, panel_id: NodeId, x: f64, y: f64) {
         let mut layout = self.layout.lock_mut();
         if let Some(panel) = layout.floating.iter_mut().find(|p| p.id == panel_id) {
@@ -206,6 +301,9 @@ impl DockState {
     }
 
     /// Resize a floating panel.
+    ///
+    /// Dimensions are clamped to minimum values (200x150 pixels).
+    /// Triggers `on_layout_change`.
     pub fn resize_floating_panel(&self, panel_id: NodeId, width: f64, height: f64) {
         let mut layout = self.layout.lock_mut();
         if let Some(panel) = layout.floating.iter_mut().find(|p| p.id == panel_id) {

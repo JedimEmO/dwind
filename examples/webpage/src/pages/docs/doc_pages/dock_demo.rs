@@ -43,9 +43,10 @@ impl Workspace {
 /// The dock demo page.
 pub fn dock_demo_page() -> Dom {
     let current_workspace = Mutable::new(Workspace::Default);
-    let state = Arc::new(DockState::new(Workspace::Default.create_layout(), |_layout| {
+    // DockState is cheaply cloneable (uses Arc internally), no need to wrap in Arc
+    let state = DockState::new(Workspace::Default.create_layout(), |_layout| {
         // Could persist to localStorage here
-    }));
+    });
 
     html!("div", {
         .dwclass!("w-full h-full flex flex-col")
@@ -87,7 +88,7 @@ pub fn dock_demo_page() -> Dom {
     })
 }
 
-fn workspace_button(workspace: Workspace, current: Mutable<Workspace>, state: Arc<DockState>) -> Dom {
+fn workspace_button(workspace: Workspace, current: Mutable<Workspace>, state: DockState) -> Dom {
     let is_active = current.signal().map(move |c| c == workspace);
 
     button!({
@@ -108,11 +109,11 @@ fn workspace_button(workspace: Workspace, current: Mutable<Workspace>, state: Ar
     })
 }
 
-fn create_dock_with_state(state: Arc<DockState>) -> Dom {
+fn create_dock_with_state(state: DockState) -> Dom {
     let tab_content: TabContentRenderer = Arc::new(|tab_id| render_tab_content(tab_id));
 
     dock_area(DockAreaProps {
-        state: (*state).clone(),
+        state,
         tab_content,
         theme: DockTheme::default(),
         apply: None,
@@ -123,150 +124,70 @@ fn create_dock_with_state(state: Arc<DockState>) -> Dom {
 
 #[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
 fn create_default_layout() -> DockLayout {
-    let left_panel = DockNode::Leaf {
-        id: 1,
-        container: TabContainer::new(vec![
-            Tab::new("files", "Files"),
-            Tab::new("properties", "Properties"),
-        ]),
-    };
-
-    let right_panel = DockNode::Leaf {
-        id: 2,
-        container: TabContainer::new(vec![
-            Tab::new("editor", "Editor"),
-            Tab::new("preview", "Preview"),
-        ]),
-    };
-
-    let top_split = DockNode::Split {
-        id: 3,
-        direction: SplitDirection::Horizontal,
-        ratio: 0.3,
-        first: Box::new(left_panel),
-        second: Box::new(right_panel),
-    };
-
-    let bottom_panel = DockNode::Leaf {
-        id: 4,
-        container: TabContainer::new(vec![
+    DockLayout::new(DockNode::vsplit(
+        DockNode::hsplit(
+            DockNode::leaf_with_tabs(vec![
+                Tab::new("files", "Files"),
+                Tab::new("properties", "Properties"),
+            ]),
+            DockNode::leaf_with_tabs(vec![
+                Tab::new("editor", "Editor"),
+                Tab::new("preview", "Preview"),
+            ]),
+            0.3,
+        ),
+        DockNode::leaf_with_tabs(vec![
             Tab::new("console", "Console"),
             Tab::new("output", "Output"),
             Tab::new("errors", "Errors"),
         ]),
-    };
-
-    let root = DockNode::Split {
-        id: 5,
-        direction: SplitDirection::Vertical,
-        ratio: 0.7,
-        first: Box::new(top_split),
-        second: Box::new(bottom_panel),
-    };
-
-    DockLayout::new(root)
+        0.7,
+    ))
 }
 
 fn create_coding_layout() -> DockLayout {
     // Focused coding: large editor, small file browser, no bottom panel
-    let files_panel = DockNode::Leaf {
-        id: 10,
-        container: TabContainer::new(vec![
-            Tab::new("files", "Files"),
-        ]),
-    };
-
-    let editor_panel = DockNode::Leaf {
-        id: 11,
-        container: TabContainer::new(vec![
+    DockLayout::new(DockNode::hsplit(
+        DockNode::leaf(Tab::new("files", "Files")),
+        DockNode::leaf_with_tabs(vec![
             Tab::new("editor", "Editor"),
             Tab::new("editor2", "Editor 2"),
             Tab::new("editor3", "Editor 3"),
         ]),
-    };
-
-    let root = DockNode::Split {
-        id: 12,
-        direction: SplitDirection::Horizontal,
-        ratio: 0.2,
-        first: Box::new(files_panel),
-        second: Box::new(editor_panel),
-    };
-
-    DockLayout::new(root)
+        0.2,
+    ))
 }
 
 fn create_debug_layout() -> DockLayout {
     // Debug layout: editor on left, debug panels on right, console at bottom
-    let editor_panel = DockNode::Leaf {
-        id: 20,
-        container: TabContainer::new(vec![
-            Tab::new("editor", "Editor"),
-        ]),
-    };
-
-    let variables_panel = DockNode::Leaf {
-        id: 21,
-        container: TabContainer::new(vec![
-            Tab::new("variables", "Variables"),
-            Tab::new("watch", "Watch"),
-        ]),
-    };
-
-    let callstack_panel = DockNode::Leaf {
-        id: 22,
-        container: TabContainer::new(vec![
-            Tab::new("callstack", "Call Stack"),
-            Tab::new("breakpoints", "Breakpoints"),
-        ]),
-    };
-
-    let right_split = DockNode::Split {
-        id: 23,
-        direction: SplitDirection::Vertical,
-        ratio: 0.5,
-        first: Box::new(variables_panel),
-        second: Box::new(callstack_panel),
-    };
-
-    let top_split = DockNode::Split {
-        id: 24,
-        direction: SplitDirection::Horizontal,
-        ratio: 0.6,
-        first: Box::new(editor_panel),
-        second: Box::new(right_split),
-    };
-
-    let console_panel = DockNode::Leaf {
-        id: 25,
-        container: TabContainer::new(vec![
+    DockLayout::new(DockNode::vsplit(
+        DockNode::hsplit(
+            DockNode::leaf(Tab::new("editor", "Editor")),
+            DockNode::vsplit(
+                DockNode::leaf_with_tabs(vec![
+                    Tab::new("variables", "Variables"),
+                    Tab::new("watch", "Watch"),
+                ]),
+                DockNode::leaf_with_tabs(vec![
+                    Tab::new("callstack", "Call Stack"),
+                    Tab::new("breakpoints", "Breakpoints"),
+                ]),
+                0.5,
+            ),
+            0.6,
+        ),
+        DockNode::leaf_with_tabs(vec![
             Tab::new("console", "Console"),
             Tab::new("output", "Output"),
             Tab::new("errors", "Errors"),
         ]),
-    };
-
-    let root = DockNode::Split {
-        id: 26,
-        direction: SplitDirection::Vertical,
-        ratio: 0.7,
-        first: Box::new(top_split),
-        second: Box::new(console_panel),
-    };
-
-    DockLayout::new(root)
+        0.7,
+    ))
 }
 
 fn create_minimal_layout() -> DockLayout {
     // Just an editor
-    let editor_panel = DockNode::Leaf {
-        id: 30,
-        container: TabContainer::new(vec![
-            Tab::new("editor", "Editor"),
-        ]),
-    };
-
-    DockLayout::new(editor_panel)
+    DockLayout::new(DockNode::leaf(Tab::new("editor", "Editor")))
 }
 
 // --- Tab Content Renderers ---
