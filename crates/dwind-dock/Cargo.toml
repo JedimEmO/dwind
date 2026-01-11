@@ -1,0 +1,23 @@
+[package]
+name = "dwind-dock"
+version = "0.1.0"
+edition = "2021"
+description = "Dockable views component library for DOMINATOR - Blender-style panel system"
+homepage = "https://github.com/JedimEmO/dwind"
+repository = "https://github.com/JedimEmO/dwind"
+license = "MIT"
+keywords = ["web", "wasm", "dock", "ui", "dominator"]
+
+[dependencies]
+dominator = { workspace = true }
+dwind = { path = "../dwind", version = "0.7.0" }
+dwind-macros = { path = "../dwind-macros", version = "0.4.0" }
+futures-signals = { workspace = true }
+futures-signals-component-macro = { workspace = true }
+once_cell = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+web-sys = { workspace = true }
+
+[dev-dependencies]
+wasm-bindgen-test = { workspace = true }

@@ -198,6 +198,7 @@ dependencies = [
  "const_format",
  "dominator",
  "dwind",
+ "dwind-dock",
  "dwind-macros",
  "dwui",
  "example-html-highlight-macro",
@@ -259,6 +260,22 @@ version = "0.3.0"
 dependencies = [
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "dwind-dock"
+version = "0.1.0"
+dependencies = [
+ "dominator",
+ "dwind",
+ "dwind-macros",
+ "futures-signals",
+ "futures-signals-component-macro",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "wasm-bindgen-test",
+ "web-sys",
 ]
 
 [[package]]

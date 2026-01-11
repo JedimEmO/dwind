@@ -34,6 +34,9 @@ pub enum DocPage {
     // Examples
     Examples,
     DwuiExamples,
+
+    // Components
+    DockDemo,
 }
 
 impl DocPage {
@@ -51,7 +54,8 @@ impl DocPage {
             DocPage::Pseudoclasses => go_to_url("#/docs/pseudoclasses"),
             DocPage::Examples => go_to_url("#/examples"),
             DocPage::DwuiExamples => go_to_url("#/dwui-examples"),
-            &DocPage::Animation => go_to_url("#/docs/animation"),
+            DocPage::Animation => go_to_url("#/docs/animation"),
+            DocPage::DockDemo => go_to_url("#/dock-demo"),
         }
     }
 }
@@ -77,6 +81,7 @@ impl Display for DocPage {
             DocPage::Examples => write!(f, "Examples"),
             DocPage::DwuiExamples => write!(f, "DWUI Examples"),
             DocPage::Animation => write!(f, "Animation"),
+            DocPage::DockDemo => write!(f, "Dock Demo"),
         }
     }
 }
@@ -95,6 +100,10 @@ pub fn doc_sections() -> Vec<DocSection> {
         DocSection {
             title: "Flex and Grid".to_string(),
             docs: vec![DocPage::Flex /*, DocPage::Justify, DocPage::Align*/],
+        },
+        DocSection {
+            title: "Components".to_string(),
+            docs: vec![DocPage::DockDemo],
         },
         /*DocSection {
             title: "Borders".to_string(),

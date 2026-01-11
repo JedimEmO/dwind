@@ -1,5 +1,6 @@
 use crate::pages::docs::doc_pages::animations::animation_page;
 use crate::pages::docs::doc_pages::colors::colors_page;
+use crate::pages::docs::doc_pages::dock_demo::dock_demo_page;
 use crate::pages::docs::doc_pages::dwui_examples::dwui_examples_page;
 use crate::pages::docs::doc_pages::examples::examples_page;
 use crate::pages::docs::doc_pages::flex::flex_page;
@@ -23,6 +24,7 @@ pub fn doc_main_view(
             DocPage::Examples => examples_page(),
             DocPage::DwuiExamples => dwui_examples_page(),
             DocPage::Animation => animation_page(),
+            DocPage::DockDemo => dock_demo_page(),
             _ => html!("div", {
                 .dwclass!("w-full")
                 .text("todo")

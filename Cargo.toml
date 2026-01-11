@@ -5,6 +5,7 @@ members = [
     "crates/dwind",
     "crates/dwind-base",
     "crates/dwind-build",
+    "crates/dwind-dock",
     "crates/dwind-macros",
     "crates/dwui",
     "crates/example-html-macro",
