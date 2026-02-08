@@ -1,0 +1,26 @@
+/* Chart axis labels */
+.glass-chart-label {
+    fill: var(--glass-text-secondary);
+    font-size: 12px;
+    font-family: inherit;
+}
+
+/* Chart tick labels */
+.glass-chart-tick {
+    fill: var(--glass-text-tertiary);
+    font-size: 11px;
+    font-family: inherit;
+}
+
+/* Chart grid lines */
+.glass-chart-grid {
+    stroke: var(--glass-border-color);
+    stroke-width: 0.5;
+    opacity: 0.5;
+}
+
+/* Chart axis lines */
+.glass-chart-axis {
+    stroke: var(--glass-text-tertiary);
+    stroke-width: 1;
+}

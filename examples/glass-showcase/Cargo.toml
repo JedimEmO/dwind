@@ -12,7 +12,10 @@ dominator = { workspace = true }
 dwind = { path = "../../crates/dwind", version = "0.7.0" }
 dwind-macros = { path = "../../crates/dwind-macros", version = "0.4.0" }
 dwind-glass = { path = "../../crates/dwind-glass" }
+dwind-graph-data = { path = "../../crates/dwind-graph-data" }
 futures-signals = { workspace = true }
+gloo-timers = { workspace = true }
+js-sys = "0.3"
 log = { workspace = true }
 matchit = { workspace = true }
 wasm-bindgen = { workspace = true }

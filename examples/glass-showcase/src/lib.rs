@@ -108,6 +108,7 @@ fn main_view() -> Dom {
                         Page::Core => pages::core_page::core_page(),
                         Page::Navigation => pages::navigation_page::navigation_page(),
                         Page::Data => pages::data_page::data_page(),
+                        Page::Charts => pages::charts_page::charts_page(),
                         Page::Theme => pages::theme_page::theme_page(),
                     })
                 }))

@@ -15,6 +15,7 @@ members = [
     "examples/tauri-app",
     "examples/tauri-app/src-tauri",
     "crates/dwind-glass",
+    "crates/dwind-graph-data",
     "examples/glass-showcase",
 ]
 

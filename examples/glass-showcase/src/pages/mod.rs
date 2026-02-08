@@ -1,3 +1,4 @@
+pub mod charts_page;
 pub mod core_page;
 pub mod data_page;
 pub mod navigation_page;

@@ -2,7 +2,11 @@ use std::path::Path;
 use std::{env, fs};
 
 fn main() {
-    let files = vec!["resources/css/base.css", "resources/css/glass.css"];
+    let files = vec![
+        "resources/css/base.css",
+        "resources/css/glass.css",
+        "resources/css/chart.css",
+    ];
 
     let out_dir = env::var_os("OUT_DIR").unwrap();
 

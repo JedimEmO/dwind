@@ -274,6 +274,7 @@ pub fn apply_glass_theme(theme: Option<GlassTheme>) {
 
     glass_css::apply_glass_stylesheet();
     base_css::apply_base_stylesheet();
+    chart_css::apply_chart_stylesheet();
 }
 
 pub mod glass_css {
@@ -282,4 +283,8 @@ pub mod glass_css {
 
 pub mod base_css {
     include!(concat!(env!("OUT_DIR"), "/base.rs"));
+}
+
+pub mod chart_css {
+    include!(concat!(env!("OUT_DIR"), "/chart.rs"));
 }

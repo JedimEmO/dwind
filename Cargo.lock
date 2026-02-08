@@ -810,6 +810,7 @@ dependencies = [
  "dominator",
  "dominator-css-bindgen",
  "dwind",
+ "dwind-graph-data",
  "dwind-macros",
  "dwui",
  "futures-signals",
@@ -817,8 +818,13 @@ dependencies = [
  "gloo-timers",
  "once_cell",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
+
+[[package]]
+name = "dwind-graph-data"
+version = "0.1.0"
 
 [[package]]
 name = "dwind-macros"
@@ -1325,8 +1331,11 @@ dependencies = [
  "dominator",
  "dwind",
  "dwind-glass",
+ "dwind-graph-data",
  "dwind-macros",
  "futures-signals",
+ "gloo-timers",
+ "js-sys",
  "log",
  "matchit",
  "wasm-bindgen",

@@ -134,6 +134,31 @@ pub fn all_sections() -> Vec<SectionEntry> {
             keywords: "tooltip hover hint popover info",
             page: Page::Data,
         },
+        // Charts
+        SectionEntry {
+            name: "Line Chart",
+            id: "section-line-chart",
+            keywords: "chart line graph trend time series data visualization",
+            page: Page::Charts,
+        },
+        SectionEntry {
+            name: "Bar Chart",
+            id: "section-bar-chart",
+            keywords: "chart bar graph comparison category grouped stacked",
+            page: Page::Charts,
+        },
+        SectionEntry {
+            name: "Pie & Donut",
+            id: "section-pie-chart",
+            keywords: "chart pie donut ring proportion percentage slice",
+            page: Page::Charts,
+        },
+        SectionEntry {
+            name: "Sparkline",
+            id: "section-sparkline",
+            keywords: "chart sparkline mini inline trend compact",
+            page: Page::Charts,
+        },
         // Theme
         SectionEntry {
             name: "Theme Selector",

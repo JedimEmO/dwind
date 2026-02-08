@@ -10,12 +10,24 @@ const_format = { workspace = true }
 dominator = { workspace = true }
 dwind = { path = "../dwind", version = "0.7.0" }
 dwind-macros = { path = "../dwind-macros", version = "0.4.0" }
+dwind-graph-data = { path = "../dwind-graph-data", version = "0.1.0" }
 dwui = { path = "../dwui", version = "0.7.4" }
 futures-signals = { workspace = true }
 futures-signals-component-macro = { workspace = true }
 once_cell = { workspace = true }
-web-sys = { workspace = true, features = ["HtmlInputElement"] }
+web-sys = { workspace = true, features = [
+    "HtmlInputElement",
+    "SvgsvgElement",
+    "SvgGraphicsElement",
+    "SvgPoint",
+    "SvgMatrix",
+    "SvgRect",
+    "MouseEvent",
+    "WheelEvent",
+    "AddEventListenerOptions",
+] }
 wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
 gloo-timers = { workspace = true }
 
 [build-dependencies]

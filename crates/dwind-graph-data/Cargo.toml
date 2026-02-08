@@ -1,0 +1,9 @@
+[package]
+name = "dwind-graph-data"
+version = "0.1.0"
+edition = "2021"
+description = "Data processing primitives for chart visualization"
+license = "MIT"
+
+# No DOM dependencies — pure data crate
+[dependencies]
