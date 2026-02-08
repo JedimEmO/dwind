@@ -1,0 +1,22 @@
+[package]
+name = "dwind-glass"
+version = "0.1.0"
+edition = "2021"
+description = "Glassmorphic UI component library for DOMINATOR web applications"
+license = "MIT"
+
+[dependencies]
+const_format = { workspace = true }
+dominator = { workspace = true }
+dwind = { path = "../dwind", version = "0.7.0" }
+dwind-macros = { path = "../dwind-macros", version = "0.4.0" }
+dwui = { path = "../dwui", version = "0.7.4" }
+futures-signals = { workspace = true }
+futures-signals-component-macro = { workspace = true }
+once_cell = { workspace = true }
+web-sys = { workspace = true, features = ["HtmlInputElement"] }
+wasm-bindgen = { workspace = true }
+gloo-timers = { workspace = true }
+
+[build-dependencies]
+dominator-css-bindgen = { path = "../dominator-css-bindgen", version = "0.2.0" }

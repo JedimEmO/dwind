@@ -1,0 +1,68 @@
+# DWIND - Tailwind-like CSS for Rust/WebAssembly
+
+DWIND (Dominator Wind) provides Tailwind-like CSS utility classes for DOMINATOR web applications. All styling compiles into your WASM binary with automatic dead code elimination.
+
+## Documentation Index
+
+- [dwind-quickstart.md](./dwind-quickstart.md) - Macro syntax, breakpoints, pseudo-classes, reactive styling
+- [dwind-classes.md](./dwind-classes.md) - Complete CSS utility class reference
+- [dwui-components.md](./dwui-components.md) - UI component library (buttons, modals, inputs, cards)
+- [dwind-glass-components.md](./dwind-glass-components.md) - Glassmorphic design system (dwind-glass)
+- [design-system-guide.md](./design-system-guide.md) - Guide to building design systems with the DWIND stack
+- [dwind-dock.md](./dwind-dock.md) - Dockable panel system (tabs, splits, floating panels)
+- [dwind-tauri.md](./dwind-tauri.md) - Tauri desktop application setup and integration
+
+## Quick Start
+
+```rust
+use dominator::{html, Dom};
+use dwind::prelude::*;
+
+fn my_component() -> Dom {
+    html!("div", {
+        // Basic styling
+        .dwclass!("flex flex-col gap-4 p-4 bg-gray-900 rounded-lg")
+
+        // Responsive breakpoints
+        .dwclass!("@sm:flex-row @md:gap-8")
+
+        // Hover/focus states
+        .dwclass!("hover:bg-gray-800 focus:ring-2")
+
+        .child(html!("button", {
+            .dwclass!("px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600")
+            .text("Click me")
+        }))
+    })
+}
+```
+
+## Key Concepts
+
+1. **dwclass!** - Apply utility classes to DOMINATOR elements
+2. **dwclass_signal!** - Apply classes conditionally based on reactive signals
+3. **Breakpoints** - `@sm:`, `@md:`, `@lg:`, `@xl:` for responsive design
+4. **Pseudo-classes** - `hover:`, `focus:`, `nth-child(n):` etc.
+5. **Variants** - `[& > *]:`, `[& selector]:` for child styling
+
+## Crates
+
+| Crate | Purpose |
+|-------|---------|
+| `dwind` | Main library - Tailwind-like utilities |
+| `dwind-macros` | Procedural macros (dwclass!, dwclass_signal!) |
+| `dwind-base` | Runtime utilities, media query helpers |
+| `dwui` | Themeable UI component library |
+| `dwind-glass` | Glassmorphic design system (frosted glass components) |
+| `dwind-dock` | Dockable panel system with drag-and-drop |
+
+## Dependencies
+
+```toml
+[dependencies]
+dominator = "0.5"
+dwind = { git = "https://github.com/user/dominator-css-bindgen" }
+dwui = { git = "https://github.com/user/dominator-css-bindgen" }       # optional
+dwind-dock = { git = "https://github.com/user/dominator-css-bindgen" } # optional
+futures-signals = "0.3"
+```

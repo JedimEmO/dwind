@@ -1,0 +1,5 @@
+[build]
+target = "public/index.html"
+
+[serve]
+port = 8812

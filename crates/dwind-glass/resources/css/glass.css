@@ -1,0 +1,99 @@
+/* Glass text colors */
+.glass-text-primary {
+    color: var(--glass-text-primary);
+}
+
+.glass-text-secondary {
+    color: var(--glass-text-secondary);
+}
+
+.glass-text-tertiary {
+    color: var(--glass-text-tertiary);
+}
+
+.glass-text-on-accent {
+    color: var(--glass-text-on-accent);
+}
+
+.glass-text-success {
+    color: var(--glass-success);
+}
+
+.glass-text-warning {
+    color: var(--glass-warning);
+}
+
+.glass-text-error {
+    color: var(--glass-error);
+}
+
+.glass-text-info {
+    color: var(--glass-info);
+}
+
+/* Glass background colors */
+.glass-bg-accent {
+    background-color: var(--glass-accent);
+}
+
+.glass-bg-accent-hover {
+    background-color: var(--glass-accent-hover);
+}
+
+.glass-bg-accent-muted {
+    background-color: var(--glass-accent-muted);
+}
+
+.glass-bg-success-muted {
+    background-color: var(--glass-success-muted);
+}
+
+.glass-bg-warning-muted {
+    background-color: var(--glass-warning-muted);
+}
+
+.glass-bg-error-muted {
+    background-color: var(--glass-error-muted);
+}
+
+.glass-bg-info-muted {
+    background-color: var(--glass-info-muted);
+}
+
+/* Glass border colors */
+.glass-border-accent {
+    border-color: var(--glass-accent);
+}
+
+.glass-border-default {
+    border-color: var(--glass-border-color);
+}
+
+.glass-border-hover {
+    border-color: var(--glass-border-color-hover);
+}
+
+.glass-border-focus {
+    border-color: var(--glass-border-color-focus);
+}
+
+/* Glass shadow utilities */
+.glass-shadow-sm {
+    box-shadow: var(--glass-shadow-sm);
+}
+
+.glass-shadow {
+    box-shadow: var(--glass-shadow);
+}
+
+.glass-shadow-lg {
+    box-shadow: var(--glass-shadow-lg);
+}
+
+.glass-shadow-xl {
+    box-shadow: var(--glass-shadow-xl);
+}
+
+.glass-shadow-inset {
+    box-shadow: var(--glass-shadow-inset);
+}

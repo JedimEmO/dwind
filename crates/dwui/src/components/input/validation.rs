@@ -38,3 +38,13 @@ where
         self.signal_cloned().map(|v| v.to_string()).boxed_local()
     }
 }
+
+impl<T: InputValueWrapper + ?Sized> InputValueWrapper for Box<T> {
+    fn set(&self, value: String) -> ValidationResult {
+        (**self).set(value)
+    }
+
+    fn value_signal_cloned(&self) -> LocalBoxSignal<'static, String> {
+        (**self).value_signal_cloned()
+    }
+}

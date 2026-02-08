@@ -12,6 +12,10 @@ members = [
     "crates/modern-normalize-cssys",
     "crates/tests/dominator-css-bindgen-test",
     "examples/webpage",
+    "examples/tauri-app",
+    "examples/tauri-app/src-tauri",
+    "crates/dwind-glass",
+    "examples/glass-showcase",
 ]
 
 [workspace.dependencies]
