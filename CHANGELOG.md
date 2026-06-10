@@ -2,6 +2,13 @@
 
 ## dwui 0.9.0 - 2026-06-10
 
+### Heavy components
+
+- `data_table!` — themed table with sortable headers (`aria-sort`, controlled `on_sort`), rich `Dom` cells, and optional clickable rows
+- `virtual_scroll!` — windowed list rendering only visible rows (tested against 50k items), `aria-setsize`/`aria-posinset`, and `on_reach_end` infinite loading with an `aria-busy` spinner row
+- `date_picker!` — calendar popup (`role="dialog"` + `role="grid"`) with month navigation, full keyboard support (arrows, PageUp/PageDown, Home/End, Escape), outside-click close, and a controlled `CalendarDate` value
+- `CalendarDate` — dependency-free civil date type (ISO-8601 parse/format, date arithmetic) backing the picker
+
 ### New components
 
 - `alert!` — status callouts (info/success/warning/error/neutral) with severity-aware ARIA roles and an optional dismiss button

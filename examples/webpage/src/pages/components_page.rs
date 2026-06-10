@@ -76,6 +76,15 @@ pub fn components_page() -> Dom {
             }))
             .child(html!("div", {
                 .dwclass!("m-t-4")
+                .child(section_card("Data table", "Sortable columns with aria-sort; sorting is controlled, so your data layer stays in charge. Click the headers.", data_table_demo()))
+            }))
+            .child(html!("div", {
+                .dwclass!("m-t-4 grid @md:grid-cols-2 @<md:grid-cols-1 gap-4")
+                .child(section_card("Virtual scroll", "Windowed rendering — this list has 50,000 rows but only the visible handful exist in the DOM. Scroll to the bottom to trigger infinite loading.", virtual_scroll_demo()))
+                .child(section_card("Date picker", "Calendar popup with full keyboard support: arrows move by day and week, PageUp/PageDown by month, Escape closes.", date_picker_demo()))
+            }))
+            .child(html!("div", {
+                .dwclass!("m-t-4")
                 .child(section_card("Modal dialogs", "Focus-managed dialogs with backdrop blur, escape key, and entrance animation", example_card_modal()))
             }))
         }))
@@ -483,5 +492,162 @@ fn accordion_demo() -> Dom {
                 text("They animate open and closed using the CSS grid-template-rows technique, no JavaScript measurements required."),
             ),
         ])
+    })
+}
+
+fn data_table_demo() -> Dom {
+    #[derive(Clone)]
+    struct Pioneer {
+        id: &'static str,
+        name: &'static str,
+        born: u32,
+        field: &'static str,
+    }
+
+    let pioneers = vec![
+        Pioneer {
+            id: "lovelace",
+            name: "Ada Lovelace",
+            born: 1815,
+            field: "Analytical engines",
+        },
+        Pioneer {
+            id: "hopper",
+            name: "Grace Hopper",
+            born: 1906,
+            field: "Compilers",
+        },
+        Pioneer {
+            id: "turing",
+            name: "Alan Turing",
+            born: 1912,
+            field: "Computability",
+        },
+        Pioneer {
+            id: "hamilton",
+            name: "Margaret Hamilton",
+            born: 1936,
+            field: "Software engineering",
+        },
+        Pioneer {
+            id: "liskov",
+            name: "Barbara Liskov",
+            born: 1939,
+            field: "Abstraction",
+        },
+    ];
+
+    let sorted: Mutable<Option<(String, SortDirection)>> =
+        Mutable::new(Some(("born".to_string(), SortDirection::Ascending)));
+
+    let rows_signal = sorted.signal_cloned().map(move |sort| {
+        let mut rows = pioneers.clone();
+
+        if let Some((key, direction)) = sort {
+            match key.as_str() {
+                "name" => rows.sort_by_key(|p| p.name),
+                "born" => rows.sort_by_key(|p| p.born),
+                _ => {}
+            }
+
+            if direction == SortDirection::Descending {
+                rows.reverse();
+            }
+        }
+
+        rows.into_iter()
+            .map(|p| {
+                (
+                    p.id.to_string(),
+                    vec![text(p.name), text(&p.born.to_string()), text(p.field)],
+                )
+            })
+            .collect::<Vec<_>>()
+    });
+
+    data_table!({
+        .columns(vec![
+            TableColumn::new("name", "Name", true),
+            TableColumn::new("born", "Born", true),
+            TableColumn::new("field", "Field", false),
+        ])
+        .rows_signal_vec(rows_signal.to_signal_vec())
+        .sorted_by_signal(sorted.signal_cloned())
+        .on_sort(clone!(sorted => move |key, direction| {
+            sorted.set(Some((key, direction)));
+        }))
+    })
+}
+
+fn virtual_scroll_demo() -> Dom {
+    let count = Mutable::new(50_000usize);
+    let loading = Mutable::new(false);
+
+    virtual_scroll!({
+        .item_count_signal(count.signal())
+        .item_height(36.0)
+        .height(320.0)
+        .aria_label("Virtual scroll demo".to_string())
+        .loading_signal(loading.signal())
+        .render_item(Box::new(|index: usize| {
+            html!("div", {
+                .dwclass!("flex flex-row align-items-center gap-4 p-l-4 p-r-4 h-full")
+                .dwclass!("border-b dwui-border-void-800 is(.light *):dwui-border-void-200")
+                .child(html!("span", {
+                    .class("font-code")
+                    .dwclass!("text-xs dwui-text-primary-400 is(.light *):dwui-text-primary-600 w-16 flex-none")
+                    .text(&format!("#{index:05}"))
+                }))
+                .child(html!("span", {
+                    .dwclass!("text-sm dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-700")
+                    .text(&format!("Row {index} — rendered on demand"))
+                }))
+            })
+        }))
+        .on_reach_end(clone!(count, loading => move || {
+            if loading.get() {
+                return;
+            }
+
+            loading.set(true);
+
+            wasm_bindgen_futures::spawn_local(clone!(count, loading => async move {
+                gloo_timers::future::TimeoutFuture::new(600).await;
+                count.set(count.get() + 10_000);
+                loading.set(false);
+            }));
+        }))
+    })
+}
+
+fn date_picker_demo() -> Dom {
+    let start = Mutable::new(None::<CalendarDate>);
+    let end = Mutable::new(Some(CalendarDate::today()));
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-4")
+        .child(date_picker!({
+            .label("Start date".to_string())
+            .value_signal(start.signal())
+            .on_change(clone!(start => move |date| {
+                start.set(Some(date));
+            }))
+        }))
+        .child(date_picker!({
+            .label("End date".to_string())
+            .value_signal(end.signal())
+            .on_change(clone!(end => move |date| {
+                end.set(Some(date));
+            }))
+        }))
+        .child(html!("p", {
+            .dwclass!("text-sm dwui-text-on-primary-400 is(.light *):dwui-text-on-primary-600 m-0")
+            .text_signal(start.signal().map(|v| {
+                match v {
+                    Some(date) => format!("Selected start: {date}"),
+                    None => "No start date selected yet".to_string(),
+                }
+            }))
+        }))
     })
 }

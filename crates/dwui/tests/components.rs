@@ -7,7 +7,7 @@
 #[macro_use]
 extern crate dwui;
 
-use dominator::{clone, text};
+use dominator::{clone, html, text};
 use dwui::prelude::*;
 use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
@@ -789,4 +789,265 @@ async fn button_sizes_set_height_classes() {
         .unwrap();
     // h-8 == 2rem == 32px
     assert_eq!(height, "32px");
+}
+
+#[wasm_bindgen_test]
+async fn data_table_sorts_through_headers() {
+    let tc = TestContainer::new();
+    let sorted: Mutable<Option<(String, SortDirection)>> = Mutable::new(None);
+    let last_sort: Mutable<Option<(String, SortDirection)>> = Mutable::new(None);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        data_table!({
+            .columns(vec![
+                TableColumn::new("name", "Name", true),
+                TableColumn::new("role", "Role", false),
+            ])
+            .rows(vec![
+                ("1".to_string(), vec![text("Ada"), text("Engineer")]),
+                ("2".to_string(), vec![text("Grace"), text("Admiral")]),
+            ])
+            .sorted_by_signal(sorted.signal_cloned())
+            .on_sort(clone!(sorted, last_sort => move |key, direction| {
+                last_sort.set(Some((key.clone(), direction)));
+                sorted.set(Some((key, direction)));
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    assert_eq!(tc.query_all("tbody tr").length(), 2);
+
+    let name_header = tc.query("th button").unwrap();
+    let name_th = tc.query("th").unwrap();
+    assert!(!name_th.has_attribute("aria-sort"));
+
+    click(&name_header);
+    wait_frames(2).await;
+
+    assert_eq!(
+        last_sort.get_cloned(),
+        Some(("name".to_string(), SortDirection::Ascending))
+    );
+    assert_eq!(
+        name_th.get_attribute("aria-sort").as_deref(),
+        Some("ascending")
+    );
+
+    click(&name_header);
+    wait_frames(2).await;
+
+    assert_eq!(
+        last_sort.get_cloned(),
+        Some(("name".to_string(), SortDirection::Descending))
+    );
+    assert_eq!(
+        name_th.get_attribute("aria-sort").as_deref(),
+        Some("descending")
+    );
+
+    // the non-sortable column renders no button
+    assert_eq!(tc.query_all("th button").length(), 1);
+}
+
+#[wasm_bindgen_test]
+async fn data_table_row_clicks_report_ids() {
+    let tc = TestContainer::new();
+    let clicked = Mutable::new(None::<String>);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        data_table!({
+            .columns(vec![TableColumn::new("name", "Name", false)])
+            .rows(vec![
+                ("alpha".to_string(), vec![text("Ada")]),
+                ("beta".to_string(), vec![text("Grace")]),
+            ])
+            .rows_clickable(true)
+            .on_row_click(clone!(clicked => move |id| {
+                clicked.set(Some(id));
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    let rows = tc.query_all("tbody tr");
+    let second: web_sys::Element = rows.get(1).unwrap().dyn_into().unwrap();
+    click(&second);
+    wait_frame().await;
+
+    assert_eq!(clicked.get_cloned().as_deref(), Some("beta"));
+}
+
+#[wasm_bindgen_test]
+async fn virtual_scroll_renders_only_a_window() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        virtual_scroll!({
+            .item_count(10_000)
+            .item_height(30.0)
+            .height(300.0)
+            .render_item(Box::new(|index: usize| {
+                html!("div", {
+                    .text(&format!("row {}", index))
+                })
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    let rendered = tc.query_all("[role=listitem]").length();
+    assert!(rendered > 0, "some rows render");
+    assert!(
+        rendered < 50,
+        "windowing keeps row count small, got {}",
+        rendered
+    );
+
+    let first = tc.query("[role=listitem]").unwrap();
+    assert_eq!(
+        first.get_attribute("aria-setsize").as_deref(),
+        Some("10000")
+    );
+    assert_eq!(first.get_attribute("aria-posinset").as_deref(), Some("1"));
+
+    // scroll deep into the list; the window must follow
+    let container: web_sys::Element = tc.query("[role=list]").unwrap();
+    container.set_scroll_top(60_000);
+    wait_frames(3).await;
+
+    let first_index: usize = tc
+        .query("[data-vs-index]")
+        .unwrap()
+        .get_attribute("data-vs-index")
+        .unwrap()
+        .parse()
+        .unwrap();
+
+    assert!(
+        first_index > 1_000,
+        "window moved with scroll, got {}",
+        first_index
+    );
+    assert!(tc.query_all("[role=listitem]").length() < 50);
+}
+
+#[wasm_bindgen_test]
+async fn virtual_scroll_requests_more_at_the_end() {
+    let tc = TestContainer::new();
+    let requested = Mutable::new(0usize);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        virtual_scroll!({
+            .item_count(100)
+            .item_height(30.0)
+            .height(300.0)
+            .render_item(Box::new(|index: usize| {
+                html!("div", {
+                    .text(&format!("row {}", index))
+                })
+            }))
+            .on_reach_end(clone!(requested => move || {
+                requested.set(requested.get() + 1);
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    let container: web_sys::Element = tc.query("[role=list]").unwrap();
+    container.set_scroll_top(100 * 30);
+    wait_frames(3).await;
+
+    assert_eq!(requested.get(), 1, "on_reach_end fires once per item count");
+
+    // scrolling again without new items must not re-fire
+    container.set_scroll_top(99 * 30);
+    wait_frames(3).await;
+    assert_eq!(requested.get(), 1);
+}
+
+#[wasm_bindgen_test]
+async fn date_picker_opens_a_grid_and_selects_a_day() {
+    let tc = TestContainer::new();
+    let value = Mutable::new(Some(CalendarDate::new(2026, 6, 10)));
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        date_picker!({
+            .label("Start date".to_string())
+            .value_signal(value.signal())
+            .on_change(clone!(value => move |date| {
+                value.set(Some(date));
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    // closed by default
+    assert!(tc.query("[role=dialog]").is_none());
+
+    let field = tc.query("button[aria-haspopup=dialog]").unwrap();
+    assert_eq!(field.text_content().unwrap(), "2026-06-10");
+
+    click(&field);
+    wait_frames(2).await;
+
+    let dialog = tc.query("[role=dialog]").unwrap();
+    assert!(dialog.query_selector("[role=grid]").unwrap().is_some());
+    assert_eq!(tc.query_all("[role=row]").length(), 6);
+
+    // the current value is marked selected
+    let selected = tc
+        .query("[role=gridcell] button[aria-selected=true]")
+        .unwrap();
+    assert_eq!(
+        selected.get_attribute("aria-label").as_deref(),
+        Some("2026-06-10")
+    );
+
+    // pick another day
+    let target = tc.query("button[aria-label='2026-06-15']").unwrap();
+    click(&target);
+    wait_frames(2).await;
+
+    assert_eq!(value.get(), Some(CalendarDate::new(2026, 6, 15)));
+    assert!(
+        tc.query("[role=dialog]").is_none(),
+        "picker closes after selection"
+    );
+    assert_eq!(field.text_content().unwrap(), "2026-06-15");
+}
+
+#[wasm_bindgen_test]
+async fn date_picker_navigates_months() {
+    let tc = TestContainer::new();
+    let value = Mutable::new(Some(CalendarDate::new(2026, 1, 15)));
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        date_picker!({
+            .label("Date".to_string())
+            .value_signal(value.signal())
+        }),
+    );
+    wait_frames(2).await;
+
+    click(&tc.query("button[aria-haspopup=dialog]").unwrap());
+    wait_frames(2).await;
+
+    let month_label = tc.query("[aria-live=polite]").unwrap();
+    assert_eq!(month_label.text_content().unwrap(), "January 2026");
+
+    // previous month wraps the year
+    click(&tc.query("button[aria-label='Previous month']").unwrap());
+    wait_frames(2).await;
+    assert_eq!(month_label.text_content().unwrap(), "December 2025");
+
+    click(&tc.query("button[aria-label='Next month']").unwrap());
+    wait_frames(2).await;
+    assert_eq!(month_label.text_content().unwrap(), "January 2026");
 }
