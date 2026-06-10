@@ -61,10 +61,11 @@ pub fn example_box(child: Dom, resizeable: bool) -> Dom {
                     b.child(html!("div", {
                         .attr("role", "separator")
                         .attr("aria-label", "Resize preview")
-                        .style_signal("right", width.signal().map(|v| format!("{}%", 97.0 - v)))
+                        // keep the handle inside the clipped frame even at 100% width
+                        .style_signal("right", width.signal().map(|v| format!("max(0.4rem, {}%)", 97.0 - v)))
                         .dwclass!("absolute rounded-md h-10 w-2 cursor-col-resize pointer-events-auto transition-colors")
-                        .dwclass!("bg-woodsmoke-600 hover:bg-candlelight-500")
-                        .dwclass_signal!("bg-candlelight-500", dragging.signal())
+                        .dwclass!("bg-candlelight-600 hover:bg-candlelight-400")
+                        .dwclass_signal!("bg-candlelight-400", dragging.signal())
                         .event(clone!(dragging => move |_: events::MouseDown| {
                             dragging.set(true);
                         }))
