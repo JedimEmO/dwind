@@ -1,6 +1,7 @@
 use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
 use crate::prelude::{InputValueWrapper, ValidationResult};
 use crate::theme::prelude::*;
+use crate::utils::component_id;
 use dominator::{clone, events, html, with_node, Dom};
 use dwind::prelude::*;
 use futures_signals::signal::SignalExt;
@@ -45,15 +46,20 @@ pub fn slider(props: SliderProps) -> Dom {
 
     let min = min.broadcast();
     let max = max.broadcast();
+    let label = label.broadcast();
+
+    let slider_id = component_id("slider");
 
     html!("div", {
         .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 text-base")
-        .dwclass!("grid")
+        .dwclass!("grid rounded-t-sm")
         .child(html!("div", {
-            .dwclass!("flex flex-row grid-col-1 grid-row-1 w-full align-items-center")
+            .dwclass!("flex flex-row grid-col-1 grid-row-1 w-full align-items-center gap-2 p-r-2")
             .child(html!("input" => HtmlInputElement, {
-                .dwclass!("h-10 grow")
+                .attr("id", &slider_id)
+                .dwclass!("h-10 grow cursor-pointer")
                 .attr("type", "range")
+                .style("accent-color", "var(--dwui-primary-400)")
                 .attr_signal("value", value.value_signal_cloned())
                 .attr_signal("min", min.signal().map(|v| v.to_string()))
                 .attr_signal("max", max.signal().map(|v| v.to_string()))
@@ -69,9 +75,16 @@ pub fn slider(props: SliderProps) -> Dom {
                 })
             }))
             .child(html!("input" => HtmlInputElement, {
-                .dwclass!("w-16 text-center flex-none")
+                .dwclass!("w-16 text-center flex-none rounded-sm")
                 .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 text-base")
                 .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
+                .attr_signal("aria-label", label.signal_ref(|label| {
+                    if label.is_empty() {
+                        "value".to_string()
+                    } else {
+                        format!("{} value", label)
+                    }
+                }))
                 .attr_signal("min", min.signal().map(|v| v.to_string()))
                 .attr_signal("max", max.signal().map(|v| v.to_string()))
                 .attr("type", "number")
@@ -86,7 +99,7 @@ pub fn slider(props: SliderProps) -> Dom {
                 })
             }))
         }))
-        .apply(labelled_rect_mixin(label, always(true), always(ValidationResult::Valid)))
+        .apply(labelled_rect_mixin(label.signal_cloned(), always(true), always(ValidationResult::Valid), slider_id))
         .apply_if(apply.is_some(),|b| b.apply(apply.unwrap()))
     })
 }

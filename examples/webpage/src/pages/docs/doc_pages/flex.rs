@@ -12,21 +12,27 @@ pub fn flex_page() -> Dom {
     html!("div", {
         .dwclass!("w-full")
         .child(doc_page_title("Flex"))
-        .text("Using flex display for adaptable containers")
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-300 leading-relaxed m-t-4 m-b-2")
+            .text("Using flex display for adaptable containers. Drag the amber handles to see how each strategy behaves.")
+        }))
         .child(doc_page_sub_header("flex-initial"))
         .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-0")
             .text("Allows elements to shrink but not expand to fit the flex box")
         }))
         .child(example_box(flex_example_initial(), true))
         .child(code(&FLEX_EXAMPLE_INITIAL_EXAMPLE_HTML_MAP))
         .child(doc_page_sub_header("flex-1"))
         .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-0")
             .text("Scales elements to fit the flex box")
         }))
         .child(example_box(flex_example_1(), true))
         .child(code(&FLEX_EXAMPLE_1_EXAMPLE_HTML_MAP))
         .child(doc_page_sub_header("flex-auto"))
         .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-0")
             .text("Scales elements to fit the flex box, relative to their original size")
         }))
         .child(example_box(flex_example_auto(), true))

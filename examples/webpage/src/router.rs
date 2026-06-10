@@ -48,6 +48,13 @@ pub fn make_app_router() -> AppRouter<DocPage> {
         .unwrap_throw();
 
     router
+        .insert(
+            "#/docs/getting-started",
+            Box::new(|_| Ok(DocPage::GettingStarted)),
+        )
+        .unwrap_throw();
+
+    router
         .insert("#/docs/flex", Box::new(|_| Ok(DocPage::Flex)))
         .unwrap_throw();
 
@@ -75,6 +82,57 @@ pub fn make_app_router() -> AppRouter<DocPage> {
 
     router
         .insert("#/dwui-examples", Box::new(|_| Ok(DocPage::DwuiExamples)))
+        .unwrap_throw();
+
+    router
+        .insert("#/components", Box::new(|_| Ok(DocPage::DwuiExamples)))
+        .unwrap_throw();
+
+    router
+        .insert("#/", Box::new(|_| Ok(DocPage::Home)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/grid", Box::new(|_| Ok(DocPage::Grid)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/position", Box::new(|_| Ok(DocPage::Position)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/spacing", Box::new(|_| Ok(DocPage::Spacing)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/sizing", Box::new(|_| Ok(DocPage::Sizing)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/typography", Box::new(|_| Ok(DocPage::Typography)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/borders", Box::new(|_| Ok(DocPage::Borders)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/shadows", Box::new(|_| Ok(DocPage::Shadows)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/filters", Box::new(|_| Ok(DocPage::Filters)))
+        .unwrap_throw();
+
+    router
+        .insert("#/docs/transforms", Box::new(|_| Ok(DocPage::Transforms)))
+        .unwrap_throw();
+
+    router
+        .insert(
+            "#/docs/interactivity",
+            Box::new(|_| Ok(DocPage::Interactivity)),
+        )
         .unwrap_throw();
 
     AppRouter::new(router)

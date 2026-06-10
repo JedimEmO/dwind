@@ -2,6 +2,7 @@ use crate::components::input::validation::InputValueWrapper;
 use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
 use crate::prelude::ValidationResult;
 use crate::theme::prelude::*;
+use crate::utils::component_id;
 use dominator::{clone, events, html, with_node, Dom};
 use dwind::prelude::*;
 use futures_signals::map_ref;
@@ -81,17 +82,30 @@ pub fn text_input(props: TextInputProps) -> Dom {
         or(or(is_focused.signal(), has_value), not(is_valid.signal())),
     );
 
+    let input_id = component_id("text-input");
+    let error_id = format!("{}-error", input_id);
+
     html!("div", {
         .dwclass!("grid")
         .children([
             html!("input" => HtmlInputElement, {
+                .attr("id", &input_id)
                 .dwclass!("text-base transition-all")
                 .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 text-base")
-                .dwclass!("p-l-2")
+                .dwclass!("p-l-2 rounded-t-sm")
                 .dwclass!("grid-col-1 grid-row-1")
                 .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
                 .dwclass_signal!("h-10", is_valid.signal())
                 .dwclass_signal!("h-6", not(is_valid.signal()))
+                .style("outline", "none")
+                .attr_signal("aria-invalid", is_valid.signal().map(|valid| if valid { None } else { Some("true") }))
+                .attr_signal("aria-describedby", is_valid.signal().map(clone!(error_id => move |valid| {
+                    if valid {
+                        None
+                    } else {
+                        Some(error_id.clone())
+                    }
+                })))
                 .focused(claim_focus)
                 .attr_signal("type", input_type.map(|t| {
                     match t {
@@ -126,7 +140,7 @@ pub fn text_input(props: TextInputProps) -> Dom {
             }),
         ])
 
-        .apply(labelled_rect_mixin(label.signal_cloned(), raise_label, validation_signal.signal_cloned()))
+        .apply(labelled_rect_mixin(label.signal_cloned(), raise_label, validation_signal.signal_cloned(), input_id))
         .apply_if(apply.is_some(),|b| b.apply(apply.unwrap()))
     })
 }

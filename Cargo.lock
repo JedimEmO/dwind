@@ -279,17 +279,20 @@ dependencies = [
 
 [[package]]
 name = "dwui"
-version = "0.7.4"
+version = "0.9.0"
 dependencies = [
  "const_format",
  "dominator",
  "dominator-css-bindgen",
  "dwind",
  "dwind-macros",
+ "futures",
  "futures-signals",
  "futures-signals-component-macro",
  "once_cell",
  "serde",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test",
  "web-sys",
 ]
 

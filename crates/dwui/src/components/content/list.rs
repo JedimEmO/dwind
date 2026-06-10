@@ -1,4 +1,5 @@
-use dominator::{clone, events, html, Dom};
+use crate::theme::prelude::*;
+use dominator::{clone, events, html, Dom, EventOptions};
 use dwind::prelude::*;
 use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
@@ -19,9 +20,6 @@ struct List {
     #[default(Box::new(|_|{}))]
     item_click_handler: dyn Fn(usize) + 'static,
 }
-
-dwgenerate!("li-item-text", "hover:text-woodsmoke-50");
-dwgenerate!("li-item-border", "hover:border-woodsmoke-200");
 
 pub fn pretty_list(props: ListProps) -> Dom {
     let ListProps {
@@ -45,17 +43,35 @@ pub fn pretty_list(props: ListProps) -> Dom {
             }.broadcast();
 
             html!("li", {
-                .dwclass!("li-item-border li-item-text border-l h-6 border-woodsmoke-600 text-woodsmoke-200 cursor-pointer")
+                .attr("tabindex", "0")
+                .attr_signal("aria-current", selected_signal.signal().map(|selected| {
+                    if selected { Some("true") } else { None }
+                }))
+                .dwclass!("border-l h-6 cursor-pointer")
+                .dwclass!("dwui-border-void-600 is(.light *):dwui-border-void-300")
+                .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-700")
+                .dwclass!("hover:dwui-text-on-primary-50 is(.light *):hover:dwui-text-on-primary-950 hover:dwui-border-void-300")
+                .dwclass!("transition-colors focus-visible:ring-1")
                 .style("padding-left", "10px")
+                .style("outline", "none")
                 .child(item)
-                .dwclass_signal!("text-picton-blue-400", selected_signal.signal())
-                .dwclass_signal!("hover:text-picton-blue-400", selected_signal.signal())
+                .dwclass_signal!("dwui-text-primary-300 is(.light *):dwui-text-primary-700", selected_signal.signal())
+                .dwclass_signal!("hover:dwui-text-primary-300 is(.light *):hover:dwui-text-primary-700", selected_signal.signal())
                 .dwclass_signal!("font-bold", selected_signal.signal())
-                .dwclass_signal!("border-picton-blue-400", selected_signal.signal())
-                .apply(clone!(item_click_handler =>move |b| {
-                    b.event(clone!(item_click_handler => move |_: events::Click| {
+                .dwclass_signal!("dwui-border-primary-400 is(.light *):dwui-border-primary-600", selected_signal.signal())
+                .apply(clone!(item_click_handler, index =>move |b| {
+                    b.event(clone!(item_click_handler, index => move |_: events::Click| {
                         if let Some(idx) = index.get() {
                             item_click_handler(idx);
+                        }
+                    }))
+                    .event_with_options(&EventOptions::preventable(), clone!(item_click_handler, index => move |e: events::KeyDown| {
+                        if e.key() == "Enter" || e.key() == " " {
+                            e.prevent_default();
+
+                            if let Some(idx) = index.get() {
+                                item_click_handler(idx);
+                            }
                         }
                     }))
                 }))

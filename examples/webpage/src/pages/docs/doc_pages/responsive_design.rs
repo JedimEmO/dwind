@@ -12,9 +12,15 @@ use futures_signals::signal::SignalExt;
 pub fn responsive_design() -> Dom {
     html!("div", {
         .child(doc_page_title("Responsive Design"))
-        .text("Any modern web app must look good on on both small mobile devices, as well as on enormous desktop monitors.")
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-300 leading-relaxed m-t-4 m-b-2")
+            .text("Any modern web app must look good on both small mobile devices and enormous desktop monitors.")
+        }))
         .child(doc_page_sub_header("Breakpoints"))
-        .text("To chose a breakpoint, we can use the @constraint syntax. The following breakpoints are available:")
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-0")
+            .text("To choose a breakpoint, use the @constraint syntax. The following breakpoints are available:")
+        }))
         .child(example_table(["Usage".to_string(), "Description".to_string(), "Size".to_string()], [
             ["dwclass!(\"my-cls\")".to_string(), "very small screens".to_string(), "< 640px".to_string()],
             ["dwclass!(\"@sm:my-cls\")".to_string(), "small screens".to_string(), ">= 640px".to_string()],

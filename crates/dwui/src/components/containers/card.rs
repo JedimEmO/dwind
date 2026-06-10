@@ -1,4 +1,3 @@
-
 use crate::theme::prelude::*;
 use dominator::{html, Dom};
 use dwind::prelude::*;
@@ -33,9 +32,10 @@ pub fn card(props: CardProps) -> Dom {
     let scheme = scheme.broadcast();
 
     html!("div", {
-        .dwclass!("rounded w-full")
+        .dwclass!("rounded-lg w-full shadow-lg transition-all")
+        .dwclass!("border dwui-border-void-800 is(.light *):dwui-border-void-300")
         .dwclass_signal!("dwui-bg-void-900 dwui-text-on-primary-200", scheme.signal().map(|v| v == ColorScheme::Void))
-        .dwclass_signal!("is(.light *):dwui-bg-void-400 is(.light *):dwui-text-on-primary-800", scheme.signal().map(|v| v == ColorScheme::Void))
+        .dwclass_signal!("is(.light *):dwui-bg-void-200 is(.light *):dwui-text-on-primary-800", scheme.signal().map(|v| v == ColorScheme::Void))
         .dwclass_signal!("dwui-bg-primary-900", scheme.signal().map(|v| v == ColorScheme::Primary))
         //.dwclass_signal!("dwui-bg-secondary-900", scheme.signal().map(|v| v == ColorScheme::Secondary))
         .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))

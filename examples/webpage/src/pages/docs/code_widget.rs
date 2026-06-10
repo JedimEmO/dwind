@@ -1,35 +1,46 @@
 use dominator::{events, Dom};
 use dwind::prelude::*;
 use dwind_macros::{dwclass, dwclass_signal};
-use dwui::prelude::*;
 use futures_signals::signal::not;
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, SignalExt};
 use std::collections::BTreeMap;
 
+/// A collapsible, syntax-highlighted source listing for an example.
 pub fn code(example_map: &BTreeMap<String, String>) -> Dom {
     let expanded = Mutable::new(false);
     let example_map = example_map.clone();
 
-    card!({
-        .apply(move |b| {
-            let b = dwclass!(b, "rounded-lg m-t-10 @md:overflow-x-auto");
-            let b = dwclass!(b, "border border-woodsmoke-800");
-
-            b.child(html!("div", {
-                .dwclass!("font-extrabold cursor-pointer p-4 hover:text-picton-blue-500")
-                .text("Show example code")
-                .event(clone!(expanded => move |_: events::Click| {
-                    expanded.set(!expanded.get());
+    html!("div", {
+        .dwclass!("rounded-lg m-t-2 border border-woodsmoke-800 overflow-hidden w-full")
+        .child(html!("button", {
+            .attr("type", "button")
+            .attr_signal("aria-expanded", expanded.signal().map(|v| if v { "true" } else { "false" }))
+            .class("font-code")
+            .dwclass!("flex flex-row align-items-center gap-2 w-full p-l-4 p-r-4 h-10 cursor-pointer text-left text-sm")
+            .dwclass!("bg-transparent border-none text-woodsmoke-400 hover:text-candlelight-300 transition-colors")
+            .style("outline", "none")
+            .child(html!("span", {
+                .dwclass!("inline-block transition-transform")
+                .style_signal("transform", expanded.signal().map(|v| {
+                    if v { "rotate(90deg)" } else { "rotate(0deg)" }
                 }))
+                .text("▸")
             }))
-            .child(html!("div",{
-                .dwclass!("overflow-x-auto overflow-y-scroll max-h-md transition-all brightness-125")
-                .dwclass_signal!("max-h-0 overflow-y-hidden", not(expanded.signal()))
-                .dwclass_signal!("max-h-md overflow-y-scroll", expanded.signal())
-                .child(html!("code", {
-                    .prop("innerHTML", example_map["base16-ocean.dark"].as_str())
-                }))
+            .child(html!("span", { .text("view source") }))
+            .event(clone!(expanded => move |_: events::Click| {
+                expanded.set(!expanded.get());
             }))
-        })
+        }))
+        .child(html!("div",{
+            .dwclass!("overflow-x-auto transition-all")
+            .dwclass_signal!("max-h-0 overflow-y-hidden", not(expanded.signal()))
+            .dwclass_signal!("max-h-md overflow-y-auto border-t border-woodsmoke-800", expanded.signal())
+            .style("background", "rgba(2, 2, 3, 0.7)")
+            .child(html!("code", {
+                .class("font-code")
+                .dwclass!("text-sm block p-4")
+                .prop("innerHTML", example_map["base16-ocean.dark"].as_str())
+            }))
+        }))
     })
 }
