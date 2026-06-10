@@ -20,7 +20,7 @@ pub fn example_card_border_buttons() -> Dom {
     card!({
         .scheme(ColorScheme::Void)
         .apply(|b| {
-            dwclass!(b, "p-4 w-64 h-96 flex-initial flex flex-col gap-4")
+            dwclass!(b, "p-4 w-64 flex-initial flex flex-col gap-4")
             .children([
                 button!({
                     .content(Some(text("Primary Flat")))
@@ -51,7 +51,7 @@ pub fn example_card_input() -> Dom {
     card!({
         .scheme(ColorScheme::Void)
         .apply(move |b| {
-            dwclass!(b, "p-4 w-64 h-96 flex-initial flex flex-col gap-4")
+            dwclass!(b, "p-4 w-64 flex-initial flex flex-col gap-4")
             .children([
                 text_input!({
                     .claim_focus(true)
@@ -103,7 +103,7 @@ pub fn example_card_modal() -> Dom {
     card!({
         .scheme(ColorScheme::Void)
         .apply(clone!(show_modal, show_modal_small => move |b| {
-            dwclass!(b, "p-4 w-64 h-96 flex-initial flex flex-col gap-4")
+            dwclass!(b, "p-4 w-64 flex-initial flex flex-col gap-4")
             .children([
                 heading!({
                     .content(text("Modal Example"))

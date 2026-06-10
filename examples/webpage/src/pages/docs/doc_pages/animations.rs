@@ -12,7 +12,10 @@ pub fn animation_page() -> Dom {
     html!("div", {
         .dwclass!("w-full")
         .child(doc_page_title("Animations"))
-        .text("Animation utility classes")
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-300 leading-relaxed m-t-4 m-b-2")
+            .text("Animation utility classes — toggle each one to start and stop it.")
+        }))
         .child(doc_page_sub_header("Spinning"))
         .child(example_box(animation_examples(), false))
         .child(code(&ANIMATION_EXAMPLES_EXAMPLE_HTML_MAP))
@@ -103,7 +106,7 @@ fn animation_examples() -> Dom {
                             is_bouncing.set(!is_bouncing.get());
                         }))
                         .content(html!("span", {
-                            .text("Toggle pulse")
+                            .text("Toggle bounce")
                         }).into())
                     }),
                     html!("div", {

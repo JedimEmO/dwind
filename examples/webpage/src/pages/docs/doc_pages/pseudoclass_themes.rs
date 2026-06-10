@@ -16,6 +16,7 @@ pub fn pseudo_class_themes() -> Dom {
         .dwclass!("w-full")
         .child(doc_page_title("Pseudo Classes"))
         .child(html!("p", {
+            .dwclass!("text-woodsmoke-300 leading-relaxed m-t-4 m-b-2")
             .text(r#"We can apply general pseudo classes, such as the :is() class, to any DWIND class.
              This has many use cases, one of which is theming:"#)
         }))
@@ -25,6 +26,7 @@ pub fn pseudo_class_themes() -> Dom {
         // variants
         .child(doc_page_title("Variants"))
         .child(html!("p", {
+            .dwclass!("text-woodsmoke-300 leading-relaxed m-t-4 m-b-2")
             .text(r#"We can also apply pseudo classes to specific children of a parent element:"#)
         }))
         .child(example_box(variants(), false))

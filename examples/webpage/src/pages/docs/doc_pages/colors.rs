@@ -17,19 +17,22 @@ pub fn colors_page() -> Dom {
     html!("div", {
         .dwclass!("w-full")
         .child(doc_page_title("Colors"))
-        .text("Dwind provides a collection of preconfigured colors")
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-300 leading-relaxed m-t-4 m-b-2")
+            .text("dwind provides a collection of preconfigured color palettes — click any swatch below to see its classes.")
+        }))
         .child(doc_page_sub_header("All the colors"))
         .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-b-2")
             .text(r#"DWIND includes a small selection of pre-defined colors to get you started.
 They are all defined in colors.json under the resources/ directory.
-DWIND uses this file to generate classes using these colors, for instanceborder-manatee-500 and bg-candlelight-950 etc.
-"#)
+DWIND uses this file to generate classes using these colors, for instance border-manatee-500 and bg-candlelight-950 etc."#)
         }))
         .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-0")
             .text(r#"It is very likely you will wish to create your own set of colors in your project.
 You can do this by creating your own colors json, and add processing of it to your build.rs file.
-You can see the examples directory in the DWIND repository for more information on how to make your own custom colors.
-"#)
+You can see the examples directory in the DWIND repository for more information on how to make your own custom colors."#)
         }))
 
         .child(example_box(color_list(selected_color.clone()), false))
@@ -45,19 +48,25 @@ You can see the examples directory in the DWIND repository for more information 
 pub fn show_selected_color(selected_color: &(String, u32)) -> Dom {
     let color_value = &DWIND_COLORS[&selected_color.0][&selected_color.1];
 
-    html!("ul", {
-        .dwclass!("font-mono text-woodsmoke-200")
-        .child(html!("li", {
-            .text(&format!("Color code: {color_value}"))
+    html!("div", {
+        .dwclass!("flex flex-row flex-wrap gap-4 align-items-center w-full")
+        .child(html!("div", {
+            .dwclass!("w-14 h-14 rounded-md border border-woodsmoke-700 flex-none")
+            .style("background-color", color_value.as_str())
         }))
-        .child(html!("li", {
-            .text(&format!("bg-{}-{} ", selected_color.0, selected_color.1))
-        }))
-        .child(html!("li", {
-            .text(&format!("text-{}-{} ", selected_color.0, selected_color.1))
-        }))
-        .child(html!("li", {
-            .text(&format!("border-{}-{} ", selected_color.0, selected_color.1))
+        .child(html!("div", {
+            .class("font-code")
+            .dwclass!("flex flex-col gap-1 text-sm text-woodsmoke-200")
+            .child(html!("div", {
+                .dwclass!("text-candlelight-300")
+                .text(&format!("{color_value}"))
+            }))
+            .child(html!("div", {
+                .text(&format!("bg-{}-{} · text-{}-{} · border-{}-{}",
+                    selected_color.0, selected_color.1,
+                    selected_color.0, selected_color.1,
+                    selected_color.0, selected_color.1))
+            }))
         }))
     })
 }

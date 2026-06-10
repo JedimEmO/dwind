@@ -1,26 +1,42 @@
 use dominator::{events, Dom};
 use dwind::prelude::*;
 use dwind_macros::{dwclass, dwclass_signal};
-use dwui::prelude::*;
 use futures_signals::signal::{not, Mutable, SignalExt};
 
+/// A live preview frame for documentation examples.
+///
+/// Renders the example inside a bordered panel with a mono header bar;
+/// when `resizeable` is set, a drag handle lets the reader shrink the
+/// preview to test responsive behavior.
 pub fn example_box(child: Dom, resizeable: bool) -> Dom {
     let width = Mutable::new(100.0f64);
     let dragging = Mutable::new(false);
 
-    card!({
-        .apply(move |b| {
-            let b = if resizeable {
-                b.style("background-color", "unset")
-            } else {
-                b
-            };
-
-            dwclass!(b, "relative grid m-t-10")
+    html!("div", {
+        .dwclass!("m-t-6 rounded-lg border border-woodsmoke-800 overflow-hidden w-full")
+        // header bar
+        .child(html!("div", {
+            .dwclass!("flex flex-row justify-between align-items-center h-8 p-l-4 p-r-4 border-b border-woodsmoke-800")
+            .style("background", "rgba(18, 18, 21, 0.7)")
+            .child(html!("span", {
+                .class("font-code")
+                .dwclass!("text-xs text-woodsmoke-500 select-none")
+                .text("// preview")
+            }))
+            .apply_if(resizeable, |b| {
+                b.child(html!("span", {
+                    .class("font-code")
+                    .dwclass!("text-xs text-woodsmoke-600 select-none")
+                    .text("drag handle to resize ↔")
+                }))
+            })
+        }))
+        // body
+        .child(html!("div", {
+            .dwclass!("relative grid p-5")
+            .style("background", "rgba(2, 2, 3, 0.5)")
             .child(html!("div", {
-                .dwclass!("rounded-lg")
-                .dwclass!("border border-woodsmoke-800")
-                .dwclass!("flex justify-center align-items-center p-5")
+                .dwclass!("flex justify-center align-items-center")
                 .dwclass_signal!("pointer-events-none", dragging.signal())
                 .style_signal("width", width.signal().map(|v| format!("{v}%")))
                 .child(child)
@@ -43,8 +59,12 @@ pub fn example_box(child: Dom, resizeable: bool) -> Dom {
                 })
                 .apply_if(resizeable, |b| {
                     b.child(html!("div", {
+                        .attr("role", "separator")
+                        .attr("aria-label", "Resize preview")
                         .style_signal("right", width.signal().map(|v| format!("{}%", 97.0 - v)))
-                        .dwclass!("absolute bg-woodsmoke-600 rounded-md h-10 w-2 cursor-col-resize pointer-events-auto")
+                        .dwclass!("absolute rounded-md h-10 w-2 cursor-col-resize pointer-events-auto transition-colors")
+                        .dwclass!("bg-woodsmoke-600 hover:bg-candlelight-500")
+                        .dwclass_signal!("bg-candlelight-500", dragging.signal())
                         .event(clone!(dragging => move |_: events::MouseDown| {
                             dragging.set(true);
                         }))
@@ -57,6 +77,6 @@ pub fn example_box(child: Dom, resizeable: bool) -> Dom {
                     }))
                 })
             }))
-        })
+        }))
     })
 }
