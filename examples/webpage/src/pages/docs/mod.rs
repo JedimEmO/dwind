@@ -22,18 +22,22 @@ pub enum DocPage {
     Colors,
     Responsiveness,
     Pseudoclasses,
-    // Flex
+    // Layout
     Flex,
-    Justify,
-    Align,
+    Grid,
+    Position,
+    Spacing,
+    Sizing,
 
-    // Borders
-    Border,
-    Rounding,
-    Color,
-    Style,
+    // Style
+    Typography,
+    Borders,
+    Shadows,
+    Filters,
+    Transforms,
+    Interactivity,
 
-    // Examples
+    // Showcases
     Examples,
     DwuiExamples,
 }
@@ -45,12 +49,16 @@ impl DocPage {
             DocPage::GettingStarted => go_to_url("#/docs/getting-started"),
             DocPage::Colors => go_to_url("#/docs/colors"),
             DocPage::Flex => go_to_url("#/docs/flex"),
-            DocPage::Justify => {}
-            DocPage::Align => {}
-            DocPage::Border => {}
-            DocPage::Rounding => {}
-            DocPage::Color => {}
-            DocPage::Style => {}
+            DocPage::Grid => go_to_url("#/docs/grid"),
+            DocPage::Position => go_to_url("#/docs/position"),
+            DocPage::Spacing => go_to_url("#/docs/spacing"),
+            DocPage::Sizing => go_to_url("#/docs/sizing"),
+            DocPage::Typography => go_to_url("#/docs/typography"),
+            DocPage::Borders => go_to_url("#/docs/borders"),
+            DocPage::Shadows => go_to_url("#/docs/shadows"),
+            DocPage::Filters => go_to_url("#/docs/filters"),
+            DocPage::Transforms => go_to_url("#/docs/transforms"),
+            DocPage::Interactivity => go_to_url("#/docs/interactivity"),
             DocPage::Responsiveness => go_to_url("#/docs/responsive-design"),
             DocPage::Pseudoclasses => go_to_url("#/docs/pseudoclasses"),
             DocPage::Examples => go_to_url("#/examples"),
@@ -72,12 +80,16 @@ impl Display for DocPage {
             DocPage::GettingStarted => write!(f, "Getting Started"),
             DocPage::Colors => write!(f, "Colors"),
             DocPage::Flex => write!(f, "Flex"),
-            DocPage::Justify => write!(f, "Justify"),
-            DocPage::Align => write!(f, "Align"),
-            DocPage::Border => write!(f, "Border"),
-            DocPage::Rounding => write!(f, "Rounding"),
-            DocPage::Color => write!(f, "Color"),
-            DocPage::Style => write!(f, "Style"),
+            DocPage::Grid => write!(f, "Grid"),
+            DocPage::Position => write!(f, "Position"),
+            DocPage::Spacing => write!(f, "Spacing"),
+            DocPage::Sizing => write!(f, "Sizing"),
+            DocPage::Typography => write!(f, "Typography"),
+            DocPage::Borders => write!(f, "Borders"),
+            DocPage::Shadows => write!(f, "Shadows"),
+            DocPage::Filters => write!(f, "Filters"),
+            DocPage::Transforms => write!(f, "Transforms"),
+            DocPage::Interactivity => write!(f, "Interactivity"),
             DocPage::Responsiveness => write!(f, "Responsiveness"),
             DocPage::Pseudoclasses => write!(f, "Pseudoclasses"),
             DocPage::Examples => write!(f, "Examples"),
@@ -93,24 +105,32 @@ pub fn doc_sections() -> Vec<DocSection> {
             title: "General".to_string(),
             docs: vec![
                 DocPage::GettingStarted,
-                DocPage::Animation,
                 DocPage::Colors,
                 DocPage::Responsiveness,
                 DocPage::Pseudoclasses,
             ],
         },
         DocSection {
-            title: "Flex and Grid".to_string(),
-            docs: vec![DocPage::Flex /*, DocPage::Justify, DocPage::Align*/],
-        },
-        /*DocSection {
-            title: "Borders".to_string(),
+            title: "Layout".to_string(),
             docs: vec![
-                DocPage::Border,
-                DocPage::Rounding,
-                DocPage::Color,
-                DocPage::Style,
+                DocPage::Flex,
+                DocPage::Grid,
+                DocPage::Position,
+                DocPage::Spacing,
+                DocPage::Sizing,
             ],
-        },*/
+        },
+        DocSection {
+            title: "Style".to_string(),
+            docs: vec![
+                DocPage::Typography,
+                DocPage::Borders,
+                DocPage::Shadows,
+                DocPage::Filters,
+                DocPage::Transforms,
+                DocPage::Animation,
+                DocPage::Interactivity,
+            ],
+        },
     ]
 }
