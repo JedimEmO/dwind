@@ -220,7 +220,7 @@ fn footer() -> Dom {
                 .child(html!("p", {
                     .class("font-code")
                     .dwclass!("text-woodsmoke-600 text-xs m-0")
-                    .text("[ok] rendered by dominator — no virtual dom, no runtime css engine")
+                    .text("[ok] rendered by dominator — no virtual dom, styles compiled by rustc")
                 }))
             }))
             .child(html!("div", {

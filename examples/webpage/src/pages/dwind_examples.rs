@@ -306,7 +306,7 @@ fn pricing_card() -> Dom {
             .children([
                 "✓ unlimited projects",
                 "✓ compile-time styling",
-                "✓ zero runtime overhead",
+                "✓ no css build pipeline",
             ].map(|item| html!("li", { .text(item) })))
         }))
         .child(html!("div", {

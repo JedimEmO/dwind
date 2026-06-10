@@ -57,7 +57,7 @@ fn hero() -> Dom {
                 .child(html!("div", {
                     .class("font-code")
                     .dwclass!("text-candlelight-400 text-sm")
-                    .text("// rust → wasm → css · zero runtime")
+                    .text("// rust → wasm → css · no node toolchain")
                 }))
                 .child(html!("h1", {
                     .class("font-display")
@@ -158,7 +158,7 @@ fn code_card() -> Dom {
             }))
             .child(html!("span", {
                 .dwclass!("text-woodsmoke-500")
-                .text("0 errors · 0 warnings · 0 runtime css")
+                .text("0 errors · 0 warnings · 0 css build steps")
             }))
         }))
     })
@@ -200,7 +200,7 @@ fn stats_strip() -> Dom {
         .child(html!("div", {
             .dwclass!("m-x-auto max-w-6xl grid @sm:grid-cols-4 @<sm:grid-cols-2")
             .children([
-                stat_cell("0", "runtime css engine"),
+                stat_cell("0", "css build pipeline"),
                 stat_cell("100%", "type-checked styles"),
                 stat_cell("24", "accessible components"),
                 stat_cell("1", "language, end to end"),
