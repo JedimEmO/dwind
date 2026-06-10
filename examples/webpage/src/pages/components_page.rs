@@ -1,9 +1,11 @@
-use crate::pages::dwui::example_small::example_card_modal;
+use crate::pages::docs::code_widget::code;
+use crate::pages::dwui::example_small::{example_card_modal, EXAMPLE_CARD_MODAL_EXAMPLE_HTML_MAP};
 use dominator::{clone, text, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use dwui::prelude::*;
 use dwui::theme::prelude::*;
+use example_html_highlight_macro::example_html;
 use futures_signals::signal::{Mutable, SignalExt};
 
 pub fn components_page() -> Dom {
@@ -57,35 +59,35 @@ pub fn components_page() -> Dom {
             .child(html!("div", {
                 .dwclass!("grid @sm:grid-cols-2 @<sm:grid-cols-1 gap-4")
                 .children([
-                    section_card("Buttons", "Flat, border, and text variants in three sizes — with focus rings, hover, active, and disabled states", buttons_demo()),
-                    section_card("Badges", "Status pills in primary, error, void, and outline variants", badges_demo()),
-                    section_card("Alerts", "Status callouts with severity-aware ARIA roles; the error alert is dismissible", alerts_demo()),
-                    section_card("Text inputs", "Floating labels, password masking, and live validation announced to screen readers", inputs_demo()),
-                    section_card("Select & slider", "Labelled form controls bound to reactive signals", select_slider_demo()),
-                    section_card("Switch & checkbox", "Toggles with role=switch/checkbox semantics and clickable labels", toggles_demo()),
-                    section_card("Progress & spinner", "Determinate, indeterminate, and spinner loading states with aria-valuenow", progress_demo()),
-                    section_card("Avatars & skeletons", "Identity with initials fallback, plus pulsing loading placeholders", avatar_skeleton_demo()),
-                    section_card("Tooltip & divider", "Hover or focus the buttons to reveal tooltips", tooltip_divider_demo()),
-                    section_card("Breadcrumbs", "Navigation trails with aria-current on the active page", breadcrumbs_demo()),
+                    section_card("Buttons", "Flat, border, and text variants in three sizes — with focus rings, hover, active, and disabled states", buttons_demo(), code(&BUTTONS_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Badges", "Status pills in primary, error, void, and outline variants", badges_demo(), code(&BADGES_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Alerts", "Status callouts with severity-aware ARIA roles; the error alert is dismissible", alerts_demo(), code(&ALERTS_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Text inputs", "Floating labels, password masking, and live validation announced to screen readers", inputs_demo(), code(&INPUTS_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Select & slider", "Labelled form controls bound to reactive signals", select_slider_demo(), code(&SELECT_SLIDER_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Switch & checkbox", "Toggles with role=switch/checkbox semantics and clickable labels", toggles_demo(), code(&TOGGLES_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Progress & spinner", "Determinate, indeterminate, and spinner loading states with aria-valuenow", progress_demo(), code(&PROGRESS_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Avatars & skeletons", "Identity with initials fallback, plus pulsing loading placeholders", avatar_skeleton_demo(), code(&AVATAR_SKELETON_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Tooltip & divider", "Hover or focus the buttons to reveal tooltips", tooltip_divider_demo(), code(&TOOLTIP_DIVIDER_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Breadcrumbs", "Navigation trails with aria-current on the active page", breadcrumbs_demo(), code(&BREADCRUMBS_DEMO_EXAMPLE_HTML_MAP)),
                 ])
             }))
             .child(html!("div", {
                 .dwclass!("m-t-4 grid @md:grid-cols-2 @<md:grid-cols-1 gap-4")
-                .child(section_card("Tabs", "WAI-ARIA tabs with arrow-key navigation and roving tabindex", tabs_demo()))
-                .child(section_card("Accordion", "Animated disclosure panels with aria-expanded and region landmarks", accordion_demo()))
+                .child(section_card("Tabs", "WAI-ARIA tabs with arrow-key navigation and roving tabindex", tabs_demo(), code(&TABS_DEMO_EXAMPLE_HTML_MAP)))
+                .child(section_card("Accordion", "Animated disclosure panels with aria-expanded and region landmarks", accordion_demo(), code(&ACCORDION_DEMO_EXAMPLE_HTML_MAP)))
             }))
             .child(html!("div", {
                 .dwclass!("m-t-4")
-                .child(section_card("Data table", "Sortable columns with aria-sort; sorting is controlled, so your data layer stays in charge. Click the headers.", data_table_demo()))
+                .child(section_card("Data table", "Sortable columns with aria-sort; sorting is controlled, so your data layer stays in charge. Click the headers.", data_table_demo(), code(&DATA_TABLE_DEMO_EXAMPLE_HTML_MAP)))
             }))
             .child(html!("div", {
                 .dwclass!("m-t-4 grid @md:grid-cols-2 @<md:grid-cols-1 gap-4")
-                .child(section_card("Virtual scroll", "Windowed rendering — this list has 50,000 rows but only the visible handful exist in the DOM. Scroll to the bottom to trigger infinite loading.", virtual_scroll_demo()))
-                .child(section_card("Date picker", "Calendar popup with full keyboard support: arrows move by day and week, PageUp/PageDown by month, Escape closes.", date_picker_demo()))
+                .child(section_card("Virtual scroll", "Windowed rendering — this list has 50,000 rows but only the visible handful exist in the DOM. Scroll to the bottom to trigger infinite loading.", virtual_scroll_demo(), code(&VIRTUAL_SCROLL_DEMO_EXAMPLE_HTML_MAP)))
+                .child(section_card("Date picker", "Calendar popup with full keyboard support: arrows move by day and week, PageUp/PageDown by month, Escape closes.", date_picker_demo(), code(&DATE_PICKER_DEMO_EXAMPLE_HTML_MAP)))
             }))
             .child(html!("div", {
                 .dwclass!("m-t-4")
-                .child(section_card("Modal dialogs", "Focus-managed dialogs with backdrop blur, escape key, and entrance animation", example_card_modal()))
+                .child(section_card("Modal dialogs", "Focus-managed dialogs with backdrop blur, escape key, and entrance animation", example_card_modal(), code(&EXAMPLE_CARD_MODAL_EXAMPLE_HTML_MAP)))
             }))
         }))
 
@@ -109,7 +111,7 @@ pub fn components_page() -> Dom {
     })
 }
 
-fn section_card(title: &str, description: &str, demo: Dom) -> Dom {
+fn section_card(title: &str, description: &str, demo: Dom, source: Dom) -> Dom {
     let title = title.to_string();
     let description = description.to_string();
 
@@ -127,10 +129,12 @@ fn section_card(title: &str, description: &str, demo: Dom) -> Dom {
                 .text(&description)
             }))
             .child(demo)
+            .child(source)
         })
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn buttons_demo() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col gap-4")
@@ -171,6 +175,7 @@ fn buttons_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn badges_demo() -> Dom {
     html!("div", {
         .dwclass!("flex flex-row flex-wrap gap-4 align-items-center")
@@ -199,6 +204,7 @@ fn badges_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn alerts_demo() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col gap-3")
@@ -227,6 +233,7 @@ fn alerts_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn inputs_demo() -> Dom {
     let value = Mutable::new("".to_string());
 
@@ -256,6 +263,7 @@ fn inputs_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn select_slider_demo() -> Dom {
     let selected = Mutable::new("a".to_string());
     let amount = Mutable::new(25.0f32);
@@ -280,6 +288,7 @@ fn select_slider_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn toggles_demo() -> Dom {
     let notifications = Mutable::new(true);
     let newsletter = Mutable::new(false);
@@ -312,6 +321,7 @@ fn toggles_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn progress_demo() -> Dom {
     let value = Mutable::new(40.0f32);
 
@@ -346,6 +356,7 @@ fn progress_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn avatar_skeleton_demo() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col gap-4")
@@ -385,6 +396,7 @@ fn avatar_skeleton_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn tooltip_divider_demo() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col gap-4")
@@ -422,6 +434,7 @@ fn tooltip_divider_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn breadcrumbs_demo() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col gap-4")
@@ -443,6 +456,7 @@ fn breadcrumbs_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn tabs_demo() -> Dom {
     let selected = Mutable::new("overview".to_string());
 
@@ -475,6 +489,7 @@ fn tabs_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn accordion_demo() -> Dom {
     accordion!({
         .initial_open(Some(0))
@@ -495,6 +510,7 @@ fn accordion_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn data_table_demo() -> Dom {
     #[derive(Clone)]
     struct Pioneer {
@@ -579,6 +595,7 @@ fn data_table_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn virtual_scroll_demo() -> Dom {
     let count = Mutable::new(50_000usize);
     let loading = Mutable::new(false);
@@ -620,6 +637,7 @@ fn virtual_scroll_demo() -> Dom {
     })
 }
 
+#[example_html(themes = ["base16-ocean.dark"])]
 fn date_picker_demo() -> Dom {
     let start = Mutable::new(None::<CalendarDate>);
     let end = Mutable::new(Some(CalendarDate::today()));

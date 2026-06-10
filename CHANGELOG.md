@@ -33,6 +33,9 @@
 
 ### Example webpage
 
+- New dwind utility showcase at `#/examples` — eight artifacts (responsive layout, gradients, type scale, glassmorphism, motion, bracket variants, composition, custom generators) built purely from dwind classes, each with browser-viewable source
+- Every dwui gallery card now ships a "view source" toggle with compile-time highlighted Rust
+- New "Getting started" docs page introducing the two layers separately; the dwind docs no longer demo with dwui components
 - Complete redesign: landing page with hero, bento feature grid, and live component previews; full component gallery at `#/components`; restyled docs layout — Bricolage Grotesque / IBM Plex Sans / JetBrains Mono typography with a candlelight-on-woodsmoke industrial theme
 
 ## dwui 0.8.0 - 2026-06-10

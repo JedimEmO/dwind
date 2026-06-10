@@ -48,6 +48,13 @@ pub fn make_app_router() -> AppRouter<DocPage> {
         .unwrap_throw();
 
     router
+        .insert(
+            "#/docs/getting-started",
+            Box::new(|_| Ok(DocPage::GettingStarted)),
+        )
+        .unwrap_throw();
+
+    router
         .insert("#/docs/flex", Box::new(|_| Ok(DocPage::Flex)))
         .unwrap_throw();
 

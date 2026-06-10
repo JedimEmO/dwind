@@ -14,6 +14,7 @@ use crate::pages::components_page::components_page;
 use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
+use crate::pages::dwind_examples::dwind_examples_page;
 use crate::pages::home::home_page;
 use crate::router::make_app_router;
 use dominator::routing::go_to_url;
@@ -75,6 +76,7 @@ fn main_view() -> Dom {
                 Some(match page {
                     DocPage::Home => home_page(),
                     DocPage::DwuiExamples => components_page(),
+                    DocPage::Examples => dwind_examples_page(),
                     other => docs_shell(other),
                 })
             }))

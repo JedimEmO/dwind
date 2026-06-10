@@ -17,6 +17,7 @@ pub struct DocSection {
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum DocPage {
     Home,
+    GettingStarted,
     Animation,
     Colors,
     Responsiveness,
@@ -41,6 +42,7 @@ impl DocPage {
     pub fn goto(&self) {
         match self {
             DocPage::Home => go_to_url("#/"),
+            DocPage::GettingStarted => go_to_url("#/docs/getting-started"),
             DocPage::Colors => go_to_url("#/docs/colors"),
             DocPage::Flex => go_to_url("#/docs/flex"),
             DocPage::Justify => {}
@@ -67,6 +69,7 @@ impl Display for DocPage {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             DocPage::Home => write!(f, "Home"),
+            DocPage::GettingStarted => write!(f, "Getting Started"),
             DocPage::Colors => write!(f, "Colors"),
             DocPage::Flex => write!(f, "Flex"),
             DocPage::Justify => write!(f, "Justify"),
@@ -89,6 +92,7 @@ pub fn doc_sections() -> Vec<DocSection> {
         DocSection {
             title: "General".to_string(),
             docs: vec![
+                DocPage::GettingStarted,
                 DocPage::Animation,
                 DocPage::Colors,
                 DocPage::Responsiveness,

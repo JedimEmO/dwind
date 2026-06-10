@@ -1,8 +1,8 @@
 use crate::pages::components_page::components_page;
 use crate::pages::docs::doc_pages::animations::animation_page;
 use crate::pages::docs::doc_pages::colors::colors_page;
-use crate::pages::docs::doc_pages::examples::examples_page;
 use crate::pages::docs::doc_pages::flex::flex_page;
+use crate::pages::docs::doc_pages::getting_started::getting_started_page;
 use crate::pages::docs::doc_pages::pseudoclass_themes::pseudo_class_themes;
 use crate::pages::docs::doc_pages::responsive_design::responsive_design;
 use crate::pages::docs::DocPage;
@@ -20,7 +20,7 @@ pub fn doc_main_view(
             DocPage::Colors => colors_page(),
             DocPage::Responsiveness => responsive_design(),
             DocPage::Pseudoclasses => pseudo_class_themes(),
-            DocPage::Examples => examples_page(),
+            DocPage::GettingStarted => getting_started_page(),
             DocPage::DwuiExamples => components_page(),
             DocPage::Animation => animation_page(),
             _ => html!("div", {
