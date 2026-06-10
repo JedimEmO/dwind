@@ -3,6 +3,7 @@
 
 use crate::pages::docs::code_widget::code;
 use crate::pages::docs::example_box::example_box;
+use crate::reveal::reveal_on_scroll;
 use dominator::Dom;
 use dwind::background_scratched_generator;
 use dwind::bg_color_generator;
@@ -16,6 +17,7 @@ pub fn dwind_examples_page() -> Dom {
         .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 w-full m-b-20")
         .child(html!("div", {
             .dwclass!("p-t-10 flex flex-col gap-3")
+            .apply(reveal_on_scroll)
             .child(html!("div", {
                 .class("font-code")
                 .dwclass!("text-candlelight-400 text-sm")
@@ -111,6 +113,7 @@ pub fn dwind_examples_page() -> Dom {
 fn section(kicker: &str, title: &str, description: &str, preview: Dom, source: Dom) -> Dom {
     html!("section", {
         .dwclass!("m-t-14 flex flex-col")
+        .apply(reveal_on_scroll)
         .child(html!("div", {
             .class("font-code")
             .dwclass!("text-candlelight-400 text-xs")

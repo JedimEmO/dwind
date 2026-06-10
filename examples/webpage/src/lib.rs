@@ -1,4 +1,5 @@
 mod pages;
+mod reveal;
 mod router;
 
 #[macro_use]
@@ -46,6 +47,25 @@ const APP_KEYFRAMES: &str = r#"
 @keyframes dwind-glow-drift {
     0%, 100% { transform: translate(0, 0) scale(1); }
     50% { transform: translate(4%, -6%) scale(1.08); }
+}
+
+/* scroll-triggered progressive reveal (see reveal.rs) */
+.reveal-section > * {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+        opacity 650ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-section > *:nth-child(2) { transition-delay: 70ms; }
+.reveal-section > *:nth-child(3) { transition-delay: 140ms; }
+.reveal-section > *:nth-child(4) { transition-delay: 210ms; }
+.reveal-section > *:nth-child(5) { transition-delay: 280ms; }
+
+.reveal-section.reveal-in > * {
+    opacity: 1;
+    transform: translateY(0);
 }
 "#;
 
