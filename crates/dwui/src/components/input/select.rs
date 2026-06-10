@@ -1,6 +1,7 @@
 use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
 use crate::prelude::{InputValueWrapper, ValidationResult};
 use crate::theme::prelude::*;
+use crate::utils::component_id;
 use dominator::{events, html, with_node, Dom};
 use dwind::prelude::*;
 use futures_signals::signal::{always, Mutable, SignalExt};
@@ -36,12 +37,35 @@ pub fn select(props: SelectProps) -> Dom {
     } = props;
     let value_signal = value.value_signal_cloned().broadcast();
 
+    let is_valid = is_valid.broadcast();
+
+    let select_id = component_id("select");
+    let error_id = format!("{}-error", select_id);
+
+    let is_valid_bool = is_valid
+        .signal_ref(|validation| validation.is_valid())
+        .broadcast();
+
     html!("div", {
         .dwclass!("grid h-10")
         .children([
             html!("select" => HtmlSelectElement, {
+                .attr("id", &select_id)
                 .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 is(.light *):dwui-text-on-primary-800 text-base h-10 p-l-2")
-                .dwclass!("grid-row-1 grid-col-1")
+                .dwclass!("dwui-text-on-primary-300")
+                .dwclass!("grid-row-1 grid-col-1 cursor-pointer rounded-t-sm transition-all")
+                .style("outline", "none")
+                .attr_signal("aria-invalid", is_valid_bool.signal().map(|valid| if valid { None } else { Some("true") }))
+                .attr_signal("aria-describedby", is_valid_bool.signal().map({
+                    let error_id = error_id.clone();
+                    move |valid| {
+                        if valid {
+                            None
+                        } else {
+                            Some(error_id.clone())
+                        }
+                    }
+                }))
                 .children_signal_vec(options.map(move |(key, value)| {
                     html!("option", {
                         .attr("value", &key)
@@ -62,7 +86,7 @@ pub fn select(props: SelectProps) -> Dom {
                 })
             })
         ])
-        .apply(labelled_rect_mixin(label, always(true), is_valid))
+        .apply(labelled_rect_mixin(label, always(true), is_valid.signal_cloned(), select_id))
         .apply_if(apply.is_some(),|b| b.apply(apply.unwrap()))
     })
 }

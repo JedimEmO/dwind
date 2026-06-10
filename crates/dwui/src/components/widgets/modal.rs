@@ -33,6 +33,11 @@ struct Modal {
     #[signal]
     #[default(true)]
     close_on_backdrop_click: bool,
+
+    /// Accessible name announced by screen readers when the dialog opens
+    #[signal]
+    #[default("Dialog".to_string())]
+    aria_label: String,
 }
 
 pub fn modal(props: ModalProps) -> Dom {
@@ -42,6 +47,7 @@ pub fn modal(props: ModalProps) -> Dom {
         on_close,
         size,
         close_on_backdrop_click,
+        aria_label,
         apply,
     } = props;
 
@@ -81,7 +87,9 @@ pub fn modal(props: ModalProps) -> Dom {
                 .style("left", "0")
                 .style("width", "100%")
                 .style("height", "100%")
-                .style("background-color", "rgba(0, 0, 0, 0.5)")
+                .style("background-color", "rgba(0, 0, 0, 0.6)")
+                .style("backdrop-filter", "blur(4px)")
+                .style("animation", "dwui-fade-in 150ms ease-out")
                 .style("z-index", "1")
                 .apply_if(clickable, clone!(on_close => move |b| {
                     b.event(clone!(on_close => move |_: events::Click| {
@@ -93,14 +101,21 @@ pub fn modal(props: ModalProps) -> Dom {
 
         // Modal content container
         .child(html!("div", {
-            .dwclass!("rounded-lg shadow-xl")
+            .attr("role", "dialog")
+            .attr("aria-modal", "true")
+            .attr("tabindex", "-1")
+            .attr_signal("aria-label", aria_label)
+            .focused_signal(open.signal())
+            .dwclass!("rounded-lg shadow-2xl")
             .dwclass!("dwui-bg-void-900 dwui-text-on-primary-200")
             .dwclass!("is(.light *):dwui-bg-void-100 is(.light *):dwui-text-on-primary-800")
             .dwclass!("overflow-hidden p-6")
-            .dwclass!("transition-all duration-200 ease-out")
+            .dwclass!("border dwui-border-void-700 is(.light *):dwui-border-void-200")
+            .style("animation", "dwui-modal-in 200ms ease-out")
             .style("position", "relative")
             .style("z-index", "10")
             .style("pointer-events", "auto")
+            .style("outline", "none")
 
             // Size classes
             .style_signal("width", size.signal().map(|s| match s {
@@ -122,10 +137,13 @@ pub fn modal(props: ModalProps) -> Dom {
 
             // Close button
             .child(html!("button", {
+                .attr("type", "button")
+                .attr("aria-label", "Close dialog")
                 .dwclass!("w-8 h-8 flex justify-center align-items-center rounded-full")
                 .dwclass!("hover:dwui-bg-void-800 hover:dwui-text-on-primary-100")
                 .dwclass!("is(.light *):hover:dwui-bg-void-200 is(.light *):hover:dwui-text-on-primary-900")
                 .dwclass!("cursor-pointer transition-colors")
+                .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400")
                 .style("position", "absolute")
                 .style("top", "1rem")
                 .style("right", "1rem")
@@ -133,6 +151,7 @@ pub fn modal(props: ModalProps) -> Dom {
                 .style("border", "none")
                 .style("padding", "0")
                 .style("margin", "0")
+                .style("outline", "none")
                 .text("×")
                 .style("font-size", "24px")
                 .style("line-height", "1")

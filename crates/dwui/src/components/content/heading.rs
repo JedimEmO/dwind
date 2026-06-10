@@ -12,6 +12,31 @@ pub enum TextSize {
     ExtraLarge,
 }
 
+/// Semantic heading level; controls the rendered `<h1>`-`<h6>` tag so that
+/// documents keep a meaningful outline for assistive technology
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub enum HeadingLevel {
+    H1,
+    H2,
+    H3,
+    H4,
+    H5,
+    H6,
+}
+
+impl HeadingLevel {
+    fn tag_name(self) -> &'static str {
+        match self {
+            HeadingLevel::H1 => "h1",
+            HeadingLevel::H2 => "h2",
+            HeadingLevel::H3 => "h3",
+            HeadingLevel::H4 => "h4",
+            HeadingLevel::H5 => "h5",
+            HeadingLevel::H6 => "h6",
+        }
+    }
+}
+
 /// Creates a heading component
 ///
 /// # Example
@@ -27,6 +52,7 @@ pub enum TextSize {
 ///         .content_signal(always(text("Hello there!")))
 ///         .text_size(TextSize::Large)
 ///         .text_size_signal(always(TextSize::Large))
+///         .level(HeadingLevel::H2)
 ///     }))
 /// });
 /// ```
@@ -38,12 +64,16 @@ struct Heading {
     #[signal]
     #[default(TextSize::ExtraLarge)]
     text_size: TextSize,
+
+    #[default(HeadingLevel::H1)]
+    level: HeadingLevel,
 }
 
 pub fn heading(props: HeadingProps) -> Dom {
     let HeadingProps {
         content,
         text_size: size,
+        level,
         apply,
     } = props;
 
@@ -51,7 +81,7 @@ pub fn heading(props: HeadingProps) -> Dom {
     html!("div", {
         .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))
         .dwclass!("w-auto font-semibold h-12 align-items-center flex")
-        .child(html!("h1", {
+        .child(html!(level.tag_name(), {
             .dwclass_signal!("text-base", size.signal().eq(TextSize::Base))
             .dwclass_signal!("text-l", size.signal().eq(TextSize::Large))
             .dwclass_signal!("text-xl", size.signal().eq(TextSize::ExtraLarge))

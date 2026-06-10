@@ -16,6 +16,7 @@ pub struct DocSection {
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum DocPage {
+    Home,
     Animation,
     Colors,
     Responsiveness,
@@ -39,6 +40,7 @@ pub enum DocPage {
 impl DocPage {
     pub fn goto(&self) {
         match self {
+            DocPage::Home => go_to_url("#/"),
             DocPage::Colors => go_to_url("#/docs/colors"),
             DocPage::Flex => go_to_url("#/docs/flex"),
             DocPage::Justify => {}
@@ -50,20 +52,21 @@ impl DocPage {
             DocPage::Responsiveness => go_to_url("#/docs/responsive-design"),
             DocPage::Pseudoclasses => go_to_url("#/docs/pseudoclasses"),
             DocPage::Examples => go_to_url("#/examples"),
-            DocPage::DwuiExamples => go_to_url("#/dwui-examples"),
+            DocPage::DwuiExamples => go_to_url("#/components"),
             &DocPage::Animation => go_to_url("#/docs/animation"),
         }
     }
 }
 impl Default for DocPage {
     fn default() -> Self {
-        Self::Colors
+        Self::Home
     }
 }
 
 impl Display for DocPage {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
+            DocPage::Home => write!(f, "Home"),
             DocPage::Colors => write!(f, "Colors"),
             DocPage::Flex => write!(f, "Flex"),
             DocPage::Justify => write!(f, "Justify"),
@@ -75,7 +78,7 @@ impl Display for DocPage {
             DocPage::Responsiveness => write!(f, "Responsiveness"),
             DocPage::Pseudoclasses => write!(f, "Pseudoclasses"),
             DocPage::Examples => write!(f, "Examples"),
-            DocPage::DwuiExamples => write!(f, "DWUI Examples"),
+            DocPage::DwuiExamples => write!(f, "Components"),
             DocPage::Animation => write!(f, "Animation"),
         }
     }

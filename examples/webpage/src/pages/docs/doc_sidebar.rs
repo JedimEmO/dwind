@@ -1,8 +1,7 @@
 use crate::pages::docs::{DocPage, DocSection};
 use dominator::{events, text, Dom};
 use dwind::prelude::*;
-use dwind_macros::{dwclass, dwgenerate};
-use dwui::heading;
+use dwind_macros::dwclass;
 use dwui::prelude::*;
 use futures_signals::map_ref;
 use futures_signals::signal::Mutable;
@@ -37,14 +36,14 @@ where
                     .child(main())
                 })
             } else {
-                dwgenerate!("menu-text-hover", "hover:text-picton-blue-500");
-
                 html!("div", {
                     .dwclass!("flex flex-col w-full")
                     .child(html!("div", {
-                        .child(html!("h1", {
-                            .dwclass!("m-l-2 text-xl font-mono font-extrabold text-picton-blue-200 cursor-pointer menu-text-hover")
-                            .text_signal(selected_doc().map(|doc| format!("= {doc:?}")))
+                        .child(html!("button", {
+                            .attr("type", "button")
+                            .class("font-code")
+                            .dwclass!("m-l-2 text-l font-bold text-candlelight-300 hover:text-candlelight-200 cursor-pointer bg-transparent border-none")
+                            .text_signal(selected_doc().map(|doc| format!("☰ {doc}")))
                             .event(clone!(show_menu => move |_: events::Click| {
                                 show_menu.set(!show_menu.get());
                             }))
@@ -56,12 +55,12 @@ where
                             Some(html!("div", {
                                 .child(html!("div", {
                                    .dwclass!("bg-woodsmoke-950 absolute left-0 top-0 right-0 bottom-0")
-                                    .style("z-index", "2")
+                                    .style("z-index", "60")
                                     .style("opacity", "97%")
                                 }))
                                 .child(html!("div", {
-                                   .dwclass!("absolute left-0 top-0 right-0 bottom-0")
-                                    .style("z-index", "3")
+                                   .dwclass!("absolute left-0 top-0 right-0 bottom-0 p-6")
+                                    .style("z-index", "61")
                                     .child(doc_sidebar_inline(doc_sections.clone(), selected_doc(), goto.clone()))
                                 }))
                             }))
@@ -82,8 +81,9 @@ pub fn doc_sidebar_inline(
 ) -> Dom {
     let selected_doc_bc = selected_doc.broadcast();
 
-    html!("div", {
-        .dwclass!("w-44 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-50 h-full flex-none")
+    html!("nav", {
+        .attr("aria-label", "Documentation")
+        .dwclass!("w-44 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-50 flex-none flex flex-col gap-6 p-t-2")
         .children(doc_sections.into_iter().map(clone!(goto => move |section| {
             let section_cloned = section.clone();
             let selected_index_signal = map_ref! {
@@ -93,12 +93,15 @@ pub fn doc_sidebar_inline(
             }.broadcast();
 
             html!("div", {
+                .dwclass!("flex flex-col gap-2")
                 .children([
-                    heading!({
-                        .text_size(TextSize::Base)
-                        .content(text(section.title.as_str()))
+                    html!("div", {
+                        .class("font-code")
+                        .dwclass!("text-xs text-woodsmoke-500 font-medium")
+                        .text(&format!("// {}", section.title.to_lowercase()))
                     }),
                     list!({
+                        .apply(|b| dwclass!(b, "flex flex-col gap-1 p-0 m-0"))
                         .selected_index_signal(selected_index_signal.signal())
                         .item_click_handler(clone!(section, goto => move |idx| {
                             goto(section.docs[idx])

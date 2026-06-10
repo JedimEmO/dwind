@@ -77,5 +77,13 @@ pub fn make_app_router() -> AppRouter<DocPage> {
         .insert("#/dwui-examples", Box::new(|_| Ok(DocPage::DwuiExamples)))
         .unwrap_throw();
 
+    router
+        .insert("#/components", Box::new(|_| Ok(DocPage::DwuiExamples)))
+        .unwrap_throw();
+
+    router
+        .insert("#/", Box::new(|_| Ok(DocPage::Home)))
+        .unwrap_throw();
+
     AppRouter::new(router)
 }

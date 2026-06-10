@@ -7,12 +7,20 @@ use futures_signals::signal::SignalExt;
 use futures_signals::signal::{not, Signal};
 use web_sys::HtmlElement;
 
+/// Draws the floating label, outline rectangle, and validation message for
+/// labelled input components.
+///
+/// `input_id` is the id of the inner form control; it associates the
+/// `<label for=..>` element and the validation message
+/// (`id = {input_id}-error`) which the control should reference via
+/// `aria-describedby` when invalid.
 pub fn labelled_rect_mixin(
     label: impl Signal<Item = String> + 'static,
     raise_label: impl Signal<Item = bool> + 'static,
     validation_signal: impl Signal<Item = ValidationResult> + 'static,
+    input_id: String,
 ) -> impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
-    |b| {
+    move |b| {
         let raise_label = raise_label.broadcast();
         let label = label.broadcast();
         let validation_signal = validation_signal.broadcast();
@@ -35,7 +43,10 @@ pub fn labelled_rect_mixin(
             }
         };
 
+        let error_id = format!("{}-error", input_id);
+
         b.child(html!("label", {
+            .attr("for", &input_id)
             .dwclass!("grid-col-1 grid-row-1 pointer-events-none transition-all m-l-4")
             .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
             .dwclass_signal!("text-sm", raise_label.signal())
@@ -50,26 +61,28 @@ pub fn labelled_rect_mixin(
             .text_signal(label.signal_cloned())
         }))
         .child(html!("div", {
-            .dwclass!("grid-col-1 grid-row-1 pointer-events-none border-l border-r border-b")
+            .dwclass!("grid-col-1 grid-row-1 pointer-events-none border-l border-r border-b rounded-b-sm transition-colors")
             .dwclass_signal!("dwui-border-void-600 is(.light *):dwui-border-void-200", is_valid.signal())
             .dwclass_signal!("dwui-border-error-600 is(.light *):dwui-border-error-700", not(is_valid.signal()))
         }))
         .child(html!("div", {
-            .dwclass!("grid-col-1 grid-row-1 pointer-events-none w-2 border-t")
+            .dwclass!("grid-col-1 grid-row-1 pointer-events-none w-2 border-t transition-colors")
             .dwclass_signal!("dwui-border-void-600 is(.light *):dwui-border-void-200", is_valid.signal())
             .dwclass_signal!("dwui-border-error-500 is(.light *):dwui-border-error-700", not(is_valid.signal()))
         }))
             .child(html!("div", {
-            .dwclass!("grid-col-1 grid-row-1 pointer-events-none transition-all border-t")
+            .dwclass!("grid-col-1 grid-row-1 pointer-events-none transition-all border-t transition-colors")
             .dwclass_signal!("dwui-border-void-600 is(.light *):dwui-border-void-200", is_valid.signal())
             .dwclass_signal!("dwui-border-error-500 is(.light *):dwui-border-error-700", not(is_valid.signal()))
             .style_signal("margin-left", top_border_margin_signal)
         }))
-        .child_signal(validation_signal.signal_cloned().map(|validation| {
+        .child_signal(validation_signal.signal_cloned().map(move |validation| {
             match validation {
                 ValidationResult::Valid => None,
                 ValidationResult::Invalid { message } => {
                     Some(html!("div", {
+                        .attr("id", &error_id)
+                        .attr("role", "alert")
                         .dwclass!("grid-col-1 grid-row-2 pointer-events-none transition-all text-sm h-4")
                         .dwclass!("dwui-text-error-500 is(.light *):dwui-text-error-700")
                         .text(&message)
