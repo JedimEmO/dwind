@@ -202,8 +202,8 @@ fn stats_strip() -> Dom {
             .children([
                 stat_cell("0", "runtime css engine"),
                 stat_cell("100%", "type-checked styles"),
-                stat_cell("32", "browser tests in ci"),
-                stat_cell("14", "themeable palettes"),
+                stat_cell("24", "accessible components"),
+                stat_cell("1", "language, end to end"),
             ])
         }))
     })
@@ -368,7 +368,7 @@ fn bento_tile_a11y() -> Dom {
         html!("div", {
             .class("font-code")
             .dwclass!("text-xs text-apple-400 m-t-2")
-            .text("[pass] 32/32 a11y + interaction tests")
+            .text("[pass] a11y + interaction suite — headless in ci")
         }),
     ])
 }
@@ -398,7 +398,7 @@ fn components_preview() -> Dom {
         .child(html!("p", {
             .dwclass!("text-woodsmoke-400 m-t-4 m-b-8")
             .style("max-width", "40rem")
-            .text("Buttons, forms, tables, dialogs, date pickers, virtualized lists — 25+ themeable building blocks, \
+            .text("Buttons, forms, tables, dialogs, date pickers, virtualized lists — 24 themeable building blocks, \
                    each with ARIA semantics and keyboard support baked in.")
         }))
         .child(html!("div", {
