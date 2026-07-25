@@ -177,9 +177,10 @@ pub fn number_input(props: NumberInputProps) -> Dom {
                 .dwclass_signal!("cursor-not-allowed", disabled.signal())
                 .style("outline", "none")
                 // Hide the native spinners; the themed steppers replace them.
-                // Inline declarations only — no vendor pseudo-element selectors.
+                // Inline declaration only — no vendor pseudo-element selectors,
+                // and no vendor-prefixed properties (dominator panics when an
+                // engine rejects a property; `appearance` is universal now).
                 .style("appearance", "textfield")
-                .style("-moz-appearance", "textfield")
                 .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
                 .attr_signal("min", min.map(|v| v.map(|v| v.to_string())))
                 .attr_signal("max", max.map(|v| v.map(|v| v.to_string())))

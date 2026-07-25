@@ -76,6 +76,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
+name = "console_error_panic_hook"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
+dependencies = [
+ "cfg-if",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "const_format"
 version = "0.2.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -195,6 +205,7 @@ dependencies = [
 name = "dominator-css-bindgen-ui"
 version = "0.1.0"
 dependencies = [
+ "console_error_panic_hook",
  "const_format",
  "dominator",
  "dwind",
@@ -282,6 +293,7 @@ name = "dwui"
 version = "0.10.0"
 dependencies = [
  "const_format",
+ "discard",
  "dominator",
  "dominator-css-bindgen",
  "dwind",

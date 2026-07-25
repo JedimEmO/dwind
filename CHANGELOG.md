@@ -61,6 +61,16 @@ keyboard-accessible, and covered by the headless browser suite. dwui now
 depends on `gloo-timers` and `wasm-bindgen-futures` for toast auto-dismiss and
 menu focus management.
 
+### Overlays portal to the body
+
+`modal!`, `drawer!`, and `toasts!` render their fixed-position layer as a
+direct child of `document.body` (falling back to the document element when an
+app has replaced `<body>` wholesale). `position: fixed` resolves against the
+nearest transformed ancestor, so overlays rendered in place broke inside
+anything with a transform, filter, or page-transition animation — the gallery's
+own route transition captured them. The component's mount point now only hosts
+an invisible placeholder; unmounting it tears the portal down.
+
 ## dwind 0.8.0 / dwind-macros 0.5.0 / dwind-base 0.1.2 / dwui 0.9.1 - 2026-07-25
 
 Everything here is additive. The theme: raw CSS in an application was almost

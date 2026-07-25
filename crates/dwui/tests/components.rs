@@ -78,6 +78,16 @@ fn click(element: &web_sys::Element) {
         .click();
 }
 
+/// Query the whole document — used for overlays that portal to `body`.
+fn doc_query(selector: &str) -> Option<web_sys::Element> {
+    web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .query_selector(selector)
+        .unwrap()
+}
+
 #[wasm_bindgen_test]
 async fn button_is_a_real_button_and_handles_clicks() {
     let tc = TestContainer::new();
@@ -379,10 +389,12 @@ async fn progress_indeterminate_omits_valuenow() {
 
 #[wasm_bindgen_test]
 async fn modal_has_dialog_semantics_and_closes() {
+    use discard::Discard;
+
     let tc = TestContainer::new();
     let open = Mutable::new(true);
 
-    dominator::append_dom(
+    let handle = dominator::append_dom(
         &tc.dom_element(),
         modal!({
             .open_signal(open.signal())
@@ -395,18 +407,23 @@ async fn modal_has_dialog_semantics_and_closes() {
     );
     wait_frame().await;
 
-    let dialog = tc.query("[role=dialog]").unwrap();
+    // The modal portals to the body, so query the document
+    let dialog = doc_query("[role=dialog]").unwrap();
     assert_eq!(dialog.get_attribute("aria-modal").as_deref(), Some("true"));
     assert_eq!(
         dialog.get_attribute("aria-label").as_deref(),
         Some("Example dialog")
     );
 
-    let close_button = tc.query("button[aria-label='Close dialog']").unwrap();
+    let close_button = doc_query("button[aria-label='Close dialog']").unwrap();
     click(&close_button);
     wait_frame().await;
 
     assert!(!open.get());
+
+    handle.discard();
+    wait_frame().await;
+    assert!(doc_query("[role=dialog]").is_none(), "the portal should clean up");
 }
 
 #[wasm_bindgen_test]
@@ -1511,9 +1528,11 @@ async fn card_defaults_to_padded_content() {
 
 #[wasm_bindgen_test]
 async fn modal_traps_tab_focus() {
+    use discard::Discard;
+
     let tc = TestContainer::new();
 
-    dominator::append_dom(
+    let handle = dominator::append_dom(
         &tc.dom_element(),
         modal!({
             .open(true)
@@ -1525,9 +1544,8 @@ async fn modal_traps_tab_focus() {
     );
     wait_frames(2).await;
 
-    let dialog = tc.query("[role=dialog]").unwrap();
-    let inner: web_sys::HtmlElement = tc
-        .query("[id=trap-inner]")
+    let dialog = doc_query("[role=dialog]").unwrap();
+    let inner: web_sys::HtmlElement = doc_query("[id=trap-inner]")
         .unwrap()
         .dyn_into()
         .unwrap();
@@ -1560,6 +1578,8 @@ async fn modal_traps_tab_focus() {
         Some("Close dialog"),
         "Tab from the last focusable should wrap to the close button"
     );
+
+    handle.discard();
 }
 
 #[wasm_bindgen_test]
@@ -1716,10 +1736,12 @@ async fn popover_opens_and_closes_on_escape() {
 
 #[wasm_bindgen_test]
 async fn drawer_opens_from_a_side_and_closes() {
+    use discard::Discard;
+
     let tc = TestContainer::new();
     let open = Mutable::new(true);
 
-    dominator::append_dom(
+    let handle = dominator::append_dom(
         &tc.dom_element(),
         drawer!({
             .open_signal(open.signal())
@@ -1733,17 +1755,19 @@ async fn drawer_opens_from_a_side_and_closes() {
     );
     wait_frames(2).await;
 
-    let dialog = tc.query("[role=dialog]").unwrap();
+    let dialog = doc_query("[role=dialog]").unwrap();
     assert_eq!(dialog.get_attribute("aria-label").as_deref(), Some("Settings"));
     assert_eq!(dialog.get_attribute("aria-modal").as_deref(), Some("true"));
 
     let style = dialog.get_attribute("style").unwrap_or_default();
     assert!(style.contains("left: 0"), "left drawer should pin to the left edge, got {style:?}");
 
-    click(&tc.query("button[aria-label='Close drawer']").unwrap());
+    click(&doc_query("button[aria-label='Close drawer']").unwrap());
     wait_frames(2).await;
 
     assert!(!open.get());
+
+    handle.discard();
 }
 
 // ---------------------------------------------------------------------------
@@ -1752,10 +1776,12 @@ async fn drawer_opens_from_a_side_and_closes() {
 
 #[wasm_bindgen_test]
 async fn toaster_pushes_auto_dismisses_and_manually_dismisses() {
+    use discard::Discard;
+
     let tc = TestContainer::new();
     let toaster = Toaster::default();
 
-    dominator::append_dom(
+    let handle = dominator::append_dom(
         &tc.dom_element(),
         toasts!({
             .toaster(toaster.clone())
@@ -1763,7 +1789,7 @@ async fn toaster_pushes_auto_dismisses_and_manually_dismisses() {
     );
     wait_frame().await;
 
-    let host = tc.query("[aria-live=polite]").unwrap();
+    let host = doc_query("[aria-live=polite]").unwrap();
     assert_eq!(host.child_element_count(), 0);
 
     // Auto-dismissing toast
@@ -1784,13 +1810,13 @@ async fn toaster_pushes_auto_dismisses_and_manually_dismisses() {
 
     wait_frame().await;
     assert_eq!(host.child_element_count(), 2);
-    assert!(tc.query("[role=alert]").is_some(), "error toasts announce assertively");
+    assert!(doc_query("[role=alert]").is_some(), "error toasts announce assertively");
 
     gloo_timers::future::TimeoutFuture::new(300).await;
     assert_eq!(host.child_element_count(), 1, "the timed toast should have auto-dismissed");
 
     // Dismiss the sticky one via its button
-    click(&tc.query("button[aria-label=Dismiss]").unwrap());
+    click(&host.query_selector("button[aria-label=Dismiss]").unwrap().unwrap());
     wait_frame().await;
     assert_eq!(host.child_element_count(), 0);
 
@@ -1802,4 +1828,6 @@ async fn toaster_pushes_auto_dismisses_and_manually_dismisses() {
     toaster.clear();
     wait_frame().await;
     assert_eq!(host.child_element_count(), 0);
+
+    handle.discard();
 }

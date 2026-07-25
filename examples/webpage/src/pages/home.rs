@@ -435,7 +435,7 @@ fn components_preview() -> Dom {
                         }))
                         .child(badge!({
                             .variant(BadgeVariant::Outline)
-                            .content(Some(text("v0.9.0")))
+                            .content(Some(text("v0.10.0")))
                         }))
                     }),
                     breadcrumbs!({

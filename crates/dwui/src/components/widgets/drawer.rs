@@ -73,7 +73,9 @@ pub fn drawer(props: DrawerProps) -> Dom {
     let size = size.broadcast();
     let is_open = Mutable::new(false);
 
-    html!("div", {
+    // Portalled to the body so a transformed ancestor can never capture the
+    // fixed positioning (see utils::body_portal).
+    crate::utils::body_portal(html!("div", {
         .visible_signal(open.signal())
         .future(open.signal().for_each(clone!(is_open => move |open_val| {
             is_open.set(open_val);
@@ -190,5 +192,5 @@ pub fn drawer(props: DrawerProps) -> Dom {
             // Drawer content
             .child_signal(content)
         }))
-    })
+    }))
 }

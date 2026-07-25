@@ -112,7 +112,9 @@ pub fn modal(props: ModalProps) -> Dom {
     let open = open.broadcast();
     let is_open = Mutable::new(false);
 
-    html!("div", {
+    // Portalled to the body so a transformed ancestor can never capture the
+    // fixed positioning (see utils::body_portal).
+    crate::utils::body_portal(html!("div", {
         .visible_signal(open.signal())
         // Track open state
         .future(open.signal().for_each(clone!(is_open => move |open_val| {
@@ -235,5 +237,5 @@ pub fn modal(props: ModalProps) -> Dom {
             // Modal content
             .child_signal(content)
         }))
-    })
+    }))
 }

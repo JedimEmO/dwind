@@ -135,7 +135,9 @@ pub fn toasts(props: ToastsProps) -> Dom {
         apply,
     } = props;
 
-    html!("div", {
+    // Portalled to the body so a transformed ancestor can never capture the
+    // fixed positioning (see utils::body_portal).
+    crate::utils::body_portal(html!("div", {
         .attr("aria-live", "polite")
         .attr("role", "status")
         .dwclass!("flex flex-col gap-2")
@@ -160,7 +162,7 @@ pub fn toasts(props: ToastsProps) -> Dom {
             render_toast(&toaster, entry)
         })))
         .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))
-    })
+    }))
 }
 
 fn render_toast(toaster: &Toaster, entry: Rc<ToastEntry>) -> Dom {

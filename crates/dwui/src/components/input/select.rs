@@ -71,7 +71,6 @@ pub fn select(props: SelectProps) -> Dom {
                 .style("outline", "none")
                 // The themed chevron beside this select replaces the native one
                 .style("appearance", "none")
-                .style("-webkit-appearance", "none")
                 .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
                 .attr_signal("aria-invalid", is_valid_bool.signal().map(|valid| if valid { None } else { Some("true") }))
                 .attr_signal("aria-describedby", is_valid_bool.signal().map({

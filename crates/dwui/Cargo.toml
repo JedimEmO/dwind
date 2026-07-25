@@ -19,6 +19,7 @@ gloo-timers = { workspace = true, features = ["futures"] }
 wasm-bindgen-futures = { workspace = true }
 once_cell = { workspace = true }
 web-sys = { workspace = true, features = ["NodeList"] }
+discard = "1"
 
 [dev-dependencies]
 futures = { workspace = true }
