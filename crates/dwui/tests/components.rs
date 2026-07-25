@@ -1384,3 +1384,77 @@ async fn radio_group_selection_and_roving_tabindex() {
 
     assert_eq!(value.get_cloned(), "a", "ArrowDown should wrap to the first option");
 }
+
+// ---------------------------------------------------------------------------
+// Control chrome
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn slider_chrome_tracks_fill_percentage() {
+    dwui::theme::apply_style_sheet(None);
+
+    let tc = TestContainer::new();
+    let value = Mutable::new(25.0f32);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        slider!({
+            .value(value.clone())
+            .label("Volume".to_string())
+            .min(0.0f32)
+            .max(100.0f32)
+        }),
+    );
+    wait_frames(2).await;
+
+    let range = tc.query("input[type=range]").unwrap();
+    assert!(range.class_list().contains("dwui-slider"));
+
+    let fill = |el: &web_sys::Element| {
+        el.dyn_ref::<web_sys::HtmlElement>()
+            .unwrap()
+            .style()
+            .get_property_value("--dwui-slider-fill")
+            .unwrap()
+    };
+
+    assert_eq!(fill(&range).trim(), "25%");
+
+    value.set(50.0);
+    wait_frames(2).await;
+    assert_eq!(fill(&range).trim(), "50%");
+}
+
+#[wasm_bindgen_test]
+async fn checkbox_and_switch_use_the_on_accent_token() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .child(checkbox!({ .checked(true) .label("Check".to_string()) }))
+            .child(switch!({ .checked(true) .label("Toggle".to_string()) }))
+        }),
+    );
+    wait_frames(2).await;
+
+    // Checkmark stroke is themed, not hard-coded white
+    let check_path = tc.query("[role=checkbox] path").unwrap();
+    assert!(check_path
+        .get_attribute("style")
+        .unwrap()
+        .contains("--dwui-on-accent"));
+    assert!(!check_path.has_attribute("stroke"));
+
+    // The switch knob is themed and moves by transform
+    let knob = tc.query("[role=switch] span").unwrap();
+    assert!(!knob.class_list().contains("bg-white"));
+
+    let transform = knob
+        .dyn_ref::<web_sys::HtmlElement>()
+        .unwrap()
+        .style()
+        .get_property_value("transform")
+        .unwrap();
+    assert!(transform.contains("translateX"), "got {transform:?}");
+}

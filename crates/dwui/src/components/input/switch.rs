@@ -65,11 +65,14 @@ pub fn switch(props: SwitchProps) -> Dom {
             .dwclass_signal!("dwui-bg-void-600 is(.light *):dwui-bg-void-300", checked.signal().map(|v| !v))
             .style("position", "relative")
             .child(html!("span", {
-                .dwclass!("w-5 h-5 rounded-full bg-white block shadow-md")
+                .dwclass!("w-5 h-5 rounded-full dwui-bg-on-accent block shadow-md")
                 .style("position", "absolute")
                 .style("top", "2px")
-                .style("transition", "left 150ms ease-out")
-                .style_signal("left", checked.signal().map(|v| if v { "22px" } else { "2px" }))
+                .style("left", "2px")
+                .style("transition", "transform 150ms ease-out")
+                .style_signal("transform", checked.signal().map(|v| {
+                    if v { "translateX(1.25rem)" } else { "translateX(0)" }
+                }))
             }))
             .event(clone!(checked_state => move |_: events::Click| {
                 (on_change)(!checked_state.get());

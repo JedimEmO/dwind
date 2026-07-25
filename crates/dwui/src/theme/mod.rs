@@ -78,6 +78,58 @@ pub fn apply_style_sheet(colors: Option<crate::theme::colors::ColorsCssVariables
 
     base::apply_base_stylesheet();
     colors::apply_colors_stylesheet();
+    controls::apply_controls_stylesheet();
+}
+
+/// Native-control chrome that can only be styled through vendor
+/// pseudo-elements (slider track/thumb).
+///
+/// Every vendor pseudo-element lives in its own rule, and `-moz` rules are
+/// only inserted in Firefox while `-webkit` rules are kept away from it:
+/// dominator panics when `insertRule` rejects a selector, and each engine
+/// rejects (some of) the other's vendor selectors. Never combine vendors in
+/// one rule, and never append a pseudo-class to a vendor pseudo-element.
+pub mod controls {
+    use dominator::stylesheet;
+    use std::sync::Once;
+
+    pub fn apply_controls_stylesheet() {
+        static ONCE: Once = Once::new();
+
+        ONCE.call_once(|| {
+            let is_firefox = web_sys::window()
+                .and_then(|w| w.navigator().user_agent().ok())
+                .map(|ua| ua.to_lowercase().contains("firefox"))
+                .unwrap_or(false);
+
+            stylesheet!(".dwui-slider", {
+                .raw("appearance: none; -webkit-appearance: none; background: transparent;")
+            });
+
+            // Track: filled up to --dwui-slider-fill, muted after it.
+            let track = "height: 0.25rem; border-radius: 9999px; \
+                background: linear-gradient(to right, \
+                var(--dwui-primary-400) var(--dwui-slider-fill, 0%), \
+                var(--dwui-void-600) var(--dwui-slider-fill, 0%));";
+
+            let thumb = "box-sizing: border-box; appearance: none; -webkit-appearance: none; \
+                width: 1rem; height: 1rem; border-radius: 9999px; \
+                background: var(--dwui-on-accent); \
+                border: 2px solid var(--dwui-primary-400); cursor: pointer;";
+
+            if is_firefox {
+                stylesheet!(".dwui-slider::-moz-range-track", { .raw(track) });
+                stylesheet!(".dwui-slider::-moz-range-thumb", { .raw(thumb) });
+            } else {
+                stylesheet!(".dwui-slider::-webkit-slider-runnable-track", { .raw(track) });
+                // WebKit renders the thumb inside the track's box, so it has
+                // to be pulled up to center on the 0.25rem track.
+                stylesheet!(".dwui-slider::-webkit-slider-thumb", {
+                    .raw(&format!("{} margin-top: -0.375rem;", thumb))
+                });
+            }
+        });
+    }
 }
 
 pub mod prelude {

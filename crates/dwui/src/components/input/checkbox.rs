@@ -77,7 +77,7 @@ pub fn checkbox(props: CheckboxProps) -> Dom {
                     .attr("aria-hidden", "true")
                     .child(svg!("path", {
                         .attr("d", "M2 6.5 L4.5 9 L10 3")
-                        .attr("stroke", "white")
+                        .attr("style", "stroke: var(--dwui-on-accent)")
                         .attr("stroke-width", "2")
                         .attr("stroke-linecap", "round")
                         .attr("stroke-linejoin", "round")

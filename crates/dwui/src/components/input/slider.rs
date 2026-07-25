@@ -4,6 +4,7 @@ use crate::theme::prelude::*;
 use crate::utils::component_id;
 use dominator::{clone, events, html, with_node, Dom};
 use dwind::prelude::*;
+use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal::{always, Mutable};
 use futures_signals_component_macro::component;
@@ -75,10 +76,21 @@ pub fn slider(props: SliderProps) -> Dom {
             ))
             .child(html!("input" => HtmlInputElement, {
                 .attr("id", &slider_id)
-                .dwclass!("h-6 grow cursor-pointer")
+                .class("dwui-slider")
+                .dwclass!("h-6 grow cursor-pointer dwui-focusable")
                 .dwclass_signal!("cursor-not-allowed", disabled.signal())
                 .attr("type", "range")
-                .style("accent-color", "var(--dwui-primary-400)")
+                .style_signal("--dwui-slider-fill", map_ref! {
+                    let value = value.value_signal_cloned(),
+                    let min = min.signal(),
+                    let max = max.signal() => {
+                        let value = value.parse::<f32>().unwrap_or(*min);
+                        let range = (*max - *min).max(f32::EPSILON);
+                        let fraction = ((value - *min) / range).clamp(0.0, 1.0);
+
+                        format!("{}%", fraction * 100.0)
+                    }
+                })
                 .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
                 .attr_signal("value", value.value_signal_cloned())
                 .attr_signal("min", min.signal().map(|v| v.to_string()))

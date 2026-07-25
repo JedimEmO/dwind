@@ -2,7 +2,7 @@ use crate::mixins::field_mixin::{field_error_row, field_surface_mixin};
 use crate::prelude::{InputValueWrapper, ValidationResult};
 use crate::theme::prelude::*;
 use crate::utils::component_id;
-use dominator::{events, html, with_node, Dom};
+use dominator::{events, html, svg, with_node, Dom};
 use dwind::prelude::*;
 use futures_signals::signal::{always, Mutable, SignalExt};
 use futures_signals::signal_vec::SignalVecExt;
@@ -65,10 +65,13 @@ pub fn select(props: SelectProps) -> Dom {
             ))
             .child(html!("select" => HtmlSelectElement, {
                 .attr("id", &select_id)
-                .dwclass!("w-full h-full bg-transparent border-none text-base p-l-3 p-t-3 cursor-pointer")
+                .dwclass!("w-full h-full bg-transparent border-none text-base p-l-3 p-r-8 p-t-3 cursor-pointer")
                 .dwclass!("dwui-text-on-primary-200 is(.light *):dwui-text-on-primary-900")
                 .dwclass_signal!("cursor-not-allowed", disabled.signal())
                 .style("outline", "none")
+                // The themed chevron beside this select replaces the native one
+                .style("appearance", "none")
+                .style("-webkit-appearance", "none")
                 .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
                 .attr_signal("aria-invalid", is_valid_bool.signal().map(|valid| if valid { None } else { Some("true") }))
                 .attr_signal("aria-describedby", is_valid_bool.signal().map({
@@ -99,6 +102,27 @@ pub fn select(props: SelectProps) -> Dom {
                         value.set(node.value());
                     })
                 })
+            }))
+            .child(html!("span", {
+                .attr("aria-hidden", "true")
+                .dwclass!("absolute pointer-events-none flex align-items-center")
+                .dwclass!("dwui-text-on-primary-400 is(.light *):dwui-text-on-primary-600")
+                .style("right", "0.75rem")
+                .style("top", "50%")
+                .style("transform", "translateY(-50%)")
+                .child(svg!("svg", {
+                    .attr("viewBox", "0 0 12 12")
+                    .attr("width", "12")
+                    .attr("height", "12")
+                    .attr("fill", "none")
+                    .child(svg!("path", {
+                        .attr("d", "M2 4 L6 8 L10 4")
+                        .attr("stroke", "currentColor")
+                        .attr("stroke-width", "1.5")
+                        .attr("stroke-linecap", "round")
+                        .attr("stroke-linejoin", "round")
+                    }))
+                }))
             }))
         }))
         .child(field_error_row(is_valid.signal_cloned(), &select_id))
