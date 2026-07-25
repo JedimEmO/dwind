@@ -9,5 +9,5 @@
 
 .dwui-field-surface:focus-within {
     outline: 2px solid var(--dwui-primary-400);
-    outline-offset: -2px;
+    outline-offset: 2px;
 }

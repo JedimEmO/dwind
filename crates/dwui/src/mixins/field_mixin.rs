@@ -57,6 +57,10 @@ pub fn field_surface_mixin(
             .dwclass_signal!("dwui-text-on-primary-400 is(.light *):dwui-text-on-primary-600", is_valid.signal())
             .dwclass_signal!("dwui-text-error-500 is(.light *):dwui-text-error-600", not(is_valid.signal()))
             .style("left", "0")
+            // A tight line box: with the default ~1.5 line-height the raised
+            // label reaches the surface's top edge and collides with the
+            // :focus-within outline drawn just inside it.
+            .style("line-height", "1")
             // Multi-line surfaces (textarea) override the resting anchor so the
             // label rests on their first line instead of the surface's center.
             .style("top", "var(--dwui-field-label-top, 50%)")
