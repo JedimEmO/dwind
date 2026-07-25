@@ -19,7 +19,7 @@ pub fn doc_page_title(title: &str) -> Dom {
         .child(html!("h1", {
             .class("font-display")
             .dwclass!("@sm:text-5xl @<sm:text-3xl font-extrabold text-woodsmoke-50 m-0")
-            .style("letter-spacing", "-0.03em")
+            .dwclass!("tracking-tighter")
             .text(title)
         }))
     })

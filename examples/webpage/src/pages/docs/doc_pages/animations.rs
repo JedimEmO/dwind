@@ -19,6 +19,59 @@ pub fn animation_page() -> Dom {
         .child(doc_page_sub_header("Spinning"))
         .child(example_box(animation_examples(), false))
         .child(code(&ANIMATION_EXAMPLES_EXAMPLE_HTML_MAP))
+
+        .child(doc_page_sub_header("Your own keyframes"))
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-0")
+            .text("A utility class is a single declaration block, so a @keyframes can never be one. \
+                   Declare them with dwkeyframes! instead: it emits the at-rule and, when you give it \
+                   an #[animation(...)], a matching animate-* class that rustc still checks. The rule \
+                   is injected the first time something uses it, and never twice.")
+        }))
+        .child(html!("pre", {
+            .class("font-code")
+            .dwclass!("text-sm p-4 m-0 m-t-4 rounded-lg border border-woodsmoke-800 text-woodsmoke-200 overflow-x-auto")
+            .dwclass!("[background:rgba(2, 2, 3, 0.7)]")
+            .text(r#"dwkeyframes! {
+    #[animation("900ms cubic-bezier(0.16, 1, 0.3, 1) both")]
+    fade_up {
+        "from" => "opacity: 0; transform: translateY(14px);",
+        "to"   => "opacity: 1; transform: translateY(0);",
+    }
+}
+
+html!("div", { .dwclass!("animate-fade-up") })"#)
+        }))
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-t-4 m-b-0")
+            .text("Every CSS fragment is a string literal, because Rust's lexer splits 0%, --sx and .35 \
+                   in ways that do not survive a round trip through the token stream.")
+        }))
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-t-4 m-b-0")
+            .text("When the shorthand has to be built at runtime — a per-item delay, say — use the handle \
+                   directly. Formatting it registers the rule, so the animation can never point at a \
+                   keyframe that was never injected:")
+        }))
+        .child(html!("pre", {
+            .class("font-code")
+            .dwclass!("text-sm p-4 m-0 m-t-2 rounded-lg border border-woodsmoke-800 text-woodsmoke-200 overflow-x-auto")
+            .dwclass!("[background:rgba(2, 2, 3, 0.7)]")
+            .text(".style(\"animation\", &format!(\"{FADE_UP_KEYFRAMES} 600ms {}ms ease-out both\", i * 60))")
+        }))
+
+        .child(doc_page_sub_header("Reduced motion"))
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-0")
+            .text("Motion preferences are just another media query, so the @(( )) conditional covers them \
+                   with no extra machinery:")
+        }))
+        .child(html!("pre", {
+            .class("font-code")
+            .dwclass!("text-sm p-4 m-0 m-t-2 rounded-lg border border-woodsmoke-800 text-woodsmoke-200 overflow-x-auto")
+            .dwclass!("[background:rgba(2, 2, 3, 0.7)]")
+            .text("dwclass!(\"animate-spin @((prefers-reduced-motion: reduce)):animate-none\")")
+        }))
     })
 }
 

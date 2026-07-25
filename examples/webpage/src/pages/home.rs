@@ -1,4 +1,5 @@
 use crate::fx::{self, kinetic_headline, magnetic, spotlight, spotlight_tilt};
+use crate::keyframes::*;
 use crate::pages::signal_lab::signal_lab;
 use crate::reveal::reveal_on_scroll;
 use dominator::routing::go_to_url;
@@ -27,7 +28,7 @@ pub fn home_page() -> Dom {
 fn hero() -> Dom {
     html!("section", {
         .dwclass!("w-full overflow-hidden")
-        .style("position", "relative")
+        .dwclass!("relative")
         .child(fx::blueprint_grid(
             "radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 75%)",
         ))
@@ -35,37 +36,37 @@ fn hero() -> Dom {
             .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 p-t-20 p-b-10")
             // @md is 1280px in dwind — the hero goes side-by-side from there up.
             .dwclass!("flex @md:flex-row @<md:flex-col gap-12 align-items-center")
-            .style("position", "relative")
+            .dwclass!("relative")
             // Left: headline
             .child(html!("div", {
                 .dwclass!("flex flex-col gap-6 grow")
                 .child(html!("div", {
                     .class("font-code")
                     .dwclass!("flex flex-row align-items-center gap-3 text-sm text-candlelight-400")
-                    .style("animation", "dwind-fade-up 400ms ease-out both")
+                    .style("animation", &format!("{FADE_UP_KEYFRAMES} 400ms ease-out both"))
                     .child(html!("span", {
                         .dwclass!("w-2 h-2 rounded-full bg-candlelight-400 flex-none")
-                        .style("animation", "dwind-pulse-ring 2.4s ease-out infinite")
+                        .dwclass!("animate-pulse-ring")
                     }))
                     .child(html!("span", { .text("rust → wasm → css · no node toolchain") }))
                 }))
                 .child(html!("h1", {
                     .class("font-display")
                     .dwclass!("@sm:text-6xl @<sm:text-4xl font-extrabold text-woodsmoke-50 m-0 leading-tight")
-                    .style("letter-spacing", "-0.03em")
+                    .dwclass!("tracking-tighter")
                     .children(kinetic_headline("Styling *forged* at compile time."))
                 }))
                 .child(html!("p", {
                     .dwclass!("text-woodsmoke-300 text-l m-0 leading-relaxed")
                     .style("max-width", "34rem")
-                    .style("animation", "dwind-fade-up 900ms 300ms ease-out both")
+                    .style("animation", &format!("{FADE_UP_KEYFRAMES} 900ms 300ms ease-out both"))
                     .text("dwind brings utility-first styling to the DOMINATOR web framework — \
                            every class checked by rustc, every state change driven by signals, \
                            and a complete accessible component library on top.")
                 }))
                 .child(html!("div", {
                     .dwclass!("flex @sm:flex-row @<sm:flex-col gap-4 align-items-center m-t-2")
-                    .style("animation", "dwind-fade-up 900ms 420ms ease-out both")
+                    .style("animation", &format!("{FADE_UP_KEYFRAMES} 900ms 420ms ease-out both"))
                     .child(html!("div", {
                         .dwclass!("w-44")
                         .apply(magnetic(7.0))
@@ -91,7 +92,7 @@ fn hero() -> Dom {
                         .class("font-code")
                         .dwclass!("text-woodsmoke-400 text-sm border border-woodsmoke-800 rounded-md p-l-3 p-r-3 p-t-1 p-b-1 select-all flex-none")
                         .style("background", "rgba(18, 18, 21, 0.6)")
-                        .style("white-space", "nowrap")
+                        .dwclass!("whitespace-nowrap")
                         .text("> cargo add dwind dwui")
                     }))
                 }))
@@ -106,9 +107,9 @@ fn code_card() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col flex-none w-full")
         .style("max-width", "30rem")
-        .style("animation", "dwind-fade-up 900ms 200ms ease-out both")
+        .style("animation", &format!("{FADE_UP_KEYFRAMES} 900ms 200ms ease-out both"))
         .child(html!("div", {
-            .class("dw-glass")
+            .apply(crate::fx::glass)
             .dwclass!("rounded-lg border border-woodsmoke-800 overflow-hidden shadow-2xl")
             .apply(spotlight_tilt(4.0))
             // window chrome
@@ -243,7 +244,7 @@ pub fn section_header(kicker: &str, title: &str) -> Dom {
         .child(html!("h2", {
             .class("font-display")
             .dwclass!("@sm:text-4xl @<sm:text-2xl font-bold text-woodsmoke-50 m-0")
-            .style("letter-spacing", "-0.02em")
+            .dwclass!("tracking-tight")
             .text(title)
         }))
     })
@@ -251,7 +252,7 @@ pub fn section_header(kicker: &str, title: &str) -> Dom {
 
 fn bento_tile(span_large: bool, children: Vec<Dom>) -> Dom {
     html!("div", {
-        .class("dw-glass")
+        .apply(crate::fx::glass)
         .dwclass!("rounded-lg border border-woodsmoke-800 p-6 flex flex-col gap-3")
         .dwclass!("hover:border-candlelight-700")
         .apply(spotlight_tilt(2.5))
@@ -344,7 +345,7 @@ fn bento_tile_themes() -> Dom {
                     .dwclass!("w-6 h-6 rounded-full border border-woodsmoke-700 transition-all")
                     .dwclass!("hover:scale-125")
                     .style("background-color", c)
-                    .style("animation", &format!("dwind-fade-up 600ms {}ms ease-out both", i * 60))
+                    .style("animation", &format!("{FADE_UP_KEYFRAMES} 600ms {}ms ease-out both", i * 60))
                 })
             }))
         }),
@@ -464,7 +465,7 @@ fn components_preview() -> Dom {
 
 fn preview_card(label: &str, children: Vec<Dom>) -> Dom {
     html!("div", {
-        .class("dw-glass")
+        .apply(crate::fx::glass)
         .dwclass!("rounded-lg border border-woodsmoke-800 p-6 flex flex-col gap-5 hover:border-candlelight-700")
         .apply(spotlight)
         .child(html!("div", {
@@ -483,17 +484,17 @@ fn preview_card(label: &str, children: Vec<Dom>) -> Dom {
 fn final_cta() -> Dom {
     html!("section", {
         .dwclass!("w-full p-t-20")
-        .style("position", "relative")
+        .dwclass!("relative")
         .apply(reveal_on_scroll)
         .child(html!("div", {
             .dwclass!("m-x-auto max-w-3xl p-l-4 p-r-4 flex flex-col gap-6 align-items-center")
             .child(html!("h2", {
                 .class("font-display")
                 .dwclass!("@sm:text-5xl @<sm:text-3xl font-extrabold text-woodsmoke-50 m-0 text-center")
-                .style("letter-spacing", "-0.03em")
+                .dwclass!("tracking-tighter")
                 .child(text("Build interfaces in "))
                 .child(html!("span", {
-                    .class("dw-sheen")
+                    .apply(crate::fx::sheen)
                     .text("Rust")
                 }))
                 .child(text("."))

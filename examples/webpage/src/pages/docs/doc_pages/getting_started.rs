@@ -111,7 +111,7 @@ fn next_link(label: &str, href: &str) -> Dom {
         .class("font-code")
         .dwclass!("p-l-4 p-r-4 p-t-2 p-b-2 text-sm rounded-md border border-woodsmoke-800 cursor-pointer transition-colors")
         .dwclass!("text-woodsmoke-300 hover:text-candlelight-300 hover:border-candlelight-700")
-        .style("text-decoration", "none")
+        .dwclass!("no-underline")
         .text(label)
         .event(move |_: events::Click| {
             go_to_url(&href);

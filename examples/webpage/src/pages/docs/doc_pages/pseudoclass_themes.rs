@@ -28,6 +28,76 @@ pub fn pseudo_class_themes() -> Dom {
         }))
         .child(example_box(variants(), false))
         .child(code(&VARIANTS_EXAMPLE_HTML_MAP))
+
+        // pseudo-elements
+        .child(doc_page_title("Pseudo Elements"))
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-300 leading-relaxed m-t-4 m-b-2")
+            .text(r#"::before and ::after are variants like any other. dwind adds the content: "" they
+             need in order to render, so a utility is enough on its own — and because declarations are
+             appended in source order, your own content utility later in the same class still wins."#)
+        }))
+        .child(example_box(pseudo_elements(), false))
+        .child(code(&PSEUDO_ELEMENTS_EXAMPLE_HTML_MAP))
+
+        // arbitrary declarations
+        .child(doc_page_title("Arbitrary Declarations"))
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-300 leading-relaxed m-t-4 m-b-2")
+            .text(r#"When a property has no utility — a vendor-prefixed mask, a custom property, a
+             one-off gradient — write the declaration inline in square brackets. It is unambiguous
+             against the variant syntax because a variant's ] is always followed by a colon."#)
+        }))
+        .child(html!("p", {
+            .dwclass!("text-woodsmoke-400 leading-relaxed m-0 m-b-2")
+            .text("Underscores in the value become spaces, since a class string is space-separated. \
+                   Modifiers go first: hover:[color:red], not [color:red]:hover.")
+        }))
+        .child(example_box(arbitrary_declarations(), false))
+        .child(code(&ARBITRARY_DECLARATIONS_EXAMPLE_HTML_MAP))
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
+fn pseudo_elements() -> Dom {
+    html!("div", {
+        .dwclass!("flex flex-row flex-wrap gap-6 justify-center w-full p-4")
+        // A decorative corner notch, drawn entirely by ::before.
+        .child(html!("div", {
+            .dwclass!("relative rounded-lg border border-woodsmoke-700 p-6 text-woodsmoke-200")
+            .dwclass!("[&::before]:absolute [&::before]:[top:-6px] [&::before]:[left:-6px]")
+            .dwclass!("[&::before]:w-4 [&::before]:h-4 [&::before]:rounded-full")
+            .dwclass!("[&::before]:[background:#D5B65F]")
+            .text("[&::before] corner dot")
+        }))
+        // The `before:` shorthand, with an explicit content override.
+        .child(html!("div", {
+            .dwclass!("relative rounded-lg border border-woodsmoke-700 p-6 text-woodsmoke-200")
+            .dwclass!("before:[content:'→'] before:m-r-2 before:text-candlelight-400")
+            .text("before: shorthand")
+        }))
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark", "base16-ocean.light"])]
+fn arbitrary_declarations() -> Dom {
+    html!("div", {
+        .dwclass!("flex flex-row flex-wrap gap-6 justify-center w-full p-4")
+        .child(html!("div", {
+            .dwclass!("rounded-lg p-6 text-woodsmoke-950 font-bold")
+            .dwclass!("[background:conic-gradient(from 210deg, #D5B65F, #5FB0D5, #D5B65F)]")
+            .text("conic-gradient")
+        }))
+        .child(html!("div", {
+            .dwclass!("rounded-lg border border-woodsmoke-700 p-6 text-woodsmoke-200")
+            .dwclass!("[writing-mode:vertical-rl] [letter-spacing:0.2em]")
+            .text("vertical-rl")
+        }))
+        .child(html!("div", {
+            .dwclass!("rounded-lg border border-woodsmoke-700 p-6")
+            .dwclass!("[--accent:#75D55F] [color:var(--accent)] [box-shadow:0 0 0 1px var(--accent)]")
+            .text("--accent custom property")
+        }))
     })
 }
 

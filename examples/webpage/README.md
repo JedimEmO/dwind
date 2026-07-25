@@ -34,12 +34,33 @@ trunk serve --open
 | Module | What lives there |
 | --- | --- |
 | `lib.rs` | App shell: router, sticky header with active-route indicator, scroll-progress rail, docs shell and prev/next pager, footer |
-| `fx.rs` | Reusable reactive effects — pointer spotlight, 3D tilt, magnetic controls, aurora background, film grain, scroll-spy, marquee, kinetic headlines |
+| `fx.rs` | Reusable reactive effects — pointer spotlight, 3D tilt, magnetic controls, aurora background, film grain, scroll-spy, marquee, kinetic headlines, glass and scrollbar surfaces |
+| `keyframes.rs` | Every animation on the site, declared with `dwkeyframes!` |
 | `palette.rs` | The ⌘K command palette: fuzzy search over every route, full keyboard control |
-| `styles.rs` | App-level raw CSS — keyframes, glass surfaces, grain, masks |
 | `reveal.rs` | `IntersectionObserver`-driven progressive reveal on scroll |
 | `pages/signal_lab.rs` | The reactivity demo on the home page |
 | `pages/docs/` | Documentation pages, sidebar, live example frames, syntax-highlighted source |
+
+### There is no app stylesheet
+
+This example used to carry ~300 lines of hand-written CSS. It now carries none.
+The only `<style>` block left is in `public/index.html`, holding exactly the
+things that are document-level rather than component-level: the font-family
+classes, `:root` colour-scheme, `::selection`, a site-wide `:focus-visible` ring,
+and the blanket `prefers-reduced-motion` clamp.
+
+Everything else went back into dwind:
+
+- **Keyframes** are `dwkeyframes!` declarations in `keyframes.rs`, which mint
+  compile-checked `animate-*` classes and inject their rule lazily.
+- **The pointer spotlight** — a `::before` glow and a masked `::after` ring, both
+  tracking the cursor — is `dwclass!` variants. `content: ""` is supplied
+  automatically, and the mask declarations that have no utility use the
+  `[property:value]` escape hatch.
+- **The scroll-reveal cascade**, including the parent-state `.reveal-in > *`
+  rules and the `:nth-child` stagger, is child-selector variants.
+- **Scrollbars, glass panels and the marquee hover-pause** are variants too —
+  `[&::-webkit-scrollbar-thumb]:`, `[&:hover > *]:`.
 
 ### The effects are signals, not an animation library
 

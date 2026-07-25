@@ -7,6 +7,7 @@
 //! depend on it.
 
 use crate::fx;
+use crate::keyframes::*;
 use dominator::{html, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
@@ -61,15 +62,15 @@ fn stage(
     const CARD_TINTS: [&str; 5] = ["#D5B65F", "#D59A5F", "#5FB0D5", "#8F5FD5", "#5FD59A"];
 
     html!("div", {
-        .class("dw-glass")
+        .apply(crate::fx::glass)
         .dwclass!("rounded-lg border border-woodsmoke-800 overflow-hidden")
-        .style("position", "relative")
+        .dwclass!("relative")
         .style("min-height", "22rem")
         .child(fx::blueprint_grid("radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 78%)"))
         // the fan of cards
         .child(html!("div", {
             .dwclass!("flex flex-row justify-center align-items-center w-full")
-            .style("position", "relative")
+            .dwclass!("relative")
             .style("height", "22rem")
             .style("perspective", "1200px")
             .children((0..5).map(|i| {
@@ -112,7 +113,7 @@ fn fan_card(
 
     html!("div", {
         .dwclass!("rounded-lg border border-woodsmoke-700 flex flex-col justify-between p-4")
-        .style("position", "absolute")
+        .dwclass!("absolute")
         .style("width", "9.5rem")
         .style("height", "13rem")
         .style("background", "linear-gradient(160deg, rgba(30, 30, 36, 0.96), rgba(10, 10, 13, 0.96))")
@@ -166,13 +167,13 @@ fn write_counter(writes: &Mutable<u32>) -> Dom {
         .class("font-code")
         .dwclass!("flex flex-row gap-3 align-items-center")
         .dwclass!("text-xs text-woodsmoke-500 border border-woodsmoke-800 rounded-full p-l-3 p-r-3 p-t-1 p-b-1")
-        .style("position", "absolute")
+        .dwclass!("absolute")
         .style("bottom", "0.9rem")
         .style("right", "0.9rem")
         .style("background", "rgba(2, 2, 3, 0.7)")
         .child(html!("span", {
             .dwclass!("w-2 h-2 rounded-full bg-apple-400 flex-none")
-            .style("animation", "dwind-pulse-ring 2.2s ease-out infinite")
+            .dwclass!("animate-pulse-ring")
         }))
         .child(html!("span", {
             .dwclass!("text-woodsmoke-400")
@@ -195,7 +196,7 @@ fn controls(
     let stacked = stacked.clone();
 
     html!("div", {
-        .class("dw-glass")
+        .apply(crate::fx::glass)
         .dwclass!("rounded-lg border border-woodsmoke-800 p-6 flex flex-col gap-5")
         .apply(fx::spotlight)
         .child(html!("div", {

@@ -325,7 +325,7 @@ fn variant_zebra_list() -> Dom {
         .dwclass!("[& > *]:p-3 [& > *]:text-sm [& > *]:text-woodsmoke-200")
         .dwclass!("[& > *:nth-child(odd)]:bg-woodsmoke-900 [& > *:nth-child(even)]:bg-woodsmoke-800")
         .dwclass!("[& > *]:nth-child(3):text-candlelight-300")
-        .style("list-style", "none")
+        .dwclass!("list-none")
         .children([
             html!("li", { .text("zebra striping from the parent") }),
             html!("li", { .text("no classes on the children") }),
@@ -353,7 +353,7 @@ fn pricing_card() -> Dom {
         }))
         .child(html!("ul", {
             .dwclass!("flex flex-col gap-2 p-4 m-0 text-sm text-woodsmoke-300")
-            .style("list-style", "none")
+            .dwclass!("list-none")
             .children([
                 "✓ unlimited projects",
                 "✓ compile-time styling",

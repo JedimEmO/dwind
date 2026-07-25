@@ -1,12 +1,17 @@
 //! Scroll-triggered progressive reveal.
 //!
-//! A single shared `IntersectionObserver` watches elements tagged with the
-//! `reveal-section` class; when one scrolls into view it gains `reveal-in`,
-//! and the CSS in [`crate::APP_KEYFRAMES`] cascades its children up with a
-//! small stagger. Elements are unobserved after revealing, so the effect
-//! plays once.
+//! A single shared `IntersectionObserver` watches tagged elements; when one
+//! scrolls into view it gains `reveal-in`, and the child-selector variants
+//! applied by [`reveal_on_scroll`] cascade its children up with a stagger.
+//! Elements are unobserved after revealing, so the effect plays once.
+//!
+//! The whole cascade — including the parent-state-driven `.reveal-in > *` rules
+//! and the `:nth-child` stagger — is expressed with `dwclass!` variants, so it
+//! needs no stylesheet.
 
 use dominator::DomBuilder;
+use dwind::prelude::*;
+use dwind_macros::dwclass;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::{JsCast, JsValue, UnwrapThrowExt};
@@ -57,8 +62,32 @@ fn with_observer(f: impl FnOnce(&IntersectionObserver)) {
 /// Tags the element for scroll reveal. Apply on a container; its direct
 /// children fade up in a staggered cascade when it enters the viewport.
 pub fn reveal_on_scroll(builder: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
-    builder.class("reveal-section").after_inserted(|element| {
-        let element: &Element = element.as_ref();
-        with_observer(|observer| observer.observe(element));
-    })
+    builder
+        // Resting state: every direct child is down and invisible.
+        .apply(|b| {
+            dwclass!(
+                b,
+                "[& > *]:opacity-0 [& > *]:[transform:translateY(26px)] \
+                 [& > *]:[transition:opacity 650ms cubic-bezier(0.16, 1, 0.3, 1), transform 650ms cubic-bezier(0.16, 1, 0.3, 1)]"
+            )
+        })
+        // Stagger. Each child leaves a beat after the one before it.
+        .apply(|b| {
+            dwclass!(
+                b,
+                "[& > *:nth-child(2)]:delay-75 [& > *:nth-child(3)]:delay-150 \
+                 [& > *:nth-child(4)]:[transition-delay:210ms] [& > *:nth-child(5)]:[transition-delay:280ms]"
+            )
+        })
+        // Revealed state, switched on by the observer adding `reveal-in`.
+        .apply(|b| {
+            dwclass!(
+                b,
+                "[&.reveal-in > *]:opacity-100 [&.reveal-in > *]:[transform:translateY(0)]"
+            )
+        })
+        .after_inserted(|element| {
+            let element: &Element = element.as_ref();
+            with_observer(|observer| observer.observe(element));
+        })
 }

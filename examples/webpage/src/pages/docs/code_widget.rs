@@ -18,7 +18,7 @@ pub fn code(example_map: &BTreeMap<String, String>) -> Dom {
             .class("font-code")
             .dwclass!("flex flex-row align-items-center gap-2 w-full p-l-4 p-r-4 h-10 cursor-pointer text-left text-sm")
             .dwclass!("bg-transparent border-none text-woodsmoke-400 hover:text-candlelight-300 transition-colors")
-            .style("outline", "none")
+            .dwclass!("outline-hidden")
             .child(html!("span", {
                 .dwclass!("inline-block transition-transform")
                 .style_signal("transform", expanded.signal().map(|v| {
