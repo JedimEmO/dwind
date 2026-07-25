@@ -40,6 +40,19 @@
             color: #020203;
         }
 
+        /* Firefox scrollbars; the WebKit equivalent lives in styles.rs */
+        * {
+            scrollbar-color: #26262C transparent;
+            scrollbar-width: thin;
+        }
+
+        /* One focus treatment for every custom control on the site. */
+        :focus-visible {
+            outline: 2px solid #D5B65F;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;

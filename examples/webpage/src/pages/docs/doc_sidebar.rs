@@ -74,6 +74,27 @@ where
         .map(Some)
 }
 
+/// Opens the shared ⌘K palette. Cheaper than a second search implementation,
+/// and it teaches the shortcut in the place people look for search.
+fn sidebar_search() -> Dom {
+    html!("button", {
+        .attr("type", "button")
+        .class("font-code")
+        .dwclass!("flex flex-row align-items-center justify-between gap-2 w-full cursor-pointer")
+        .dwclass!("border border-woodsmoke-800 rounded-md p-l-3 p-r-2 p-t-2 p-b-2 transition-all")
+        .dwclass!("text-woodsmoke-500 hover:text-candlelight-300 hover:border-candlelight-700")
+        .style("background", "rgba(18, 18, 21, 0.6)")
+        .style("font", "inherit")
+        .style("font-size", "0.72rem")
+        .child(html!("span", { .text("search docs…") }))
+        .child(html!("kbd", {
+            .dwclass!("text-woodsmoke-600 border border-woodsmoke-800 rounded-md p-l-1 p-r-1")
+            .text("⌘K")
+        }))
+        .event(|_: events::Click| crate::palette::global().open())
+    })
+}
+
 pub fn doc_sidebar_inline(
     doc_sections: Vec<DocSection>,
     selected_doc: impl Signal<Item = DocPage> + 'static,
@@ -83,7 +104,15 @@ pub fn doc_sidebar_inline(
 
     html!("nav", {
         .attr("aria-label", "Documentation")
-        .dwclass!("w-44 m-l-0 border-r border-woodsmoke-800 border-solid text-woodsmoke-50 flex-none flex flex-col gap-6 p-t-2")
+        .dwclass!("w-52 m-l-0 text-woodsmoke-50 flex-none flex flex-col gap-6 p-t-2")
+        // Rides along with the reader instead of scrolling off the top.
+        .style("position", "sticky")
+        .style("top", "5.5rem")
+        .style("align-self", "flex-start")
+        .style("max-height", "calc(100vh - 8rem)")
+        .style("overflow-y", "auto")
+        .class("dw-scrollbar")
+        .child(sidebar_search())
         .children(doc_sections.into_iter().map(clone!(goto => move |section| {
             let section_cloned = section.clone();
             let selected_index_signal = map_ref! {

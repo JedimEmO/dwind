@@ -1,6 +1,7 @@
 //! The dwind utility showcase: every artifact on this page is built from
 //! dwind utility classes alone — no dwui components anywhere.
 
+use crate::fx;
 use crate::pages::docs::code_widget::code;
 use crate::pages::docs::example_box::example_box;
 use crate::reveal::reveal_on_scroll;
@@ -11,10 +12,42 @@ use dwind::prelude::*;
 use dwind::width_generator;
 use dwind_macros::{dwclass, dwgenerate};
 use example_html_highlight_macro::example_html;
+use futures_signals::signal::Mutable;
+
+/// Chapter index for the sticky rail. Ids double as anchor targets.
+const SECTIONS: &[(&str, &str)] = &[
+    ("layout", "Responsive layout"),
+    ("color", "Gradients & palettes"),
+    ("typography", "Type scale"),
+    ("depth", "Glass & depth"),
+    ("motion", "Transitions"),
+    ("selectors", "Variants"),
+    ("composition", "Composition"),
+    ("generators", "Generators"),
+];
 
 pub fn dwind_examples_page() -> Dom {
+    let active = Mutable::new("layout");
+
     html!("div", {
-        .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 w-full m-b-20")
+        .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 w-full m-b-20 flex flex-row gap-10")
+        .child(html!("div", {
+            .dwclass!("grow")
+            .style("min-width", "0")
+            .child(examples_body(&active))
+        }))
+        .child(html!("div", {
+            .dwclass!("p-t-20 @<md:hidden")
+            .child(fx::spy_rail(SECTIONS, active.clone()))
+        }))
+    })
+}
+
+fn examples_body(active: &Mutable<&'static str>) -> Dom {
+    let active = active.clone();
+
+    html!("div", {
+        .dwclass!("w-full")
         .child(html!("div", {
             .dwclass!("p-t-10 flex flex-col gap-3")
             .apply(reveal_on_scroll)
@@ -44,6 +77,7 @@ pub fn dwind_examples_page() -> Dom {
              breakpoint the bar stacks vertically.",
             example_box(responsive_navbar(), true),
             code(&RESPONSIVE_NAVBAR_EXAMPLE_HTML_MAP),
+            &active,
         ))
 
         .child(section(
@@ -53,6 +87,7 @@ pub fn dwind_examples_page() -> Dom {
              composes them at any rotation.",
             example_box(gradient_showcase(), false),
             code(&GRADIENT_SHOWCASE_EXAMPLE_HTML_MAP),
+            &active,
         ))
 
         .child(section(
@@ -61,6 +96,7 @@ pub fn dwind_examples_page() -> Dom {
             "Sizes, weights, leading, and font family utilities — from captions to display type.",
             example_box(typography_specimen(), false),
             code(&TYPOGRAPHY_SPECIMEN_EXAMPLE_HTML_MAP),
+            &active,
         ))
 
         .child(section(
@@ -70,6 +106,7 @@ pub fn dwind_examples_page() -> Dom {
              the utility vocabulary.",
             example_box(glass_panel(), false),
             code(&GLASS_PANEL_EXAMPLE_HTML_MAP),
+            &active,
         ))
 
         .child(section(
@@ -79,6 +116,7 @@ pub fn dwind_examples_page() -> Dom {
              pure CSS. The bottom row shows the built-in keyframe animations.",
             example_box(motion_playground(), false),
             code(&MOTION_PLAYGROUND_EXAMPLE_HTML_MAP),
+            &active,
         ))
 
         .child(section(
@@ -88,6 +126,7 @@ pub fn dwind_examples_page() -> Dom {
              hover states on specific descendants, all from the parent element.",
             example_box(variant_zebra_list(), false),
             code(&VARIANT_ZEBRA_LIST_EXAMPLE_HTML_MAP),
+            &active,
         ))
 
         .child(section(
@@ -97,6 +136,7 @@ pub fn dwind_examples_page() -> Dom {
              rings, and hover transforms.",
             example_box(pricing_card(), false),
             code(&PRICING_CARD_EXAMPLE_HTML_MAP),
+            &active,
         ))
 
         .child(section(
@@ -106,14 +146,25 @@ pub fn dwind_examples_page() -> Dom {
              utilities from parameterized generators at compile time.",
             example_box(generator_demo(), false),
             code(&GENERATOR_DEMO_EXAMPLE_HTML_MAP),
+            &active,
         ))
     })
 }
 
-fn section(kicker: &str, title: &str, description: &str, preview: Dom, source: Dom) -> Dom {
+/// `kicker` doubles as the section's anchor id and its scroll-spy key.
+fn section(
+    kicker: &'static str,
+    title: &str,
+    description: &str,
+    preview: Dom,
+    source: Dom,
+    active: &Mutable<&'static str>,
+) -> Dom {
     html!("section", {
+        .attr("id", kicker)
         .dwclass!("m-t-14 flex flex-col")
         .apply(reveal_on_scroll)
+        .apply(fx::scroll_spy(kicker, active.clone()))
         .child(html!("div", {
             .class("font-code")
             .dwclass!("text-candlelight-400 text-xs")

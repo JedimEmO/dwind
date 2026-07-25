@@ -1,6 +1,9 @@
+mod fx;
 mod pages;
+mod palette;
 mod reveal;
 mod router;
+mod styles;
 
 #[macro_use]
 extern crate log;
@@ -11,63 +14,24 @@ extern crate dominator;
 #[macro_use]
 extern crate dwui;
 
+use crate::fx::magnetic;
 use crate::pages::components_page::components_page;
 use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
 use crate::pages::docs::{doc_sections, DocPage};
 use crate::pages::dwind_examples::dwind_examples_page;
 use crate::pages::home::home_page;
+use crate::palette::Palette;
 use crate::router::make_app_router;
+use crate::styles::APP_STYLES;
 use dominator::routing::go_to_url;
-use dominator::{body, Dom};
+use dominator::{body, events, Dom};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
 use dwui::theme::prelude::ColorsCssVariables;
-use futures_signals::signal::{always, SignalExt};
+use futures_signals::signal::{always, Mutable, SignalExt};
 use std::sync::Arc;
 use web_sys::window;
-
-const APP_KEYFRAMES: &str = r#"
-@keyframes dwind-cursor-blink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
-}
-
-@keyframes dwind-fade-up {
-    from {
-        opacity: 0;
-        transform: translateY(14px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes dwind-glow-drift {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(4%, -6%) scale(1.08); }
-}
-
-/* scroll-triggered progressive reveal (see reveal.rs) */
-.reveal-section > * {
-    opacity: 0;
-    transform: translateY(26px);
-    transition:
-        opacity 650ms cubic-bezier(0.16, 1, 0.3, 1),
-        transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal-section > *:nth-child(2) { transition-delay: 70ms; }
-.reveal-section > *:nth-child(3) { transition-delay: 140ms; }
-.reveal-section > *:nth-child(4) { transition-delay: 210ms; }
-.reveal-section > *:nth-child(5) { transition-delay: 280ms; }
-
-.reveal-section.reveal-in > * {
-    opacity: 1;
-    transform: translateY(0);
-}
-"#;
 
 #[cfg(not(test))]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
@@ -85,29 +49,86 @@ fn main_view() -> Dom {
         &DWIND_COLORS["woodsmoke"],
         &DWIND_COLORS["red"],
     )));
-    dominator::stylesheet_raw(APP_KEYFRAMES);
+    dominator::stylesheet_raw(APP_STYLES);
+
+    let palette = palette::global();
+    let page = make_app_router().signal().broadcast();
+
+    // How far down the page we are, 0.0 – 1.0. One number, written by a scroll
+    // listener and read by exactly one style_signal.
+    let scrolled = Mutable::new(0.0f64);
 
     html!("div", {
+        .class("dw-scrollbar")
         .dwclass!("text-woodsmoke-100 bg-woodsmoke-950")
         .dwclass!("h-full overflow-y-auto overflow-x-hidden")
-        .child(top_nav())
+        .style("position", "relative")
+        .apply(palette.shortcuts())
+        .with_node!(element => {
+            .event(clone!(scrolled => move |_: events::Scroll| {
+                let max = (element.scroll_height() - element.client_height()).max(1) as f64;
+                scrolled.set_neq((element.scroll_top() as f64 / max).clamp(0.0, 1.0));
+            }))
+        })
+        .child(fx::aurora())
+        .child(scroll_progress(scrolled.clone()))
+        .child(top_nav(&palette, page.signal()))
         .child(html!("main", {
-            .child_signal(make_app_router().signal().map(|page| {
-                Some(match page {
-                    DocPage::Home => home_page(),
-                    DocPage::DwuiExamples => components_page(),
-                    DocPage::Examples => dwind_examples_page(),
-                    other => docs_shell(other),
-                })
+            .style("position", "relative")
+            .style("z-index", "1")
+            .child_signal(page.signal().map(|page| {
+                Some(html!("div", {
+                    .class("dw-route")
+                    .after_inserted(|_| scroll_to_top())
+                    .child(match page {
+                        DocPage::Home => home_page(),
+                        DocPage::DwuiExamples => components_page(),
+                        DocPage::Examples => dwind_examples_page(),
+                        other => docs_shell(other),
+                    })
+                }))
             }))
         }))
         .child(footer())
+        .child(fx::grain())
+        .child(palette.render())
+    })
+}
+
+fn scroll_to_top() {
+    if let Some(win) = window() {
+        win.scroll_to_with_x_and_y(0.0, 0.0);
+    }
+}
+
+/// Reading-progress rail pinned under the header.
+fn scroll_progress(scrolled: Mutable<f64>) -> Dom {
+    html!("div", {
+        .attr("aria-hidden", "true")
+        .style("position", "fixed")
+        .style("top", "0")
+        .style("left", "0")
+        .style("right", "0")
+        .style("height", "2px")
+        .style("z-index", "60")
+        .style("pointer-events", "none")
+        .child(html!("div", {
+            .style("height", "100%")
+            .style("background", "linear-gradient(90deg, #A88735, #D5B65F 45%, #FFF3CF)")
+            .style("box-shadow", "0 0 12px rgba(213, 182, 95, 0.6)")
+            .style("transform-origin", "left center")
+            .style("will-change", "transform")
+            .style_signal("transform", scrolled.signal().map(|p| {
+                format!("scaleX({:.4})", p.max(0.001))
+            }))
+            .style("width", "100%")
+        }))
     })
 }
 
 fn docs_shell(page: DocPage) -> Dom {
     html!("div", {
-        .dwclass!("m-x-auto flex max-w-5xl w-full p-t-6 p-l-4 p-r-4")
+        .dwclass!("m-x-auto flex max-w-6xl w-full p-t-8 p-l-4 p-r-4")
         .style("min-height", "70vh")
         .child_signal(doc_sidebar(
             doc_sections(),
@@ -115,28 +136,90 @@ fn docs_shell(page: DocPage) -> Dom {
             Arc::new(|v: DocPage| v.goto()),
             move || {
                 html!("div", {
-                    .dwclass!("m-l-4 m-r-0 w-full")
+                    .dwclass!("m-l-8 m-r-0 w-full")
+                    .style("min-width", "0")
                     .child_signal(doc_main_view(always(Some(page))))
+                    .child(docs_pager(page))
                 })
             },
         ))
     })
 }
 
-fn top_nav() -> Dom {
+/// Prev / next between doc pages, in reading order.
+fn docs_pager(page: DocPage) -> Dom {
+    let order: Vec<DocPage> = doc_sections()
+        .into_iter()
+        .flat_map(|section| section.docs)
+        .collect();
+
+    let index = order.iter().position(|p| *p == page);
+    let prev = index
+        .and_then(|i| i.checked_sub(1))
+        .and_then(|i| order.get(i))
+        .copied();
+    let next = index.map(|i| i + 1).and_then(|i| order.get(i)).copied();
+
+    html!("div", {
+        .dwclass!("flex flex-row justify-between gap-4 m-t-16 p-t-8 border-t border-woodsmoke-800")
+        .child(pager_link(prev, "← prev", true))
+        .child(pager_link(next, "next →", false))
+    })
+}
+
+fn pager_link(page: Option<DocPage>, hint: &str, left: bool) -> Dom {
+    let Some(page) = page else {
+        return html!("div", { .dwclass!("grow") });
+    };
+
+    html!("button", {
+        .attr("type", "button")
+        .class("dw-glass")
+        .dwclass!("flex flex-col gap-1 rounded-lg border border-woodsmoke-800 p-4 grow cursor-pointer")
+        .dwclass!("hover:border-candlelight-700 transition-all")
+        .apply(fx::spotlight)
+        .apply(move |b| if left {
+            dwclass!(b, "text-left align-items-start")
+        } else {
+            dwclass!(b, "text-right align-items-end")
+        })
+        .style("color", "inherit")
+        .style("font", "inherit")
+        .child(html!("span", {
+            .class("font-code")
+            .dwclass!("text-xs text-woodsmoke-500")
+            .text(hint)
+        }))
+        .child(html!("span", {
+            .class("font-display")
+            .dwclass!("text-l font-bold text-woodsmoke-100")
+            .text(&page.to_string())
+        }))
+        .event(move |_: events::Click| page.goto())
+    })
+}
+
+fn top_nav(
+    palette: &Palette,
+    page: impl futures_signals::signal::Signal<Item = DocPage> + 'static,
+) -> Dom {
+    let page = page.broadcast();
+    let palette = palette.clone();
+
     html!("header", {
         .dwclass!("sticky top-0 z-50 w-full")
-        .style("backdrop-filter", "blur(12px)")
-        .style("background", "rgba(2, 2, 3, 0.72)")
+        .style("backdrop-filter", "blur(16px) saturate(1.3)")
+        .style("background", "rgba(2, 2, 3, 0.62)")
         .dwclass!("border-b border-woodsmoke-800")
         .child(html!("div", {
-            .dwclass!("m-x-auto max-w-6xl flex align-items-center justify-between h-14 p-l-4 p-r-4")
+            .dwclass!("m-x-auto max-w-6xl flex align-items-center justify-between h-16 p-l-4 p-r-4")
             // Wordmark
             .child(html!("a", {
                 .attr("href", "#/")
                 .class("font-code")
                 .dwclass!("flex align-items-center gap-1 text-l font-bold text-woodsmoke-50 cursor-pointer")
                 .style("text-decoration", "none")
+                .apply(magnetic(5.0))
                 .child(html!("span", {
                     .dwclass!("text-candlelight-400")
                     .text("λ")
@@ -153,28 +236,73 @@ fn top_nav() -> Dom {
                 .attr("aria-label", "Main")
                 .class("font-code")
                 .dwclass!("flex align-items-center @sm:gap-6 @<sm:gap-3 @sm:text-sm @<sm:text-xs")
-                .children([
-                    nav_link("components", "#/components", false),
-                    nav_link("docs", "#/docs/colors", false),
-                    nav_link("examples", "#/examples", false),
-                    nav_external("github", "https://github.com/JedimEmO/dwind"),
-                ])
+                .child(nav_link("components", "#/components", page.signal().map(|p| p == DocPage::DwuiExamples)))
+                .child(nav_link("docs", "#/docs/getting-started", page.signal().map(|p| {
+                    !matches!(p, DocPage::Home | DocPage::DwuiExamples | DocPage::Examples)
+                })))
+                .child(nav_link("examples", "#/examples", page.signal().map(|p| p == DocPage::Examples)))
+                .child(nav_external("github", "https://github.com/JedimEmO/dwind"))
+                .child(palette_trigger(&palette))
             }))
         }))
     })
 }
 
-fn nav_link(label: &str, href: &str, emphasized: bool) -> Dom {
+/// The ⌘K affordance. Also the only way to discover the palette exists.
+fn palette_trigger(palette: &Palette) -> Dom {
+    let palette = palette.clone();
+
+    html!("button", {
+        .attr("type", "button")
+        .attr("aria-label", "Open command palette")
+        .class("font-code")
+        .dwclass!("flex flex-row align-items-center gap-2 cursor-pointer transition-all")
+        .dwclass!("border border-woodsmoke-800 rounded-md p-l-2 p-r-2 p-t-1 p-b-1")
+        .dwclass!("text-woodsmoke-400 hover:text-candlelight-300 hover:border-candlelight-700")
+        .dwclass!("@<sm:hidden text-xs")
+        .style("background", "rgba(18, 18, 21, 0.6)")
+        .style("font", "inherit")
+        .style("font-size", "0.72rem")
+        .child(html!("span", { .text("⌘") }))
+        .child(html!("span", { .text("K") }))
+        .event(move |_: events::Click| palette.open())
+    })
+}
+
+fn nav_link(
+    label: &str,
+    href: &str,
+    active: impl futures_signals::signal::Signal<Item = bool> + 'static,
+) -> Dom {
     let href = href.to_string();
+    let active = active.broadcast();
 
     html!("a", {
         .attr("href", &href)
         .dwclass!("cursor-pointer transition-colors select-none")
         .dwclass!("text-woodsmoke-300 hover:text-candlelight-300")
-        .apply_if(emphasized, |b| dwclass!(b, "text-candlelight-400"))
         .style("text-decoration", "none")
-        .text(label)
-        .event(move |_: dominator::events::Click| {
+        .style("position", "relative")
+        .style_signal("color", active.signal().map(|a| {
+            if a { Some("#E5CE8F") } else { None }
+        }))
+        .child(dominator::text(label))
+        // an underline that grows in when the route becomes active
+        .child(html!("span", {
+            .attr("aria-hidden", "true")
+            .style("position", "absolute")
+            .style("left", "0")
+            .style("right", "0")
+            .style("bottom", "-6px")
+            .style("height", "1px")
+            .style("background", "linear-gradient(90deg, transparent, #D5B65F, transparent)")
+            .style("transform-origin", "center")
+            .style("transition", "transform 320ms cubic-bezier(0.16, 1, 0.3, 1)")
+            .style_signal("transform", active.signal().map(|a| {
+                if a { "scaleX(1)" } else { "scaleX(0)" }
+            }))
+        }))
+        .event(move |_: events::Click| {
             go_to_url(&href);
         })
     })
@@ -191,7 +319,7 @@ fn nav_external(label: &str, url: &str) -> Dom {
         .dwclass!("text-woodsmoke-300 hover:text-candlelight-300")
         .style("text-decoration", "none")
         .text(label)
-        .event(move |_: dominator::events::Click| {
+        .event(move |_: events::Click| {
             window()
                 .unwrap()
                 .open_with_url_and_target(&url, "_blank")
@@ -203,8 +331,10 @@ fn nav_external(label: &str, url: &str) -> Dom {
 fn footer() -> Dom {
     html!("footer", {
         .dwclass!("border-t border-woodsmoke-800 w-full m-t-20")
+        .style("position", "relative")
+        .style("z-index", "1")
         .child(html!("div", {
-            .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 p-t-10 p-b-10")
+            .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 p-t-12 p-b-12")
             .dwclass!("flex @sm:flex-row @<sm:flex-col justify-between gap-8")
             .child(html!("div", {
                 .dwclass!("flex flex-col gap-2")
@@ -227,7 +357,7 @@ fn footer() -> Dom {
                 .dwclass!("flex flex-row gap-10")
                 .child(footer_column("explore", vec![
                     ("components", "#/components"),
-                    ("docs", "#/docs/colors"),
+                    ("docs", "#/docs/getting-started"),
                     ("examples", "#/examples"),
                 ]))
                 .child(footer_column("project", vec![
