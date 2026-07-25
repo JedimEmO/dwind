@@ -105,6 +105,19 @@ hold a `&String` in a `String`, so only generator-based selectors worked. Aliasi
 now works for a plain utility and for a `dwkeyframes!` animation alike, and an
 aliased animation still registers its keyframes.
 
+### Watch out: an unsupported selector is fatal
+
+A selector the browser cannot parse is not ignored. `insertRule` throws, and
+dominator panics with "selectors are incorrect" rather than skipping the rule
+(`dominator/src/dom.rs:1691`), which takes the whole app down at load.
+
+This matters more now that variants can express selectors a stylesheet used to
+hold, because a raw stylesheet drops an unparseable rule silently. Vendor
+pseudo-elements are the trap: Firefox tolerates `[&::-webkit-scrollbar]:` on its
+own but rejects `[&::-webkit-scrollbar-thumb:hover]:`, so a WebKit-only scrollbar
+style that works in Chrome blanks the page in Firefox. Prefer standard properties
+(`scrollbar-width`, `scrollbar-color`) and test in every engine you support.
+
 ### New utilities
 
 `delay-0`…`delay-1000`, `underline` / `overline` / `line-through` /

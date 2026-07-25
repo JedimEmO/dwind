@@ -474,21 +474,20 @@ pub fn glass(builder: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
 
 /// Thin scrollbars that match the surface they sit on.
 ///
-/// WebKit exposes these as pseudo-elements, which is exactly what the bracketed
-/// variant syntax selects. Firefox uses the standard `scrollbar-*` properties,
-/// set alongside.
+/// The standard `scrollbar-width` / `scrollbar-color` properties only — no
+/// `::-webkit-scrollbar` pseudo-elements. Two reasons:
+///
+/// 1. They are no longer needed. Firefox has supported the standard properties
+///    since 64 and Chrome since 121.
+/// 2. `::-webkit-scrollbar-thumb:hover` **crashes Firefox**. A selector that the
+///    browser cannot parse makes `insertRule` throw, and dominator panics rather
+///    than skipping it (`dom.rs:1691`), so the whole app dies on load. A raw
+///    stylesheet would have ignored the rule silently — moving these selectors
+///    into `dwclass!` is what made an unsupported selector fatal.
 pub fn slim_scrollbar(builder: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     dwclass!(
         builder,
-        "[scrollbar-width:thin] [scrollbar-color:#26262C transparent] \
-         [&::-webkit-scrollbar]:[width:10px] [&::-webkit-scrollbar]:[height:10px] \
-         [&::-webkit-scrollbar-track]:[background:transparent] \
-         [&::-webkit-scrollbar-thumb]:[background:#26262C] \
-         [&::-webkit-scrollbar-thumb]:[border-radius:8px] \
-         [&::-webkit-scrollbar-thumb]:[border:3px solid transparent] \
-         [&::-webkit-scrollbar-thumb]:[background-clip:content-box] \
-         [&::-webkit-scrollbar-thumb:hover]:[background:#3A3A44] \
-         [&::-webkit-scrollbar-thumb:hover]:[background-clip:content-box]"
+        "[scrollbar-width:thin] [scrollbar-color:#26262C transparent]"
     )
 }
 
