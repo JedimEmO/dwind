@@ -1,6 +1,6 @@
 [package]
 name = "dwind-macros"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 description = "Macros used by the dwind crate for applying dominator classes to components using a custom language"
 homepage = "https://github.com/JedimEmO/dwind"
@@ -13,7 +13,7 @@ proc-macro = true
 
 [dependencies]
 dominator = { workspace = true }
-dwind-base = { path = "../dwind-base", version = "0.1.1" }
+dwind-base = { path = "../dwind-base", version = "0.1.2" }
 nom = { workspace = true }
 proc-macro2 = { workspace = true }
 quote = { workspace = true }

@@ -18,11 +18,21 @@ pub struct DwindClassSelector {
     /// Variants are the first pseudo selector, bracketed with []
     /// [& > *]:nth-child(2):bg-red-500
     pub variant: Option<String>,
+    /// An arbitrary CSS declaration, written in place of a class name:
+    /// `[mask-composite:exclude]`, `[--sx:50%]`.
+    ///
+    /// The escape hatch for properties with no utility. Unambiguous against
+    /// the variant syntax because a variant's `]` is always followed by `:`.
+    pub arbitrary: Option<String>,
 }
 
 impl DwindClassSelector {
     pub fn is_generator(&self) -> bool {
         !self.generator_params.is_empty()
+    }
+
+    pub fn is_arbitrary(&self) -> bool {
+        self.arbitrary.is_some()
     }
 
     pub fn get_breakpoint(&self) -> Option<BreakpointInfo> {
@@ -69,11 +79,23 @@ impl DwindClassSelector {
 }
 
 pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
-    let (_, classes) = selectors(input).unwrap();
+    let (rest, classes) = selectors(input).unwrap();
+
+    // `many0` stops at the first thing it cannot parse and reports success with
+    // the remainder untouched. Ignoring that remainder meant a single malformed
+    // class silently discarded itself *and every class after it* — the exact
+    // failure mode dwclass! exists to prevent. Refuse instead.
+    if !rest.trim().is_empty() {
+        panic!(
+            "dwclass!: could not parse {rest:?} in {input:?}.\n\
+             Classes are separated by whitespace. An arbitrary declaration needs \
+             a property and a value in square brackets, like `[mask-composite:exclude]`."
+        );
+    }
 
     Ok(classes
         .into_iter()
-        .map(|(variant, prefixes, class_name, generator_params)| {
+        .map(|(variant, prefixes, body, generator_params)| {
             let pseudo_classes: Vec<String> = prefixes
                 .clone()
                 .into_iter()
@@ -93,29 +115,67 @@ pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
                 .map(|v| v.to_string())
                 .collect();
 
+            let (class_name, arbitrary) = match body {
+                ClassBody::Name(name) => (name.to_string().replace('-', "_"), None),
+                ClassBody::Arbitrary(decl) => (String::new(), Some(decl)),
+            };
+
             DwindClassSelector {
-                class_name: class_name.to_string().replace('-', "_"),
+                class_name,
                 pseudo_classes,
                 conditionals,
                 generator_params,
                 variant,
+                arbitrary,
             }
         })
         .collect())
 }
 
-fn selectors(
-    input: &str,
-) -> IResult<&str, Vec<(Option<String>, Vec<String>, &str, Option<Vec<&str>>)>> {
+/// Any run of whitespace between classes. Not `tag(" ")`, so that a class string
+/// broken over several source lines parses the same as a single-spaced one.
+fn whitespace(input: &str) -> IResult<&str, &str> {
+    nom::bytes::complete::take_while(|c: char| c.is_whitespace())(input)
+}
+
+/// What sits in the class-name position: either a utility name, or an arbitrary
+/// declaration written inline.
+#[derive(Debug)]
+pub enum ClassBody<'a> {
+    Name(&'a str),
+    Arbitrary(String),
+}
+
+/// Tried in the class-name position, *after* `variant_selector` and any
+/// pseudo-class prefixes have been consumed. That ordering is what makes the
+/// two bracket syntaxes unambiguous: a variant's `]` is always followed by `:`,
+/// so anything still bracketed at this point is a declaration.
+fn class_body(input: &str) -> IResult<&str, ClassBody<'_>> {
+    alt((
+        |v| arbitrary_declaration(v).map(|(rest, decl)| (rest, ClassBody::Arbitrary(decl))),
+        |v| css_identifier(v).map(|(rest, name)| (rest, ClassBody::Name(name))),
+    ))(input)
+}
+
+/// One parsed selector: `(variant, prefixes, class body, generator params)`.
+type ParsedSelector<'a> = (
+    Option<String>,
+    Vec<String>,
+    ClassBody<'a>,
+    Option<Vec<&'a str>>,
+);
+
+fn selectors(input: &str) -> IResult<&str, Vec<ParsedSelector<'_>>> {
     let prefixes = many0(pseudo_selector);
-    let parser = terminated(
+    let parser = nom::sequence::delimited(
+        whitespace,
         nom::sequence::tuple((
             variant_selector,
             prefixes,
-            css_identifier,
+            class_body,
             opt(generator_parameters),
         )),
-        opt(tag(" ")),
+        whitespace,
     );
     many0(parser)(input)
 }
@@ -123,7 +183,7 @@ fn selectors(
 pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
     let (input, variant) = variant_selector(input)?;
     let (input, prefixes) = many0(pseudo_selector)(input)?;
-    let (input, identifier) = css_identifier(input)?;
+    let (input, body) = class_body(input)?;
 
     let generator_params = if let Ok((_input, generator_params)) = generator_parameters(input) {
         generator_params
@@ -148,10 +208,15 @@ pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
         .map(|v| v.to_string())
         .collect();
 
+    let (class_name, arbitrary) = match body {
+        ClassBody::Name(name) => (name.to_string().replace('-', "_"), None),
+        ClassBody::Arbitrary(decl) => (String::new(), Some(decl)),
+    };
+
     Ok((
         input,
         DwindClassSelector {
-            class_name: identifier.to_string().replace('-', "_"),
+            class_name,
             pseudo_classes,
             conditionals,
             generator_params: generator_params
@@ -159,6 +224,7 @@ pub fn parse_selector(input: &str) -> IResult<&str, DwindClassSelector> {
                 .map(|v| v.to_string())
                 .collect(),
             variant,
+            arbitrary,
         },
     ))
 }
@@ -195,6 +261,78 @@ fn generator_parameters(input: &str) -> IResult<&str, Vec<&str>> {
 const CHARS_EXT: [char; 13] = [
     '_', '-', '@', ',', '<', '>', '*', ' ', '.', ' ', ':', '#', '&',
 ];
+
+/// Any character that is not structural to the bracket grammar.
+///
+/// A CSS value can contain essentially anything — `→` in a `content`, a `°` in a
+/// gradient angle, a `字` in a font stack. So this is a deny-list of the
+/// delimiters the parser has to track, not an allow-list of what CSS is
+/// permitted. An allow-list here also silently truncated at any non-ASCII byte,
+/// because `nom`'s `is_alphanumeric` takes a `u8`.
+///
+/// Quotes stop a run so that [`quoted_string`] can take over; brackets inside a
+/// string are content, not structure.
+fn is_declaration_char(c: char) -> bool {
+    !matches!(c, '[' | ']' | '(' | ')' | '\'' | '"')
+}
+
+/// A CSS string, consumed whole so that anything inside it — `[`, `)`, a quote
+/// of the other kind — is treated as content.
+///
+/// Without this, `[content:'[']` is valid CSS that the parser could not read.
+fn quoted_string(input: &str) -> IResult<&str, String> {
+    let quote = match input.chars().next() {
+        Some(c @ ('\'' | '"')) => c,
+        _ => {
+            return Err(nom::Err::Error(nom::error::Error::new(
+                input,
+                nom::error::ErrorKind::Tag,
+            )))
+        }
+    };
+
+    let mut escaped = false;
+
+    for (i, c) in input.char_indices().skip(1) {
+        if escaped {
+            escaped = false;
+            continue;
+        }
+
+        match c {
+            // A CSS escape, `\'` or `\\`.
+            '\\' => escaped = true,
+            c if c == quote => {
+                let end = i + c.len_utf8();
+
+                return Ok((&input[end..], input[..end].to_string()));
+            }
+            _ => {}
+        }
+    }
+
+    // Unterminated — let the caller report the whole declaration as unparseable
+    // rather than silently swallowing the rest of the class string.
+    Err(nom::Err::Error(nom::error::Error::new(
+        input,
+        nom::error::ErrorKind::Tag,
+    )))
+}
+
+fn declaration_body<'a>(input: &'a str) -> IResult<&'a str, String> {
+    many0(alt((
+        quoted_string,
+        bracketed("(", ")", declaration_body),
+        |v: &'a str| take_while1(is_declaration_char)(v).map(move |v| (v.0, v.1.to_string())),
+    )))(input)
+    .map(|r| (r.0, r.1.join("")))
+}
+
+/// `[mask-composite:exclude]`, `[--sx:50%]`,
+/// `[grid-template-columns:repeat(2,minmax(0,1fr))]`.
+fn arbitrary_declaration(input: &str) -> IResult<&str, String> {
+    delimited(tag("["), declaration_body, tag("]"))(input)
+}
 
 fn bracketed<'a>(
     bracket: &'a str,
@@ -292,6 +430,7 @@ mod test {
                 conditionals: vec!["@sm".to_string(), "@is[dark]".to_string()],
                 generator_params: vec![],
                 variant: None,
+                ..Default::default()
             }]
         );
     }
@@ -305,6 +444,7 @@ mod test {
                 conditionals: vec![],
                 generator_params: vec!["5px".to_string()],
                 variant: None,
+                ..Default::default()
             }]
         );
 
@@ -316,6 +456,7 @@ mod test {
                 conditionals: vec![],
                 generator_params: vec![],
                 variant: None,
+                ..Default::default()
             }]
         );
 
@@ -327,6 +468,7 @@ mod test {
                 conditionals: vec![],
                 generator_params: vec!["1/2".to_string()],
                 variant: None,
+                ..Default::default()
             }]
         );
     }
@@ -380,5 +522,212 @@ mod test {
 
         let parsed = parse_class_string("[& > *:is(span):hover]:is(p):b").unwrap();
         assert_eq!(parsed[0].variant, Some(" > *:is(span):hover".to_string()));
+    }
+
+    // -----------------------------------------------------------------------
+    // Regression locks.
+    //
+    // These pin the shapes that appear in the docs and in the example app, so
+    // that changes to the bracket handling cannot quietly alter what an
+    // existing `dwclass!` string means.
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn pins_documented_variant_forms() {
+        // From the Pseudoclasses docs page.
+        let parsed = parse_class_string("[& > *]:nth-child(2):bg-candlelight-500").unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].variant, Some(" > *".to_string()));
+        assert_eq!(parsed[0].pseudo_classes, vec!["nth-child(2)".to_string()]);
+        assert_eq!(parsed[0].class_name, "bg_candlelight_500");
+
+        // A variant with no leading `&`.
+        let parsed = parse_class_string("[> span]:text-apple-300").unwrap();
+        assert_eq!(parsed[0].variant, Some("> span".to_string()));
+        assert_eq!(parsed[0].class_name, "text_apple_300");
+    }
+
+    #[test]
+    fn pins_pseudo_element_variants() {
+        // Already supported today: `CHARS_EXT` includes `:`, so a `::`-prefixed
+        // variant parses and reaches `dominator::pseudo!` unchanged.
+        let parsed = parse_class_string("[&::before]:opacity-0").unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].variant, Some("::before".to_string()));
+        assert_eq!(parsed[0].class_name, "opacity_0");
+
+        // Parent-state driven child selector, as used by the scroll reveal.
+        let parsed = parse_class_string("[&.reveal-in > *]:opacity-100").unwrap();
+        assert_eq!(parsed[0].variant, Some(".reveal-in > *".to_string()));
+    }
+
+    #[test]
+    fn pins_breakpoint_forms() {
+        let parsed = parse_class_string("@sm:flex-row").unwrap();
+        assert_eq!(parsed[0].conditionals, vec!["@sm".to_string()]);
+
+        let parsed = parse_class_string("@<sm:flex-col").unwrap();
+        assert_eq!(parsed[0].conditionals, vec!["@<sm".to_string()]);
+
+        // Arbitrary media queries, including motion preferences.
+        let parsed = parse_class_string("@((max-width: 700px)):hidden").unwrap();
+        assert_eq!(
+            parsed[0].conditionals,
+            vec!["@((max-width: 700px))".to_string()]
+        );
+
+        let parsed =
+            parse_class_string("@((prefers-reduced-motion: reduce)):animate-none").unwrap();
+        assert_eq!(
+            parsed[0].conditionals,
+            vec!["@((prefers-reduced-motion: reduce))".to_string()]
+        );
+        assert_eq!(parsed[0].class_name, "animate_none");
+    }
+
+    // -----------------------------------------------------------------------
+    // Arbitrary declarations
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn arbitrary_declaration_is_distinct_from_a_variant() {
+        // A variant's `]` is always followed by `:`. Without one, the bracket
+        // group is a declaration. This is the whole disambiguation rule.
+        let parsed = parse_class_string("[mask-composite:exclude]").unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(
+            parsed[0].arbitrary,
+            Some("mask-composite:exclude".to_string())
+        );
+        assert_eq!(parsed[0].class_name, "");
+        assert_eq!(parsed[0].variant, None);
+        assert!(parsed[0].is_arbitrary());
+
+        // ...and the variant reading is untouched.
+        let parsed = parse_class_string("[& > *]:opacity-0").unwrap();
+        assert_eq!(parsed[0].variant, Some(" > *".to_string()));
+        assert_eq!(parsed[0].arbitrary, None);
+        assert_eq!(parsed[0].class_name, "opacity_0");
+    }
+
+    #[test]
+    fn arbitrary_declarations_cover_the_awkward_characters() {
+        // Custom properties, percentages, and a leading double dash.
+        let parsed = parse_class_string("[--sx:50%]").unwrap();
+        assert_eq!(parsed[0].arbitrary, Some("--sx:50%".to_string()));
+
+        // Nested parens and commas.
+        let parsed = parse_class_string("[grid-template-columns:repeat(2,minmax(0,1fr))]").unwrap();
+        assert_eq!(
+            parsed[0].arbitrary,
+            Some("grid-template-columns:repeat(2,minmax(0,1fr))".to_string())
+        );
+
+        // Quotes.
+        let parsed = parse_class_string("[content:\"x\"]").unwrap();
+        assert_eq!(parsed[0].arbitrary, Some("content:\"x\"".to_string()));
+    }
+
+    #[test]
+    fn arbitrary_declarations_compose_with_modifiers() {
+        let parsed = parse_class_string("hover:[color:red]").unwrap();
+        assert_eq!(parsed[0].pseudo_classes, vec!["hover".to_string()]);
+        assert_eq!(parsed[0].arbitrary, Some("color:red".to_string()));
+
+        let parsed = parse_class_string("[&::before]:[mask-composite:exclude]").unwrap();
+        assert_eq!(parsed[0].variant, Some("::before".to_string()));
+        assert_eq!(
+            parsed[0].arbitrary,
+            Some("mask-composite:exclude".to_string())
+        );
+
+        let parsed = parse_class_string("@sm:[color:red]").unwrap();
+        assert_eq!(parsed[0].conditionals, vec!["@sm".to_string()]);
+        assert_eq!(parsed[0].arbitrary, Some("color:red".to_string()));
+    }
+
+    #[test]
+    fn arbitrary_declarations_no_longer_truncate_the_class_list() {
+        // Before the escape hatch existed this yielded ONE class: the bracket
+        // group failed every parser, `many0` stopped, and `bar` was discarded
+        // along with it. Silent truncation, no diagnostic.
+        let parsed = parse_class_string("foo [mask-composite:exclude] bar").unwrap();
+
+        assert_eq!(parsed.len(), 3);
+        assert_eq!(parsed[0].class_name, "foo");
+        assert_eq!(
+            parsed[1].arbitrary,
+            Some("mask-composite:exclude".to_string())
+        );
+        assert_eq!(parsed[2].class_name, "bar");
+    }
+
+    #[test]
+    fn unparseable_input_is_rejected_rather_than_dropped() {
+        // `many0` succeeds with an untouched remainder, so anything the grammar
+        // cannot handle used to discard itself *and every class after it*.
+        let err = std::panic::catch_unwind(|| parse_class_string("foo ((bad)) bar"));
+        assert!(err.is_err(), "malformed input should not parse silently");
+    }
+
+    #[test]
+    fn classes_may_be_separated_by_any_whitespace() {
+        // Multi-line `dwclass!` strings and double spaces used to hit the silent
+        // truncation path above.
+        let parsed = parse_class_string("foo  bar\n  baz\tqux").unwrap();
+        let names = parsed.into_iter().map(|v| v.class_name).collect::<Vec<_>>();
+
+        assert_eq!(names, ["foo", "bar", "baz", "qux"]);
+    }
+
+    #[test]
+    fn arbitrary_declarations_accept_any_css_value() {
+        // Non-ASCII: the old allow-list truncated at the first multi-byte char,
+        // because `nom`'s `is_alphanumeric` takes a `u8`.
+        let parsed = parse_class_string("before:[content:'→'] before:m-r-2").unwrap();
+        assert_eq!(parsed.len(), 2, "{parsed:?}");
+        assert_eq!(parsed[0].arbitrary, Some("content:'→'".to_string()));
+        assert_eq!(parsed[1].class_name, "m_r_2");
+
+        // Underscores are not touched — rewriting them would corrupt this.
+        let parsed = parse_class_string("[color:var(--brand_color)]").unwrap();
+        assert_eq!(
+            parsed[0].arbitrary,
+            Some("color:var(--brand_color)".to_string())
+        );
+
+        // Brackets and parens inside a CSS string are content, not structure.
+        let parsed = parse_class_string("before:[content:'['] flex").unwrap();
+        assert_eq!(parsed.len(), 2, "{parsed:?}");
+        assert_eq!(parsed[0].arbitrary, Some("content:'['".to_string()));
+        assert_eq!(parsed[1].class_name, "flex");
+
+        let parsed = parse_class_string(r#"[content:"a]b(c"]"#).unwrap();
+        assert_eq!(parsed[0].arbitrary, Some(r#"content:"a]b(c""#.to_string()));
+
+        // An escaped quote does not end the string.
+        let parsed = parse_class_string(r"[content:'it\'s']").unwrap();
+        assert_eq!(parsed[0].arbitrary, Some(r"content:'it\'s'".to_string()));
+
+        // An unterminated string is a parse failure, not a silent swallow of
+        // everything after it.
+        assert!(std::panic::catch_unwind(|| parse_class_string("[content:'oops] flex")).is_err());
+
+        // Real spaces work inside the brackets.
+        let parsed = parse_class_string("[transition:opacity 650ms ease] flex").unwrap();
+        assert_eq!(parsed.len(), 2);
+        assert_eq!(
+            parsed[0].arbitrary,
+            Some("transition:opacity 650ms ease".to_string())
+        );
+        assert_eq!(parsed[1].class_name, "flex");
+    }
+
+    #[test]
+    fn pins_generator_forms() {
+        let parsed = parse_class_string("padding-[20px]").unwrap();
+        assert_eq!(parsed[0].class_name, "padding_");
+        assert_eq!(parsed[0].generator_params, vec!["20px".to_string()]);
+        assert!(parsed[0].is_generator());
     }
 }

@@ -230,7 +230,7 @@ dependencies = [
 
 [[package]]
 name = "dwind"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "const_format",
  "dominator",
@@ -247,7 +247,7 @@ dependencies = [
 
 [[package]]
 name = "dwind-base"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "dominator",
  "futures-signals",
@@ -263,7 +263,7 @@ dependencies = [
 
 [[package]]
 name = "dwind-macros"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "const_format",
  "dominator",
@@ -279,7 +279,7 @@ dependencies = [
 
 [[package]]
 name = "dwui"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "const_format",
  "dominator",

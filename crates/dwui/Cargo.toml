@@ -1,6 +1,6 @@
 [package]
 name = "dwui"
-version = "0.9.0"
+version = "0.9.1"
 edition = "2021"
 description = "UI Component library built on the DWIND style crate!"
 homepage = "https://github.com/JedimEmO/dwind"
@@ -11,8 +11,8 @@ keywords = ["web", "wasm", "css", "style"]
 [dependencies]
 const_format = { workspace = true }
 dominator = { workspace = true }
-dwind = { path = "../dwind", version = "0.7.0" }
-dwind-macros = { path = "../dwind-macros", version = "0.4.0" }
+dwind = { path = "../dwind", version = "0.8.0" }
+dwind-macros = { path = "../dwind-macros", version = "0.5.0" }
 futures-signals = { workspace = true }
 futures-signals-component-macro = { workspace = true }
 once_cell = { workspace = true }
@@ -23,10 +23,17 @@ futures = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 wasm-bindgen-test = { workspace = true }
 web-sys = { workspace = true, features = [
+    "CssKeyframesRule",
+    "CssRule",
+    "CssRuleList",
+    "CssStyleDeclaration",
+    "CssStyleSheet",
     "Document",
     "HtmlElement",
     "HtmlInputElement",
     "NodeList",
+    "StyleSheet",
+    "StyleSheetList",
     "console",
 ] }
 

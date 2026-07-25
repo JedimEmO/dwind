@@ -149,3 +149,8 @@
 .aspect-video {
     aspect-ratio: 16/9;
 }
+
+/* isolation ---------------------------------------------------------------- */
+
+.isolate { isolation: isolate; }
+.isolation-auto { isolation: auto; }

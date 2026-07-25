@@ -217,3 +217,47 @@
 .text-clip {
     text-overflow: clip;
 }
+/* text-decoration ---------------------------------------------------------- */
+
+.underline { text-decoration-line: underline; }
+.overline { text-decoration-line: overline; }
+.line-through { text-decoration-line: line-through; }
+.no-underline { text-decoration-line: none; }
+
+/* letter-spacing ----------------------------------------------------------- */
+
+.tracking-tighter { letter-spacing: -0.05em; }
+.tracking-tight { letter-spacing: -0.025em; }
+.tracking-normal { letter-spacing: 0; }
+.tracking-wide { letter-spacing: 0.025em; }
+.tracking-wider { letter-spacing: 0.05em; }
+.tracking-widest { letter-spacing: 0.1em; }
+
+/* white-space -------------------------------------------------------------- */
+
+.whitespace-normal { white-space: normal; }
+.whitespace-nowrap { white-space: nowrap; }
+.whitespace-pre { white-space: pre; }
+.whitespace-pre-line { white-space: pre-line; }
+.whitespace-pre-wrap { white-space: pre-wrap; }
+
+/* list-style --------------------------------------------------------------- */
+
+.list-none { list-style-type: none; }
+.list-disc { list-style-type: disc; }
+.list-decimal { list-style-type: decimal; }
+
+/* generated content -------------------------------------------------------- */
+/*
+    These set --dw-content rather than content, because a `before:`/`after:`
+    variant emits `content: var(--dw-content, "")`. Going through the property
+    is what lets two pseudo-element utilities compose without one clobbering the
+    other's content. See `generated_content` in dwind-macros.
+*/
+
+.content-empty { --dw-content: ""; }
+.content-none { --dw-content: none; }
+
+/* inheritance -------------------------------------------------------------- */
+
+.font-inherit { font: inherit; }

@@ -174,3 +174,14 @@
 .select-auto {
     user-select: auto;
 }
+/* will-change -------------------------------------------------------------- */
+
+.will-change-auto { will-change: auto; }
+.will-change-scroll { will-change: scroll-position; }
+.will-change-contents { will-change: contents; }
+.will-change-transform { will-change: transform; }
+
+/* outline ------------------------------------------------------------------ */
+
+.outline-none { outline: 2px solid transparent; outline-offset: 2px; }
+.outline-hidden { outline: none; }
