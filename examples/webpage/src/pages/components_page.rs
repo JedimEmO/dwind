@@ -62,9 +62,16 @@ pub fn components_page() -> Dom {
                     section_card("Buttons", "Flat, border, and text variants in three sizes — with focus rings, hover, active, and disabled states", buttons_demo(), code(&BUTTONS_DEMO_EXAMPLE_HTML_MAP)),
                     section_card("Badges", "Status pills in primary, error, void, and outline variants", badges_demo(), code(&BADGES_DEMO_EXAMPLE_HTML_MAP)),
                     section_card("Alerts", "Status callouts with severity-aware ARIA roles; the error alert is dismissible", alerts_demo(), code(&ALERTS_DEMO_EXAMPLE_HTML_MAP)),
-                    section_card("Text inputs", "Floating labels, password masking, and live validation announced to screen readers", inputs_demo(), code(&INPUTS_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Text inputs", "Floating labels, password masking, disabled state, and live validation announced to screen readers", inputs_demo(), code(&INPUTS_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Textarea & number", "Multi-line and numeric fields sharing the same labelled field surface", text_area_number_demo(), code(&TEXT_AREA_NUMBER_DEMO_EXAMPLE_HTML_MAP)),
                     section_card("Select & slider", "Labelled form controls bound to reactive signals", select_slider_demo(), code(&SELECT_SLIDER_DEMO_EXAMPLE_HTML_MAP)),
                     section_card("Switch & checkbox", "Toggles with role=switch/checkbox semantics and clickable labels", toggles_demo(), code(&TOGGLES_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Radio group", "WAI-ARIA radios with roving tabindex — selection follows arrow-key focus", radio_group_demo(), code(&RADIO_GROUP_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Dropdown menu", "A menu button with full keyboard navigation; disabled items are skipped", dropdown_menu_demo(), code(&DROPDOWN_MENU_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Pagination", "Windowed page numbers with ellipses and aria-current on the active page", pagination_demo(), code(&PAGINATION_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Toasts", "Push notifications into a fixed aria-live host — timed toasts dismiss themselves", toasts_demo(), code(&TOASTS_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("Cards & headings", "Card schemes and padding scales, and semantic h1-h6 headings", cards_headings_demo(), code(&CARDS_HEADINGS_DEMO_EXAMPLE_HTML_MAP)),
+                    section_card("List", "A selectable list with keyboard activation and aria-current", list_demo(), code(&LIST_DEMO_EXAMPLE_HTML_MAP)),
                     section_card("Progress & spinner", "Determinate, indeterminate, and spinner loading states with aria-valuenow", progress_demo(), code(&PROGRESS_DEMO_EXAMPLE_HTML_MAP)),
                     section_card("Avatars & skeletons", "Identity with initials fallback, plus pulsing loading placeholders", avatar_skeleton_demo(), code(&AVATAR_SKELETON_DEMO_EXAMPLE_HTML_MAP)),
                     section_card("Tooltip & divider", "Hover or focus the buttons to reveal tooltips", tooltip_divider_demo(), code(&TOOLTIP_DIVIDER_DEMO_EXAMPLE_HTML_MAP)),
@@ -86,8 +93,9 @@ pub fn components_page() -> Dom {
                 .child(section_card("Date picker", "Calendar popup with full keyboard support: arrows move by day and week, PageUp/PageDown by month, Escape closes.", date_picker_demo(), code(&DATE_PICKER_DEMO_EXAMPLE_HTML_MAP)))
             }))
             .child(html!("div", {
-                .dwclass!("m-t-4")
-                .child(section_card("Modal dialogs", "Focus-managed dialogs with backdrop blur, escape key, and entrance animation", example_card_modal(), code(&EXAMPLE_CARD_MODAL_EXAMPLE_HTML_MAP)))
+                .dwclass!("m-t-4 grid @md:grid-cols-2 @<md:grid-cols-1 gap-4")
+                .child(section_card("Modal dialogs", "Focus-trapped dialogs with backdrop scrim, escape key, and entrance animation", example_card_modal(), code(&EXAMPLE_CARD_MODAL_EXAMPLE_HTML_MAP)))
+                .child(section_card("Drawer", "A modal side panel sliding in from either edge, sharing the modal's focus trap", drawer_demo(), code(&DRAWER_DEMO_EXAMPLE_HTML_MAP)))
             }))
         }))
 
@@ -117,9 +125,10 @@ fn section_card(title: &str, description: &str, demo: Dom, source: Dom) -> Dom {
 
     card!({
         .scheme(ColorScheme::Void)
+        .padding(CardPadding::Large)
         .apply(crate::fx::spotlight)
         .apply(move |b| {
-            dwclass!(b, "p-6 flex flex-col gap-4")
+            dwclass!(b, "flex flex-col gap-4")
             .child(heading!({
                 .content(text(&title))
                 .text_size(TextSize::Large)
@@ -227,7 +236,7 @@ fn alerts_demo() -> Dom {
             alert!({
                 .variant(AlertVariant::Error)
                 .title("Build failed".to_string())
-                .content(Some(text("Click × to dismiss this alert.")))
+                .content(Some(text("Use the dismiss button to close this alert.")))
                 .dismissible(true)
             }),
         ])
@@ -260,7 +269,251 @@ fn inputs_demo() -> Dom {
                 }))
                 .label("Accepts bananas".to_string())
             }),
+            text_input!({
+                .value(Mutable::new("Read only".to_string()))
+                .disabled(true)
+                .label("Disabled".to_string())
+            }),
         ])
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn text_area_number_demo() -> Dom {
+    let bio = Mutable::new("".to_string());
+    let amount = Mutable::new(3.0f64);
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-4")
+        .children([
+            text_area!({
+                .value(bio.clone())
+                .label("Short bio".to_string())
+                .rows(3u32)
+            }),
+            number_input!({
+                .value(amount.clone())
+                .label("Quantity".to_string())
+                .min(Some(0.0))
+                .max(Some(10.0))
+                .step(1.0)
+            }),
+        ])
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn radio_group_demo() -> Dom {
+    let flavor = Mutable::new("butterscotch".to_string());
+    let channel = Mutable::new("stable".to_string());
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-6")
+        .child(radio_group!({
+            .label("Flavor".to_string())
+            .value_signal(flavor.signal_cloned())
+            .options(vec![
+                ("almond".to_string(), "Almond".to_string()),
+                ("butterscotch".to_string(), "Butterscotch".to_string()),
+                ("cinnamon".to_string(), "Cinnamon".to_string()),
+            ])
+            .on_change(clone!(flavor => move |key| flavor.set(key)))
+        }))
+        .child(radio_group!({
+            .label("Release channel".to_string())
+            .direction(RadioGroupDirection::Horizontal)
+            .value_signal(channel.signal_cloned())
+            .options(vec![
+                ("stable".to_string(), "Stable".to_string()),
+                ("beta".to_string(), "Beta".to_string()),
+                ("nightly".to_string(), "Nightly".to_string()),
+            ])
+            .on_change(clone!(channel => move |key| channel.set(key)))
+        }))
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn dropdown_menu_demo() -> Dom {
+    let last_action: Mutable<Option<String>> = Mutable::new(None);
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-4 align-items-start")
+        .child(dropdown_menu!({
+            .label("Actions".to_string())
+            .items(vec![
+                ("copy".to_string(), "Copy link".to_string(), false),
+                ("rename".to_string(), "Rename".to_string(), false),
+                ("archive".to_string(), "Archive".to_string(), true),
+                ("delete".to_string(), "Delete".to_string(), false),
+            ])
+            .on_select(clone!(last_action => move |key| {
+                last_action.set(Some(key));
+            }))
+        }))
+        .child(html!("p", {
+            .dwclass!("text-sm dwui-text-on-primary-400 is(.light *):dwui-text-on-primary-600 m-0")
+            .text_signal(last_action.signal_cloned().map(|action| {
+                match action {
+                    Some(key) => format!("Selected: {key}"),
+                    None => "Nothing selected yet".to_string(),
+                }
+            }))
+        }))
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn pagination_demo() -> Dom {
+    let page = Mutable::new(1usize);
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-4 align-items-start")
+        .child(pagination!({
+            .page_signal(page.signal())
+            .total_pages(12usize)
+            .on_page_change(clone!(page => move |p| page.set(p)))
+        }))
+        .child(html!("p", {
+            .dwclass!("text-sm dwui-text-on-primary-400 is(.light *):dwui-text-on-primary-600 m-0")
+            .text_signal(page.signal().map(|p| format!("Viewing page {p} of 12")))
+        }))
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn toasts_demo() -> Dom {
+    let toaster = Toaster::default();
+
+    html!("div", {
+        .dwclass!("flex flex-row flex-wrap gap-4")
+        // The host is position: fixed, so toasts appear at the viewport corner
+        .child(toasts!({
+            .toaster(toaster.clone())
+            .position(ToastPosition::BottomRight)
+        }))
+        .child(button!({
+            .button_type(ButtonType::Border)
+            .size(ButtonSize::Small)
+            .content(Some(text("Success toast")))
+            .on_click(clone!(toaster => move |_| {
+                toaster.success("Saved to workspace");
+            }))
+        }))
+        .child(button!({
+            .button_type(ButtonType::Border)
+            .size(ButtonSize::Small)
+            .content(Some(text("Sticky error")))
+            .on_click(clone!(toaster => move |_| {
+                toaster.push(ToastOptions {
+                    title: "Build failed".to_string(),
+                    message: Some("Sticky until dismissed".to_string()),
+                    variant: ToastVariant::Error,
+                    duration_ms: None,
+                    ..Default::default()
+                });
+            }))
+        }))
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn cards_headings_demo() -> Dom {
+    html!("div", {
+        .dwclass!("flex flex-col gap-4")
+        .child(card!({
+            .scheme(ColorScheme::Primary)
+            .padding(CardPadding::Small)
+            .content(html!("div", {
+                .child(heading!({
+                    .content(text("Primary card"))
+                    .text_size(TextSize::Base)
+                    .level(HeadingLevel::H3)
+                }))
+                .child(html!("p", {
+                    .dwclass!("text-sm m-0")
+                    .text("Small padding, primary scheme.")
+                }))
+            }))
+        }))
+        .child(card!({
+            .content(html!("div", {
+                .child(heading!({
+                    .content(text("Void card"))
+                    .text_size(TextSize::Large)
+                    .level(HeadingLevel::H3)
+                }))
+                .child(html!("p", {
+                    .dwclass!("text-sm m-0")
+                    .text("Default medium padding; headings render bare h1-h6 tags.")
+                }))
+            }))
+        }))
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn list_demo() -> Dom {
+    let selected = Mutable::new(Some(1usize));
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-4")
+        .child(list!({
+            .selected_index_signal(selected.signal())
+            .items(vec![
+                text("Getting started"),
+                text("Theming"),
+                text("Components"),
+                text("Recipes"),
+            ])
+            .item_click_handler(clone!(selected => move |index| {
+                selected.set(Some(index));
+            }))
+        }))
+    })
+}
+
+#[example_html(themes = ["base16-ocean.dark"])]
+fn drawer_demo() -> Dom {
+    let open = Mutable::new(false);
+    let side = Mutable::new(DrawerSide::Right);
+
+    html!("div", {
+        .dwclass!("flex flex-row gap-4")
+        .child(button!({
+            .button_type(ButtonType::Border)
+            .content(Some(text("Open right drawer")))
+            .on_click(clone!(open, side => move |_| {
+                side.set(DrawerSide::Right);
+                open.set(true);
+            }))
+        }))
+        .child(button!({
+            .button_type(ButtonType::Border)
+            .content(Some(text("Open left drawer")))
+            .on_click(clone!(open, side => move |_| {
+                side.set(DrawerSide::Left);
+                open.set(true);
+            }))
+        }))
+        .child(drawer!({
+            .open_signal(open.signal())
+            .side_signal(side.signal())
+            .aria_label("Demo drawer".to_string())
+            .on_close(clone!(open => move || open.set(false)))
+            .content(Some(html!("div", {
+                .dwclass!("flex flex-col gap-3 m-t-8")
+                .child(heading!({
+                    .content(text("Drawer"))
+                    .text_size(TextSize::Large)
+                    .level(HeadingLevel::H2)
+                }))
+                .child(html!("p", {
+                    .dwclass!("text-sm m-0")
+                    .text("Escape closes it, Tab stays trapped inside, and the scrim click dismisses.")
+                }))
+            })))
+        }))
     })
 }
 
