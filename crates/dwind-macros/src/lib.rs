@@ -1,5 +1,6 @@
 mod codegen;
 pub(crate) mod grammar;
+mod keyframes;
 mod macro_inputs;
 use crate::codegen::string_rendering::class_name_to_struct_identifier;
 use crate::codegen::{render_classes, render_generate_dwind_class};
@@ -212,6 +213,81 @@ pub fn dwclass_signal(input: TokenStream) -> TokenStream {
         }
     }
     .into()
+}
+
+/// Declares `@keyframes` rules and, optionally, the `animate-*` utility class
+/// that drives them.
+///
+/// dwind utility classes are single declaration blocks, so a `@keyframes` can
+/// never be one. This macro is the way to declare animations without dropping
+/// to a raw CSS string: it emits the at-rule *and* a compile-time-checked class,
+/// and injects the rule lazily the first time either is used.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use dwind_macros::{dwclass, dwkeyframes};
+///
+/// dwkeyframes! {
+///     /// Rises and fades in.
+///     #[animation("900ms cubic-bezier(0.16, 1, 0.3, 1) both")]
+///     fade_up {
+///         "from" => "opacity: 0; transform: translateY(14px);",
+///         "to"   => "opacity: 1; transform: translateY(0);",
+///     }
+///
+///     aurora {
+///         "0%, 100%" => "transform: translate3d(0, 0, 0) scale(1);",
+///         "50%"      => "transform: translate3d(6%, -8%, 0) scale(1.15);",
+///     }
+/// }
+///
+/// dominator::html!("div", {
+///     // the utility, minted by `#[animation(...)]`
+///     .dwclass!("animate-fade-up")
+///     // or compose the shorthand yourself; `Display` injects the rule
+///     .style("animation", &format!("{AURORA_KEYFRAMES} 22s ease-in-out infinite"))
+/// });
+/// ```
+///
+/// Every CSS fragment is a string literal. Bare CSS tokens cannot survive Rust's
+/// lexer intact — `0%`, `--sx` and `.35` all tokenise in ways that do not
+/// round-trip.
+///
+/// # Options
+///
+/// Inner attributes configure the whole block:
+///
+/// - `#![prefix = "app"]` — namespace for the generated CSS names. Defaults to
+///   the consuming crate's name, so two crates declaring `fade_up` do not
+///   collide.
+/// - `#![register_fn = "app_keyframes"]` — also emit a function that injects
+///   every rule eagerly, for callers who want the rules present regardless of
+///   which classes get instantiated.
+/// - `#![path = dwind_base::keyframes]` — where the runtime lives. Defaults to
+///   `dwind::prelude::keyframes`.
+///
+/// Outer attributes configure one entry:
+///
+/// - `#[name = "spin"]` — pin the exact CSS name, skipping the prefix. Use this
+///   when an existing stylesheet already references the name.
+/// - `#[animation("1s linear infinite")]` — mint an `animate-<name>` utility
+///   with this shorthand. Omit it if you only want the handle.
+///
+/// # Lazy injection has one hole
+///
+/// A rule is injected when its class or its [`Display`](std::fmt::Display) is
+/// first used. Reaching for the generated `*_RAW` constant directly — which is
+/// what `dwclass!("[&::before]:animate-fade-up")` does internally — bypasses
+/// that. Call `.ensure()` or use `#![register_fn]` if you need the guarantee.
+#[proc_macro]
+pub fn dwkeyframes(input: TokenStream) -> TokenStream {
+    let input = match syn::parse::<keyframes::DwKeyframesInput>(input) {
+        Ok(input) => input,
+        Err(err) => return err.to_compile_error().into(),
+    };
+
+    keyframes::codegen::render(input).into()
 }
 
 /// Generates a dwind class that can later be used by the 'dwclass!()' macro.

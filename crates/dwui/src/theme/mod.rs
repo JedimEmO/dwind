@@ -1,59 +1,54 @@
 use dominator::stylesheet;
+use dwind_macros::dwkeyframes;
 
-const DWUI_KEYFRAMES: &str = r#"
-@keyframes dwui-modal-in {
-    from {
-        opacity: 0;
-        transform: scale(0.95) translateY(0.5rem);
+// Components reference these by name from inline `.style("animation", …)` calls
+// (see `widgets/spinner.rs`, `widgets/progress.rs`, `content/skeleton.rs`,
+// `widgets/modal.rs`, `input/date_picker.rs`), so the names are pinned rather
+// than namespaced.
+//
+// `apply_style_sheet` still injects them all eagerly, so nothing about the
+// timing changes; the registry just makes repeat calls idempotent and turns a
+// name clash into a diagnostic instead of a silent override.
+dwkeyframes! {
+    #![register_fn = "apply_keyframes"]
+
+    #[name = "dwui-modal-in"]
+    modal_in {
+        "from" => "opacity: 0; transform: scale(0.95) translateY(0.5rem);",
+        "to" => "opacity: 1; transform: scale(1) translateY(0);",
     }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
+
+    #[name = "dwui-fade-in"]
+    fade_in {
+        "from" => "opacity: 0;",
+        "to" => "opacity: 1;",
+    }
+
+    #[name = "dwui-progress-indeterminate"]
+    progress_indeterminate {
+        "0%" => "margin-left: -40%;",
+        "100%" => "margin-left: 100%;",
+    }
+
+    #[name = "dwui-spin"]
+    spin {
+        "from" => "transform: rotate(0deg);",
+        "to" => "transform: rotate(360deg);",
+    }
+
+    #[name = "dwui-skeleton-pulse"]
+    skeleton_pulse {
+        "0%, 100%" => "opacity: 1;",
+        "50%" => "opacity: 0.45;",
     }
 }
-
-@keyframes dwui-fade-in {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes dwui-progress-indeterminate {
-    0% {
-        margin-left: -40%;
-    }
-    100% {
-        margin-left: 100%;
-    }
-}
-
-@keyframes dwui-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes dwui-skeleton-pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.45;
-    }
-}"#;
 
 pub fn apply_style_sheet(colors: Option<crate::theme::colors::ColorsCssVariables>) {
     stylesheet!(":root", {
         .raw(colors.unwrap_or_default().to_style_sheet_raw())
     });
 
-    dominator::stylesheet_raw(DWUI_KEYFRAMES);
+    apply_keyframes();
 
     base::apply_base_stylesheet();
     colors::apply_colors_stylesheet();
