@@ -15,6 +15,8 @@ dwind = { path = "../dwind", version = "0.8.0" }
 dwind-macros = { path = "../dwind-macros", version = "0.5.0" }
 futures-signals = { workspace = true }
 futures-signals-component-macro = { workspace = true }
+gloo-timers = { workspace = true, features = ["futures"] }
+wasm-bindgen-futures = { workspace = true }
 once_cell = { workspace = true }
 web-sys = { workspace = true, features = ["NodeList"] }
 

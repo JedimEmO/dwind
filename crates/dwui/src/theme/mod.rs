@@ -41,6 +41,24 @@ dwkeyframes! {
         "0%, 100%" => "opacity: 1;",
         "50%" => "opacity: 0.45;",
     }
+
+    #[name = "dwui-toast-in"]
+    toast_in {
+        "from" => "opacity: 0; transform: translateY(0.5rem);",
+        "to" => "opacity: 1; transform: translateY(0);",
+    }
+
+    #[name = "dwui-slide-in-right"]
+    slide_in_right {
+        "from" => "transform: translateX(100%);",
+        "to" => "transform: translateX(0);",
+    }
+
+    #[name = "dwui-slide-in-left"]
+    slide_in_left {
+        "from" => "transform: translateX(-100%);",
+        "to" => "transform: translateX(0);",
+    }
 }
 
 /// Layering scale for overlaid components. Every dwui z-index comes from here

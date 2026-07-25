@@ -1579,3 +1579,227 @@ async fn alert_dismiss_button_is_an_icon_with_a_label() {
     assert!(dismiss.query_selector("svg").unwrap().is_some());
     assert!(!dismiss.text_content().unwrap().contains('×'));
 }
+
+// ---------------------------------------------------------------------------
+// pagination!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn pagination_renders_window_and_aria_current() {
+    let tc = TestContainer::new();
+    let page = Mutable::new(5usize);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        pagination!({
+            .page_signal(page.signal())
+            .total_pages(10usize)
+            .on_page_change(clone!(page => move |p| {
+                page.set(p);
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    // 1 … 4 5 6 … 10 plus prev/next arrows
+    assert_eq!(tc.query_all("button").length(), 7);
+    assert_eq!(tc.query_all("span[aria-hidden=true]").length(), 2);
+
+    let current = tc.query("[aria-current=page]").unwrap();
+    assert_eq!(current.text_content().unwrap(), "5");
+
+    click(&tc.query("button[aria-label='Next page']").unwrap());
+    wait_frames(2).await;
+    assert_eq!(page.get(), 6);
+
+    click(&tc.query("button[aria-label='Page 10']").unwrap());
+    wait_frames(2).await;
+    assert_eq!(page.get(), 10);
+
+    // At the last page the next arrow is disabled
+    assert!(tc
+        .query("button[aria-label='Next page']")
+        .unwrap()
+        .has_attribute("disabled"));
+}
+
+// ---------------------------------------------------------------------------
+// dropdown_menu! / popover!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn dropdown_menu_opens_selects_and_closes() {
+    let tc = TestContainer::new();
+    let selected: Mutable<Option<String>> = Mutable::new(None);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        dropdown_menu!({
+            .label("Actions".to_string())
+            .items(vec![
+                ("copy".to_string(), "Copy".to_string(), false),
+                ("paste".to_string(), "Paste".to_string(), true),
+                ("delete".to_string(), "Delete".to_string(), false),
+            ])
+            .on_select(clone!(selected => move |key| {
+                selected.set(Some(key));
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    let trigger = tc.query("button[aria-haspopup=menu]").unwrap();
+    assert_eq!(trigger.get_attribute("aria-expanded").as_deref(), Some("false"));
+
+    let menu = tc.query("[role=menu]").unwrap();
+
+    click(&trigger);
+    wait_frames(2).await;
+
+    assert_eq!(trigger.get_attribute("aria-expanded").as_deref(), Some("true"));
+    assert_eq!(tc.query_all("[role=menuitem]").length(), 3);
+
+    let disabled_item = tc.query("[role=menuitem][aria-disabled=true]").unwrap();
+    assert_eq!(disabled_item.text_content().unwrap(), "Paste");
+
+    click(&tc.query(&format!("[id='{}-item-delete']", menu.get_attribute("id").unwrap())).unwrap());
+    wait_frames(2).await;
+
+    assert_eq!(selected.get_cloned().as_deref(), Some("delete"));
+    assert_eq!(trigger.get_attribute("aria-expanded").as_deref(), Some("false"));
+}
+
+#[wasm_bindgen_test]
+async fn popover_opens_and_closes_on_escape() {
+    let tc = TestContainer::new();
+    let open = Mutable::new(false);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        popover!({
+            .open_signal(open.signal())
+            .anchor(Some(html!("button", { .attr("id", "pop-trigger") .text("Open") })))
+            .content(Some(text("Popover body")))
+            .on_close(clone!(open => move || {
+                open.set(false);
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    open.set(true);
+    wait_frames(2).await;
+
+    let event = web_sys::KeyboardEvent::new_with_keyboard_event_init_dict("keydown", &{
+        let dict = web_sys::KeyboardEventInit::new();
+        dict.set_key("Escape");
+        dict.set_bubbles(true);
+        dict
+    })
+    .unwrap();
+    web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .body()
+        .unwrap()
+        .dispatch_event(&event)
+        .unwrap();
+    wait_frames(2).await;
+
+    assert!(!open.get(), "Escape should have closed the popover");
+}
+
+// ---------------------------------------------------------------------------
+// drawer!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn drawer_opens_from_a_side_and_closes() {
+    let tc = TestContainer::new();
+    let open = Mutable::new(true);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        drawer!({
+            .open_signal(open.signal())
+            .side(DrawerSide::Left)
+            .aria_label("Settings".to_string())
+            .content(Some(text("Drawer body")))
+            .on_close(clone!(open => move || {
+                open.set(false);
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    let dialog = tc.query("[role=dialog]").unwrap();
+    assert_eq!(dialog.get_attribute("aria-label").as_deref(), Some("Settings"));
+    assert_eq!(dialog.get_attribute("aria-modal").as_deref(), Some("true"));
+
+    let style = dialog.get_attribute("style").unwrap_or_default();
+    assert!(style.contains("left: 0"), "left drawer should pin to the left edge, got {style:?}");
+
+    click(&tc.query("button[aria-label='Close drawer']").unwrap());
+    wait_frames(2).await;
+
+    assert!(!open.get());
+}
+
+// ---------------------------------------------------------------------------
+// toasts! / Toaster
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn toaster_pushes_auto_dismisses_and_manually_dismisses() {
+    let tc = TestContainer::new();
+    let toaster = Toaster::default();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        toasts!({
+            .toaster(toaster.clone())
+        }),
+    );
+    wait_frame().await;
+
+    let host = tc.query("[aria-live=polite]").unwrap();
+    assert_eq!(host.child_element_count(), 0);
+
+    // Auto-dismissing toast
+    toaster.push(ToastOptions {
+        title: "Saved".to_string(),
+        variant: ToastVariant::Success,
+        duration_ms: Some(80),
+        ..Default::default()
+    });
+
+    // Sticky error toast
+    let sticky = toaster.push(ToastOptions {
+        title: "Broken".to_string(),
+        variant: ToastVariant::Error,
+        duration_ms: None,
+        ..Default::default()
+    });
+
+    wait_frame().await;
+    assert_eq!(host.child_element_count(), 2);
+    assert!(tc.query("[role=alert]").is_some(), "error toasts announce assertively");
+
+    gloo_timers::future::TimeoutFuture::new(300).await;
+    assert_eq!(host.child_element_count(), 1, "the timed toast should have auto-dismissed");
+
+    // Dismiss the sticky one via its button
+    click(&tc.query("button[aria-label=Dismiss]").unwrap());
+    wait_frame().await;
+    assert_eq!(host.child_element_count(), 0);
+
+    // And the handle API can clear directly
+    toaster.push(ToastOptions::default());
+    wait_frame().await;
+    assert_eq!(host.child_element_count(), 1);
+    toaster.dismiss(sticky + 1);
+    toaster.clear();
+    wait_frame().await;
+    assert_eq!(host.child_element_count(), 0);
+}
