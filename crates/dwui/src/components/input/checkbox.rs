@@ -62,10 +62,9 @@ pub fn checkbox(props: CheckboxProps) -> Dom {
             .dwclass!("flex align-items-center justify-center")
             .dwclass!("border dwui-border-void-500 is(.light *):dwui-border-void-300")
             .dwclass!("disabled:cursor-not-allowed disabled:opacity-60")
-            .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400 is(.light *):focus-visible:dwui-ring-primary-600")
+            .dwclass!("dwui-focusable")
             .dwclass_signal!("dwui-bg-primary-500 dwui-border-primary-500 is(.light *):dwui-bg-primary-400 is(.light *):dwui-border-primary-400", checked.signal())
             .dwclass_signal!("bg-transparent", checked.signal().map(|v| !v))
-            .style("outline", "none")
             .child(html!("span", {
                 .dwclass!("flex align-items-center justify-center")
                 .style("transition", "opacity 100ms ease-out")

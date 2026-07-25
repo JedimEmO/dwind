@@ -1,3 +1,13 @@
-*:focus {
+.dwui-focusable {
     outline: none;
+}
+
+.dwui-focusable:focus-visible {
+    outline: 2px solid var(--dwui-primary-400);
+    outline-offset: 2px;
+}
+
+.dwui-field-surface:focus-within {
+    outline: 2px solid var(--dwui-primary-400);
+    outline-offset: -2px;
 }

@@ -115,7 +115,7 @@ pub fn modal(props: ModalProps) -> Dom {
             .style("position", "relative")
             .style("z-index", "10")
             .style("pointer-events", "auto")
-            .style("outline", "none")
+            .dwclass!("dwui-focusable")
 
             // Size classes
             .style_signal("width", size.signal().map(|s| match s {
@@ -143,14 +143,13 @@ pub fn modal(props: ModalProps) -> Dom {
                 .dwclass!("hover:dwui-bg-void-800 hover:dwui-text-on-primary-100")
                 .dwclass!("is(.light *):hover:dwui-bg-void-200 is(.light *):hover:dwui-text-on-primary-900")
                 .dwclass!("cursor-pointer transition-colors")
-                .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400")
+                .dwclass!("dwui-focusable")
                 .style("position", "absolute")
                 .style("top", "1rem")
                 .style("right", "1rem")
                 .dwclass!("bg-transparent border-none")
                 .style("padding", "0")
                 .style("margin", "0")
-                .style("outline", "none")
                 .text("×")
                 .style("font-size", "24px")
                 .style("line-height", "1")

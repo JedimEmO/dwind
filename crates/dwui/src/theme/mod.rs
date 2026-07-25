@@ -43,6 +43,32 @@ dwkeyframes! {
     }
 }
 
+/// Layering scale for overlaid components. Every dwui z-index comes from here
+/// so overlays always stack predictably: tooltips under transient overlays
+/// (popovers, dropdowns), overlays under modals/drawers, toasts above all.
+pub mod layers {
+    pub const TOOLTIP: &str = "30";
+    pub const OVERLAY: &str = "40";
+    pub const MODAL: &str = "50";
+    pub const TOAST: &str = "60";
+}
+
+// Design-language scales
+// ----------------------
+// Radius: containers (card, modal, alert, popovers) `rounded-lg`; controls and
+//   fields (buttons, inputs, tabs, checkbox, list rows) `rounded-md`; pills
+//   (badge, switch track, avatar) `rounded-full`.
+// Control heights: sm/md/lg = `h-8`/`h-10`/`h-12`; field surfaces are always
+//   `h-10` in every state (validation must never change field height).
+// Padding: modal `p-6`; card and alert `p-4`; table cells `p-3`; field
+//   horizontal padding `p-l-3 p-r-3`.
+// Transitions: `transition-colors duration-150` is the standard; transform and
+//   opacity animations use explicit inline transitions. `transition-all` is
+//   banned in components.
+// Focus: interactive elements take the `dwui-focusable` class (outline-based
+//   `:focus-visible` ring); field wrappers take `dwui-field-surface`
+//   (`:focus-within` ring). Never use box-shadow based rings — they collide
+//   with `shadow-*` utilities.
 pub fn apply_style_sheet(colors: Option<crate::theme::colors::ColorsCssVariables>) {
     stylesheet!(":root", {
         .raw(colors.unwrap_or_default().to_style_sheet_raw())
@@ -90,6 +116,15 @@ pub mod colors {
             )
         }
 
+        /// Overrides the `--dwui-on-accent` color: the color painted *on top
+        /// of* primary-filled controls (switch knob, checkbox checkmark,
+        /// filled badge text). Defaults to near-white, which suits most
+        /// primary palettes; set a dark value when the primary ramp is light.
+        pub fn with_on_accent(mut self, on_accent: impl Into<String>) -> Self {
+            self.dwui_on_accent = on_accent.into();
+            self
+        }
+
         /// Like [`Self::new`], but with explicit success and warning palettes.
         pub fn with_status_colors(
             primary: &BTreeMap<u32, String>,
@@ -100,6 +135,8 @@ pub mod colors {
             warning: &BTreeMap<u32, String>,
         ) -> Self {
             Self {
+                dwui_on_accent: "#fafafa".to_string(),
+
                 dwui_success_50: success.get(&50).unwrap().clone(),
                 dwui_success_100: success.get(&100).unwrap().clone(),
                 dwui_success_200: success.get(&200).unwrap().clone(),
@@ -282,44 +319,7 @@ pub mod colors {
     use dwind::border_color_generator;
     use dwind::gradient_from_generator;
     use dwind::gradient_to_generator;
-    use dwind::ring_generator;
     use dwind::text_color_generator;
-
-    dwgenerate_map!(
-        "dwui-ring-primary",
-        "ring-",
-        [
-            ("50", "var(--dwui-primary-50)"),
-            ("100", "var(--dwui-primary-100)"),
-            ("200", "var(--dwui-primary-200)"),
-            ("300", "var(--dwui-primary-300)"),
-            ("400", "var(--dwui-primary-400)"),
-            ("500", "var(--dwui-primary-500)"),
-            ("600", "var(--dwui-primary-600)"),
-            ("700", "var(--dwui-primary-700)"),
-            ("800", "var(--dwui-primary-800)"),
-            ("900", "var(--dwui-primary-900)"),
-            ("950", "var(--dwui-primary-950)")
-        ]
-    );
-
-    dwgenerate_map!(
-        "dwui-ring-error",
-        "ring-",
-        [
-            ("50", "var(--dwui-error-50)"),
-            ("100", "var(--dwui-error-100)"),
-            ("200", "var(--dwui-error-200)"),
-            ("300", "var(--dwui-error-300)"),
-            ("400", "var(--dwui-error-400)"),
-            ("500", "var(--dwui-error-500)"),
-            ("600", "var(--dwui-error-600)"),
-            ("700", "var(--dwui-error-700)"),
-            ("800", "var(--dwui-error-800)"),
-            ("900", "var(--dwui-error-900)"),
-            ("950", "var(--dwui-error-950)")
-        ]
-    );
 
     dwgenerate_map!(
         "dwui-border-primary",

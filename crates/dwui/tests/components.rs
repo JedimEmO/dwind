@@ -1051,3 +1051,93 @@ async fn date_picker_navigates_months() {
     wait_frames(2).await;
     assert_eq!(month_label.text_content().unwrap(), "January 2026");
 }
+
+// ---------------------------------------------------------------------------
+// Focus standard
+// ---------------------------------------------------------------------------
+
+/// Asserts the element carries the `dwui-focusable` marker class, i.e. it
+/// participates in the outline-based `:focus-visible` ring standard.
+fn assert_focusable(element: &web_sys::Element) {
+    let class = element.get_attribute("class").unwrap_or_default();
+
+    assert!(
+        class
+            .split_whitespace()
+            .any(|c| c.starts_with("dwui_focusable_")),
+        "expected a dwui-focusable marker class, got: {class:?}"
+    );
+}
+
+/// Every style-rule selector across all document stylesheets.
+fn stylesheet_selectors() -> Vec<String> {
+    let doc = web_sys::window().unwrap().document().unwrap();
+    let sheets = doc.style_sheets();
+    let mut out = vec![];
+
+    for i in 0..sheets.length() {
+        let Some(sheet) = sheets.item(i) else { continue };
+        let Ok(sheet) = sheet.dyn_into::<web_sys::CssStyleSheet>() else {
+            continue;
+        };
+        let Ok(rules) = sheet.css_rules() else { continue };
+
+        for r in 0..rules.length() {
+            let Some(rule) = rules.item(r) else { continue };
+
+            if let Ok(style_rule) = rule.dyn_into::<web_sys::CssStyleRule>() {
+                out.push(style_rule.selector_text());
+            }
+        }
+    }
+
+    out
+}
+
+#[wasm_bindgen_test]
+async fn focus_standard_replaces_the_global_reset() {
+    dwui::theme::apply_style_sheet(None);
+
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        button!({ .content(Some(text("Focus me"))) }),
+    );
+    wait_frame().await;
+
+    assert_focusable(&tc.query("button").unwrap());
+
+    let selectors = stylesheet_selectors();
+
+    // The old blanket reset removed every native focus indicator; it must be gone.
+    assert!(
+        !selectors.iter().any(|s| s == "*:focus"),
+        "the global *:focus reset is still injected"
+    );
+
+    // The marker class carries the outline-based focus-visible ring.
+    assert!(
+        selectors
+            .iter()
+            .any(|s| s.contains("dwui_focusable") && s.contains(":focus-visible")),
+        "no :focus-visible rule found for dwui-focusable"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn interactive_controls_carry_the_focusable_marker() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .child(checkbox!({ .label("Check".to_string()) }))
+            .child(switch!({ .label("Toggle".to_string()) }))
+        }),
+    );
+    wait_frame().await;
+
+    assert_focusable(&tc.query("[role=checkbox]").unwrap());
+    assert_focusable(&tc.query("[role=switch]").unwrap());
+}

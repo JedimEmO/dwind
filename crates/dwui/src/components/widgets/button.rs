@@ -68,8 +68,7 @@ pub fn button(props: ButtonProps) -> Dom {
         .dwclass!("is(.light *):disabled:dwui-text-on-primary-600 is(.light *):disabled:hover:dwui-border-primary-200")
         .dwclass!("w-full font-bold p-l-3 p-r-3 cursor-pointer rounded-full pointer-events-auto")
         .dwclass!("transition-all duration-150")
-        .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400 is(.light *):focus-visible:dwui-ring-primary-600")
-        .style("outline", "none")
+        .dwclass!("dwui-focusable")
         .apply_if(apply.is_some(), move |b| {
             b.apply(apply.unwrap())
         })

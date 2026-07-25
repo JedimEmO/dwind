@@ -85,7 +85,7 @@ pub fn date_picker(props: DatePickerProps) -> Dom {
             .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
             .dwclass!("disabled:cursor-not-allowed disabled:opacity-60")
             .dwclass!("flex flex-row align-items-center justify-between gap-2")
-            .style("outline", "none")
+            .dwclass!("dwui-focusable")
             .child(html!("span", {
                 .text_signal(value.signal().map(|v| {
                     v.map(|v| v.to_string()).unwrap_or_default()
@@ -279,8 +279,7 @@ fn month_nav_button(label: &str, path: &str, on_click: impl Fn() + 'static) -> D
         .dwclass!("bg-transparent border-none transition-colors")
         .dwclass!("dwui-text-on-primary-300 hover:dwui-bg-void-800 hover:dwui-text-on-primary-50")
         .dwclass!("is(.light *):dwui-text-on-primary-700 is(.light *):hover:dwui-bg-void-200")
-        .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400")
-        .style("outline", "none")
+        .dwclass!("dwui-focusable")
         .child(svg!("svg", {
             .attr("viewBox", "0 0 14 14")
             .attr("width", "14")
@@ -330,8 +329,7 @@ fn day_cell(
             .focused_signal(is_focused.signal())
             .dwclass!("w-9 h-9 flex align-items-center justify-center rounded-md cursor-pointer text-sm")
             .dwclass!("bg-transparent border-none transition-colors")
-            .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400")
-            .style("outline", "none")
+            .dwclass!("dwui-focusable")
             .apply(move |b| {
                 if in_month {
                     dwclass!(b, "dwui-text-on-primary-200 is(.light *):dwui-text-on-primary-800")

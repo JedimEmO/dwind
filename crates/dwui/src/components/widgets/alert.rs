@@ -140,8 +140,7 @@ pub fn alert(props: AlertProps) -> Dom {
                 .dwclass!("flex-none w-6 h-6 flex align-items-center justify-center rounded-full cursor-pointer")
                 .dwclass!("bg-transparent border-none dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-700")
                 .dwclass!("hover:dwui-bg-void-800 is(.light *):hover:dwui-bg-void-200 transition-colors")
-                .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400")
-                .style("outline", "none")
+                .dwclass!("dwui-focusable")
                 .text("×")
                 .event(clone!(dismissed, on_dismiss => move |_: events::Click| {
                     dismissed.set(true);

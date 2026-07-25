@@ -54,7 +54,7 @@ pub fn select(props: SelectProps) -> Dom {
                 .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 is(.light *):dwui-text-on-primary-800 text-base h-10 p-l-2")
                 .dwclass!("dwui-text-on-primary-300")
                 .dwclass!("grid-row-1 grid-col-1 cursor-pointer rounded-t-sm transition-all")
-                .style("outline", "none")
+                .dwclass!("dwui-focusable")
                 .attr_signal("aria-invalid", is_valid_bool.signal().map(|valid| if valid { None } else { Some("true") }))
                 .attr_signal("aria-describedby", is_valid_bool.signal().map({
                     let error_id = error_id.clone();

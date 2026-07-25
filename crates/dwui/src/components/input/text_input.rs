@@ -97,7 +97,7 @@ pub fn text_input(props: TextInputProps) -> Dom {
                 .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
                 .dwclass_signal!("h-10", is_valid.signal())
                 .dwclass_signal!("h-6", not(is_valid.signal()))
-                .style("outline", "none")
+                .dwclass!("dwui-focusable")
                 .attr_signal("aria-invalid", is_valid.signal().map(|valid| if valid { None } else { Some("true") }))
                 .attr_signal("aria-describedby", is_valid.signal().map(clone!(error_id => move |valid| {
                     if valid {

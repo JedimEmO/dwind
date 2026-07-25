@@ -64,8 +64,7 @@ pub fn accordion(props: AccordionProps) -> Dom {
                     .dwclass!("bg-transparent border-none text-base font-medium text-left")
                     .dwclass!("dwui-text-on-primary-100 is(.light *):dwui-text-on-primary-900")
                     .dwclass!("hover:dwui-bg-void-800 is(.light *):hover:dwui-bg-void-200 transition-colors")
-                    .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400")
-                    .style("outline", "none")
+                    .dwclass!("dwui-focusable")
                     .child(html!("span", { .text(&title) }))
                     .child(html!("span", {
                         .dwclass!("flex-none inline-flex align-items-center")
