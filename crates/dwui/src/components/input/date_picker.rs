@@ -1,5 +1,5 @@
 use crate::components::input::calendar_date::CalendarDate;
-use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
+use crate::mixins::field_mixin::{field_error_row, field_surface_mixin};
 use crate::prelude::ValidationResult;
 use crate::theme::prelude::*;
 use crate::utils::component_id;
@@ -68,24 +68,36 @@ pub fn date_picker(props: DatePickerProps) -> Dom {
     let has_value = value.signal_ref(|v| v.is_some()).broadcast();
 
     html!("div", {
-        .dwclass!("grid")
+        .dwclass!("flex flex-col w-full")
         .future(value.signal().for_each(clone!(value_state => move |v| {
             value_state.set(v);
             async {}
         })))
         // Field button
-        .child(html!("button", {
+        .child(html!("div", {
+            .dwclass!("h-10 flex-none")
+            .dwclass_signal!("opacity-60", disabled.signal())
+            .apply(field_surface_mixin(
+                label.signal_cloned(),
+                map_ref! {
+                    let has_value = has_value.signal(),
+                    let open = open.signal() => *has_value || *open
+                },
+                futures_signals::signal::always(ValidationResult::Valid),
+                field_id.clone(),
+            ))
+            .child(html!("button", {
             .attr("type", "button")
             .attr("id", &field_id)
             .attr("aria-haspopup", "dialog")
             .attr_signal("aria-expanded", open.signal().map(|v| if v { "true" } else { "false" }))
             .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
-            .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 text-base h-10 p-l-2 p-r-2")
-            .dwclass!("grid-col-1 grid-row-1 cursor-pointer rounded-t-sm transition-all border-none text-left")
-            .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
-            .dwclass!("disabled:cursor-not-allowed disabled:opacity-60")
+            .dwclass!("w-full h-full bg-transparent border-none text-base p-l-3 p-r-3 p-t-3")
+            .dwclass!("cursor-pointer text-left")
+            .dwclass!("dwui-text-on-primary-200 is(.light *):dwui-text-on-primary-900")
+            .dwclass!("disabled:cursor-not-allowed")
             .dwclass!("flex flex-row align-items-center justify-between gap-2")
-            .dwclass!("dwui-focusable")
+            .style("outline", "none")
             .child(html!("span", {
                 .text_signal(value.signal().map(|v| {
                     v.map(|v| v.to_string()).unwrap_or_default()
@@ -120,10 +132,10 @@ pub fn date_picker(props: DatePickerProps) -> Dom {
                     (open_picker)();
                 }
             }))
+            }))
         }))
         // Popup
         .child(html!("div", {
-            .dwclass!("grid-col-1 grid-row-1")
             .style("position", "relative")
             .style("pointer-events", "none")
             .child_signal(open.signal().map(clone!(view, focused_day, value_state, on_change, open, field_id => move |is_open| {
@@ -153,14 +165,9 @@ pub fn date_picker(props: DatePickerProps) -> Dom {
                 }))
             })))
         }))
-        .apply(labelled_rect_mixin(
-            label.signal_cloned(),
-            map_ref! {
-                let has_value = has_value.signal(),
-                let open = open.signal() => *has_value || *open
-            },
+        .child(field_error_row(
             futures_signals::signal::always(ValidationResult::Valid),
-            field_id.clone(),
+            &field_id,
         ))
         .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))
     })
@@ -230,8 +237,7 @@ fn calendar_popup(
             .children(["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(|day| {
                 html!("div", {
                     .attr("aria-hidden", "true")
-                    .class("font-code")
-                    .dwclass!("text-xs text-center p-1 select-none")
+                    .dwclass!("text-xs text-center p-1 select-none font-medium")
                     .dwclass!("dwui-text-on-primary-500 is(.light *):dwui-text-on-primary-600")
                     .text(day)
                 })

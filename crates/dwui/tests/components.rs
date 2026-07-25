@@ -1141,3 +1141,246 @@ async fn interactive_controls_carry_the_focusable_marker() {
     assert_focusable(&tc.query("[role=checkbox]").unwrap());
     assert_focusable(&tc.query("[role=switch]").unwrap());
 }
+
+// ---------------------------------------------------------------------------
+// Field system
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn field_reserves_error_space_and_keeps_height() {
+    let tc = TestContainer::new();
+    let validity = Mutable::new(ValidationResult::Valid);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        text_input!({
+            .label("Email".to_string())
+            .is_valid_signal(validity.signal_cloned())
+        }),
+    );
+    wait_frames(2).await;
+
+    let input = tc.query("input").unwrap();
+    let input_id = input.get_attribute("id").unwrap();
+
+    // The message row exists (and reserves space) before any error appears.
+    let error_row = tc.query(&format!("[id='{}-error']", input_id)).unwrap();
+    assert_eq!(error_row.text_content().unwrap(), "");
+
+    let surface_height = input.parent_element().unwrap().client_height();
+
+    validity.set(ValidationResult::Invalid {
+        message: "Nope".to_string(),
+    });
+    wait_frames(2).await;
+
+    // Turning invalid must not change the field surface height.
+    assert_eq!(
+        input.parent_element().unwrap().client_height(),
+        surface_height,
+        "field surface changed height when it became invalid"
+    );
+    assert_eq!(error_row.text_content().unwrap(), "Nope");
+}
+
+#[wasm_bindgen_test]
+async fn text_input_and_select_support_disabled() {
+    let tc = TestContainer::new();
+    let disabled = Mutable::new(false);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .child(text_input!({
+                .label("Name".to_string())
+                .disabled_signal(disabled.signal())
+            }))
+            .child(select!({
+                .label("Fruit".to_string())
+                .disabled_signal(disabled.signal())
+                .options(vec![("a".to_string(), "Apple".to_string())])
+            }))
+            .child(slider!({
+                .label("Volume".to_string())
+                .disabled_signal(disabled.signal())
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    assert!(!tc.query("input").unwrap().has_attribute("disabled"));
+    assert!(!tc.query("select").unwrap().has_attribute("disabled"));
+
+    disabled.set(true);
+    wait_frame().await;
+
+    assert!(tc.query("input").unwrap().has_attribute("disabled"));
+    assert!(tc.query("select").unwrap().has_attribute("disabled"));
+    assert!(tc
+        .query("input[type=range]")
+        .unwrap()
+        .has_attribute("disabled"));
+}
+
+// ---------------------------------------------------------------------------
+// text_area!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn text_area_syncs_value_and_reports_invalid() {
+    let tc = TestContainer::new();
+    let value = Mutable::new("hello".to_string());
+    let validity = Mutable::new(ValidationResult::Valid);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        text_area!({
+            .value(value.clone())
+            .label("Bio".to_string())
+            .rows(6u32)
+            .is_valid_signal(validity.signal_cloned())
+        }),
+    );
+    wait_frames(2).await;
+
+    let textarea: web_sys::HtmlTextAreaElement =
+        tc.query("textarea").unwrap().dyn_into().unwrap();
+
+    assert_eq!(textarea.value(), "hello");
+    assert_eq!(textarea.get_attribute("rows").as_deref(), Some("6"));
+
+    let label = tc.query("label").unwrap();
+    assert_eq!(
+        label.get_attribute("for").unwrap(),
+        textarea.get_attribute("id").unwrap()
+    );
+
+    value.set("world".to_string());
+    wait_frames(2).await;
+    assert_eq!(textarea.value(), "world");
+
+    validity.set(ValidationResult::Invalid {
+        message: "Too short".to_string(),
+    });
+    wait_frames(2).await;
+
+    assert_eq!(
+        textarea.get_attribute("aria-invalid").as_deref(),
+        Some("true")
+    );
+    let alert = tc.query("[role=alert]").unwrap();
+    assert_eq!(alert.text_content().unwrap(), "Too short");
+}
+
+// ---------------------------------------------------------------------------
+// number_input!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn number_input_steps_and_clamps() {
+    let tc = TestContainer::new();
+    let value = Mutable::new(5.0f64);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        number_input!({
+            .value(value.clone())
+            .label("Amount".to_string())
+            .min(Some(0.0))
+            .max(Some(6.0))
+            .step(2.0)
+        }),
+    );
+    wait_frames(2).await;
+
+    let input = tc.query("input[type=number]").unwrap();
+    assert_eq!(input.get_attribute("min").as_deref(), Some("0"));
+    assert_eq!(input.get_attribute("max").as_deref(), Some("6"));
+    assert_eq!(input.get_attribute("step").as_deref(), Some("2"));
+    assert_eq!(input.get_attribute("inputmode").as_deref(), Some("decimal"));
+
+    // The steppers are decorative: not tabbable, hidden from AT.
+    let steppers = tc.query_all("button[tabindex='-1'][aria-hidden=true]");
+    assert_eq!(steppers.length(), 2);
+
+    let up: web_sys::Element = steppers.item(0).unwrap().dyn_into().unwrap();
+    let down: web_sys::Element = steppers.item(1).unwrap().dyn_into().unwrap();
+
+    click(&up);
+    wait_frame().await;
+    // 5 + 2 clamps to max 6
+    assert_eq!(value.get(), 6.0);
+
+    click(&down);
+    wait_frame().await;
+    assert_eq!(value.get(), 4.0);
+}
+
+// ---------------------------------------------------------------------------
+// radio_group!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn radio_group_selection_and_roving_tabindex() {
+    let tc = TestContainer::new();
+    let value = Mutable::new("b".to_string());
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        radio_group!({
+            .label("Flavor".to_string())
+            .value_signal(value.signal_cloned())
+            .options(vec![
+                ("a".to_string(), "Almond".to_string()),
+                ("b".to_string(), "Butterscotch".to_string()),
+                ("c".to_string(), "Cinnamon".to_string()),
+            ])
+            .on_change(clone!(value => move |key| {
+                value.set(key);
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    let group = tc.query("[role=radiogroup]").unwrap();
+    let label_id = group.get_attribute("aria-labelledby").unwrap();
+    assert_eq!(
+        tc.query(&format!("[id='{}']", label_id))
+            .unwrap()
+            .text_content()
+            .unwrap(),
+        "Flavor"
+    );
+
+    let radios = tc.query_all("[role=radio]");
+    assert_eq!(radios.length(), 3);
+
+    let radio = |i: u32| -> web_sys::Element { radios.item(i).unwrap().dyn_into().unwrap() };
+
+    // Roving tabindex: only the checked option is a tab stop
+    assert_eq!(radio(0).get_attribute("tabindex").as_deref(), Some("-1"));
+    assert_eq!(radio(1).get_attribute("tabindex").as_deref(), Some("0"));
+    assert_eq!(radio(1).get_attribute("aria-checked").as_deref(), Some("true"));
+
+    click(&radio(2));
+    wait_frames(2).await;
+
+    assert_eq!(value.get_cloned(), "c");
+    assert_eq!(radio(2).get_attribute("aria-checked").as_deref(), Some("true"));
+    assert_eq!(radio(2).get_attribute("tabindex").as_deref(), Some("0"));
+    assert_eq!(radio(1).get_attribute("tabindex").as_deref(), Some("-1"));
+
+    // ArrowDown moves selection (selection follows focus)
+    let event = web_sys::KeyboardEvent::new_with_keyboard_event_init_dict("keydown", &{
+        let dict = web_sys::KeyboardEventInit::new();
+        dict.set_key("ArrowDown");
+        dict.set_bubbles(true);
+        dict.set_cancelable(true);
+        dict
+    })
+    .unwrap();
+    radio(2).dispatch_event(&event).unwrap();
+    wait_frames(2).await;
+
+    assert_eq!(value.get_cloned(), "a", "ArrowDown should wrap to the first option");
+}

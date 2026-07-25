@@ -1,4 +1,4 @@
-use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
+use crate::mixins::field_mixin::{field_error_row, field_surface_mixin};
 use crate::prelude::{InputValueWrapper, ValidationResult};
 use crate::theme::prelude::*;
 use crate::utils::component_id;
@@ -30,6 +30,14 @@ struct Slider {
     #[signal]
     #[default("".to_string())]
     label: String,
+
+    #[signal]
+    #[default(false)]
+    disabled: bool,
+
+    #[signal]
+    #[default(ValidationResult::Valid)]
+    is_valid: ValidationResult,
 }
 
 pub fn slider(props: SliderProps) -> Dom {
@@ -39,6 +47,8 @@ pub fn slider(props: SliderProps) -> Dom {
         max,
         step,
         label,
+        disabled,
+        is_valid,
         apply,
     } = props;
 
@@ -47,19 +57,29 @@ pub fn slider(props: SliderProps) -> Dom {
     let min = min.broadcast();
     let max = max.broadcast();
     let label = label.broadcast();
+    let disabled = disabled.broadcast();
+    let is_valid = is_valid.broadcast();
 
     let slider_id = component_id("slider");
 
     html!("div", {
-        .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 text-base")
-        .dwclass!("grid rounded-t-sm")
+        .dwclass!("flex flex-col w-full")
         .child(html!("div", {
-            .dwclass!("flex flex-row grid-col-1 grid-row-1 w-full align-items-center gap-2 p-r-2")
+            .dwclass!("h-10 flex-none flex flex-row align-items-end gap-2 p-l-3 p-r-3")
+            .dwclass_signal!("opacity-60", disabled.signal())
+            .apply(field_surface_mixin(
+                label.signal_cloned(),
+                always(true),
+                is_valid.signal_cloned(),
+                slider_id.clone(),
+            ))
             .child(html!("input" => HtmlInputElement, {
                 .attr("id", &slider_id)
-                .dwclass!("h-10 grow cursor-pointer")
+                .dwclass!("h-6 grow cursor-pointer")
+                .dwclass_signal!("cursor-not-allowed", disabled.signal())
                 .attr("type", "range")
                 .style("accent-color", "var(--dwui-primary-400)")
+                .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
                 .attr_signal("value", value.value_signal_cloned())
                 .attr_signal("min", min.signal().map(|v| v.to_string()))
                 .attr_signal("max", max.signal().map(|v| v.to_string()))
@@ -75,9 +95,9 @@ pub fn slider(props: SliderProps) -> Dom {
                 })
             }))
             .child(html!("input" => HtmlInputElement, {
-                .dwclass!("w-16 text-center flex-none rounded-sm")
-                .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 text-base")
-                .dwclass!("dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-900")
+                .dwclass!("w-16 h-6 text-center flex-none rounded-sm bg-transparent border-none text-base")
+                .dwclass!("dwui-text-on-primary-200 is(.light *):dwui-text-on-primary-900")
+                .style("outline", "none")
                 .attr_signal("aria-label", label.signal_ref(|label| {
                     if label.is_empty() {
                         "value".to_string()
@@ -85,6 +105,7 @@ pub fn slider(props: SliderProps) -> Dom {
                         format!("{} value", label)
                     }
                 }))
+                .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
                 .attr_signal("min", min.signal().map(|v| v.to_string()))
                 .attr_signal("max", max.signal().map(|v| v.to_string()))
                 .attr("type", "number")
@@ -99,7 +120,7 @@ pub fn slider(props: SliderProps) -> Dom {
                 })
             }))
         }))
-        .apply(labelled_rect_mixin(label.signal_cloned(), always(true), always(ValidationResult::Valid), slider_id))
+        .child(field_error_row(is_valid.signal_cloned(), &slider_id))
         .apply_if(apply.is_some(),|b| b.apply(apply.unwrap()))
     })
 }

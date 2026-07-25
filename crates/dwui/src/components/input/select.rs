@@ -1,4 +1,4 @@
-use crate::mixins::labelled_rect_mixin::labelled_rect_mixin;
+use crate::mixins::field_mixin::{field_error_row, field_surface_mixin};
 use crate::prelude::{InputValueWrapper, ValidationResult};
 use crate::theme::prelude::*;
 use crate::utils::component_id;
@@ -9,7 +9,7 @@ use futures_signals::signal_vec::SignalVecExt;
 use futures_signals_component_macro::component;
 use web_sys::HtmlSelectElement;
 
-#[component(render_function=select)]
+#[component(render_fn = select)]
 struct Select {
     #[default(Box::new(Mutable::new("".to_string())))]
     value: dyn InputValueWrapper + 'static,
@@ -23,6 +23,10 @@ struct Select {
     label: String,
 
     #[signal]
+    #[default(false)]
+    disabled: bool,
+
+    #[signal]
     #[default(ValidationResult::Valid)]
     is_valid: ValidationResult,
 }
@@ -32,12 +36,14 @@ pub fn select(props: SelectProps) -> Dom {
         value,
         options,
         label,
+        disabled,
         is_valid,
         apply,
     } = props;
     let value_signal = value.value_signal_cloned().broadcast();
 
     let is_valid = is_valid.broadcast();
+    let disabled = disabled.broadcast();
 
     let select_id = component_id("select");
     let error_id = format!("{}-error", select_id);
@@ -47,14 +53,23 @@ pub fn select(props: SelectProps) -> Dom {
         .broadcast();
 
     html!("div", {
-        .dwclass!("grid h-10")
-        .children([
-            html!("select" => HtmlSelectElement, {
+        .dwclass!("flex flex-col w-full")
+        .child(html!("div", {
+            .dwclass!("h-10 flex-none")
+            .dwclass_signal!("opacity-60", disabled.signal())
+            .apply(field_surface_mixin(
+                label,
+                always(true),
+                is_valid.signal_cloned(),
+                select_id.clone(),
+            ))
+            .child(html!("select" => HtmlSelectElement, {
                 .attr("id", &select_id)
-                .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-300 is(.light *):dwui-text-on-primary-800 text-base h-10 p-l-2")
-                .dwclass!("dwui-text-on-primary-300")
-                .dwclass!("grid-row-1 grid-col-1 cursor-pointer rounded-t-sm transition-all")
-                .dwclass!("dwui-focusable")
+                .dwclass!("w-full h-full bg-transparent border-none text-base p-l-3 p-t-3 cursor-pointer")
+                .dwclass!("dwui-text-on-primary-200 is(.light *):dwui-text-on-primary-900")
+                .dwclass_signal!("cursor-not-allowed", disabled.signal())
+                .style("outline", "none")
+                .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
                 .attr_signal("aria-invalid", is_valid_bool.signal().map(|valid| if valid { None } else { Some("true") }))
                 .attr_signal("aria-describedby", is_valid_bool.signal().map({
                     let error_id = error_id.clone();
@@ -84,9 +99,9 @@ pub fn select(props: SelectProps) -> Dom {
                         value.set(node.value());
                     })
                 })
-            })
-        ])
-        .apply(labelled_rect_mixin(label, always(true), is_valid.signal_cloned(), select_id))
+            }))
+        }))
+        .child(field_error_row(is_valid.signal_cloned(), &select_id))
         .apply_if(apply.is_some(),|b| b.apply(apply.unwrap()))
     })
 }
