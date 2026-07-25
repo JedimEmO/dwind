@@ -117,6 +117,7 @@ fn section_card(title: &str, description: &str, demo: Dom, source: Dom) -> Dom {
 
     card!({
         .scheme(ColorScheme::Void)
+        .apply(crate::fx::spotlight)
         .apply(move |b| {
             dwclass!(b, "p-6 flex flex-col gap-4")
             .child(heading!({

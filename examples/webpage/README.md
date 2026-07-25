@@ -1,5 +1,9 @@
 # DWIND webpage
 
+The dwind documentation site — and the largest worked example of dwind + dwui in
+the repository. Everything on it is compiled Rust running as WebAssembly; there
+is no JavaScript beyond the wasm-bindgen glue and no CSS build pipeline.
+
 ## Running the webpage in local developer mode
 
 You need a recent (>= 1.79.0) version of rust, please refer to https://rustup.rs/ for how to install this.
@@ -21,3 +25,44 @@ then do
 ```shell
 trunk serve --open
 ```
+
+> Trunk does not watch the sibling workspace crates. After editing `crates/dwind`
+> or `crates/dwui`, restart `trunk serve` to pick up the rebuild.
+
+## How the site is put together
+
+| Module | What lives there |
+| --- | --- |
+| `lib.rs` | App shell: router, sticky header with active-route indicator, scroll-progress rail, docs shell and prev/next pager, footer |
+| `fx.rs` | Reusable reactive effects — pointer spotlight, 3D tilt, magnetic controls, aurora background, film grain, scroll-spy, marquee, kinetic headlines |
+| `palette.rs` | The ⌘K command palette: fuzzy search over every route, full keyboard control |
+| `styles.rs` | App-level raw CSS — keyframes, glass surfaces, grain, masks |
+| `reveal.rs` | `IntersectionObserver`-driven progressive reveal on scroll |
+| `pages/signal_lab.rs` | The reactivity demo on the home page |
+| `pages/docs/` | Documentation pages, sidebar, live example frames, syntax-highlighted source |
+
+### The effects are signals, not an animation library
+
+Nothing here reaches for a JS animation runtime. Each effect is a `Mutable` that
+an event writes and a `style_signal` reads, so a pointer move updates exactly the
+CSS properties that depend on it — no `requestAnimationFrame` loop, no re-render,
+no diff:
+
+```rust
+// fx.rs — the whole spotlight, minus bookkeeping
+.event(move |e: events::PointerMove| {
+    pos.set_neq(normalised(&element, e.mouse_x() as f64, e.mouse_y() as f64));
+})
+.style_signal("--sx", pos.signal().map(|(x, _)| format!("{:.2}%", x * 100.0)))
+```
+
+The home page's reactivity lab makes this measurable: it counts every property
+write as it happens, next to a re-render count that stays at zero.
+
+### Keyboard
+
+- <kbd>⌘K</kbd> / <kbd>Ctrl</kbd>+<kbd>K</kbd> or <kbd>/</kbd> — open the command palette
+- <kbd>↑</kbd> <kbd>↓</kbd> — move through results, <kbd>⏎</kbd> to open, <kbd>Esc</kbd> to dismiss
+
+Everything interactive is reachable by keyboard, and `prefers-reduced-motion` is
+honoured throughout — the marquee, sheen, tilt, and reveal animations all stop.

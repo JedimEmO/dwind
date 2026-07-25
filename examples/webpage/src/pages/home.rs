@@ -1,3 +1,6 @@
+use crate::fx::{self, kinetic_headline, magnetic, spotlight, spotlight_tilt};
+use crate::pages::signal_lab::signal_lab;
+use crate::reveal::reveal_on_scroll;
 use dominator::routing::go_to_url;
 use dominator::{events, text, Dom};
 use dwind::prelude::*;
@@ -9,7 +12,8 @@ pub fn home_page() -> Dom {
     html!("div", {
         .dwclass!("w-full")
         .child(hero())
-        .child(stats_strip())
+        .child(utility_ticker())
+        .child(signal_lab())
         .child(bento_features())
         .child(components_preview())
         .child(final_cta())
@@ -24,72 +28,57 @@ fn hero() -> Dom {
     html!("section", {
         .dwclass!("w-full overflow-hidden")
         .style("position", "relative")
-        // amber glow
+        .child(fx::blueprint_grid(
+            "radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 75%)",
+        ))
         .child(html!("div", {
-            .attr("aria-hidden", "true")
-            .style("position", "absolute")
-            .style("top", "-20%")
-            .style("right", "-10%")
-            .style("width", "60rem")
-            .style("height", "60rem")
-            .style("background", "radial-gradient(circle, rgba(213, 182, 95, 0.14) 0%, rgba(213, 182, 95, 0.05) 35%, transparent 65%)")
-            .style("pointer-events", "none")
-            .style("animation", "dwind-glow-drift 14s ease-in-out infinite")
-        }))
-        // engineering grid texture
-        .child(html!("div", {
-            .attr("aria-hidden", "true")
-            .style("position", "absolute")
-            .style("inset", "0")
-            .style("background-image", "linear-gradient(rgba(125, 125, 135, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(125, 125, 135, 0.07) 1px, transparent 1px)")
-            .style("background-size", "44px 44px")
-            .style("mask-image", "radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 75%)")
-            .style("pointer-events", "none")
-        }))
-        .child(html!("div", {
-            .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 p-t-20 p-b-16")
-            .dwclass!("flex @lg:flex-row @<lg:flex-col gap-12 align-items-center")
+            .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 p-t-20 p-b-10")
+            // @md is 1280px in dwind — the hero goes side-by-side from there up.
+            .dwclass!("flex @md:flex-row @<md:flex-col gap-12 align-items-center")
             .style("position", "relative")
             // Left: headline
             .child(html!("div", {
                 .dwclass!("flex flex-col gap-6 grow")
-                .style("animation", "dwind-fade-up 500ms ease-out")
                 .child(html!("div", {
                     .class("font-code")
-                    .dwclass!("text-candlelight-400 text-sm")
-                    .text("// rust → wasm → css · no node toolchain")
+                    .dwclass!("flex flex-row align-items-center gap-3 text-sm text-candlelight-400")
+                    .style("animation", "dwind-fade-up 400ms ease-out both")
+                    .child(html!("span", {
+                        .dwclass!("w-2 h-2 rounded-full bg-candlelight-400 flex-none")
+                        .style("animation", "dwind-pulse-ring 2.4s ease-out infinite")
+                    }))
+                    .child(html!("span", { .text("rust → wasm → css · no node toolchain") }))
                 }))
                 .child(html!("h1", {
                     .class("font-display")
                     .dwclass!("@sm:text-6xl @<sm:text-4xl font-extrabold text-woodsmoke-50 m-0 leading-tight")
-                    .child(text("Styling "))
-                    .child(html!("span", {
-                        .dwclass!("text-candlelight-300")
-                        .style("text-shadow", "0 0 40px rgba(213, 182, 95, 0.35)")
-                        .text("forged")
-                    }))
-                    .child(text(" at compile time."))
+                    .style("letter-spacing", "-0.03em")
+                    .children(kinetic_headline("Styling *forged* at compile time."))
                 }))
                 .child(html!("p", {
                     .dwclass!("text-woodsmoke-300 text-l m-0 leading-relaxed")
                     .style("max-width", "34rem")
+                    .style("animation", "dwind-fade-up 900ms 300ms ease-out both")
                     .text("dwind brings utility-first styling to the DOMINATOR web framework — \
                            every class checked by rustc, every state change driven by signals, \
                            and a complete accessible component library on top.")
                 }))
                 .child(html!("div", {
                     .dwclass!("flex @sm:flex-row @<sm:flex-col gap-4 align-items-center m-t-2")
+                    .style("animation", "dwind-fade-up 900ms 420ms ease-out both")
                     .child(html!("div", {
                         .dwclass!("w-44")
+                        .apply(magnetic(7.0))
                         .child(button!({
                             .content(Some(text("Get started")))
                             .on_click(|_: events::Click| {
-                                go_to_url("#/docs/colors");
+                                go_to_url("#/docs/getting-started");
                             })
                         }))
                     }))
                     .child(html!("div", {
                         .dwclass!("w-44")
+                        .apply(magnetic(7.0))
                         .child(button!({
                             .button_type(ButtonType::Border)
                             .content(Some(text("Components")))
@@ -100,8 +89,9 @@ fn hero() -> Dom {
                     }))
                     .child(html!("code", {
                         .class("font-code")
-                        .dwclass!("text-woodsmoke-400 text-sm border border-woodsmoke-800 rounded-md p-l-3 p-r-3 p-t-1 p-b-1 select-all")
+                        .dwclass!("text-woodsmoke-400 text-sm border border-woodsmoke-800 rounded-md p-l-3 p-r-3 p-t-1 p-b-1 select-all flex-none")
                         .style("background", "rgba(18, 18, 21, 0.6)")
+                        .style("white-space", "nowrap")
                         .text("> cargo add dwind dwui")
                     }))
                 }))
@@ -115,12 +105,12 @@ fn hero() -> Dom {
 fn code_card() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col flex-none w-full")
-        .style("max-width", "32rem")
-        .style("animation", "dwind-fade-up 700ms ease-out")
+        .style("max-width", "30rem")
+        .style("animation", "dwind-fade-up 900ms 200ms ease-out both")
         .child(html!("div", {
+            .class("dw-glass")
             .dwclass!("rounded-lg border border-woodsmoke-800 overflow-hidden shadow-2xl")
-            .style("background", "rgba(10, 10, 12, 0.85)")
-            .style("backdrop-filter", "blur(6px)")
+            .apply(spotlight_tilt(4.0))
             // window chrome
             .child(html!("div", {
                 .dwclass!("flex flex-row align-items-center gap-2 p-l-4 p-r-4 h-10 border-b border-woodsmoke-800")
@@ -171,7 +161,7 @@ fn window_dot(color: &str) -> Dom {
     })
 }
 
-fn code_line(parts: Vec<(&str, &str)>) -> Dom {
+pub fn code_line(parts: Vec<(&str, &str)>) -> Dom {
     html!("div", {
         .children(parts.into_iter().map(|(content, kind)| {
             html!("span", {
@@ -190,38 +180,33 @@ fn code_line(parts: Vec<(&str, &str)>) -> Dom {
 }
 
 // ---------------------------------------------------------------------------
-// Stats strip
+// Utility ticker
 // ---------------------------------------------------------------------------
 
-fn stats_strip() -> Dom {
+/// A slow drift of real, compiler-checked class names. Every one of these
+/// resolves to a Rust constant at build time.
+fn utility_ticker() -> Dom {
     html!("section", {
-        .dwclass!("border-t border-b border-woodsmoke-800 w-full")
-        .style("background", "rgba(18, 18, 21, 0.5)")
-        .child(html!("div", {
-            .dwclass!("m-x-auto max-w-6xl grid @sm:grid-cols-4 @<sm:grid-cols-2")
-            .children([
-                stat_cell("0", "css build pipeline"),
-                stat_cell("100%", "type-checked styles"),
-                stat_cell("24", "accessible components"),
-                stat_cell("1", "language, end to end"),
-            ])
-        }))
-    })
-}
-
-fn stat_cell(value: &str, label: &str) -> Dom {
-    html!("div", {
-        .dwclass!("flex flex-col gap-1 p-6 align-items-center")
-        .child(html!("div", {
-            .class("font-display")
-            .dwclass!("text-3xl font-bold text-candlelight-300")
-            .text(value)
-        }))
-        .child(html!("div", {
-            .class("font-code")
-            .dwclass!("text-xs text-woodsmoke-400")
-            .text(label)
-        }))
+        .dwclass!("border-t border-b border-woodsmoke-800 w-full p-t-6 p-b-6 m-t-8")
+        .style("background", "rgba(10, 10, 12, 0.45)")
+        .child(fx::marquee(&[
+            "flex flex-col gap-4",
+            "@sm:grid-cols-3",
+            "hover:bg-candlelight-400",
+            "rounded-full",
+            "text-picton-blue-300",
+            "linear-gradient-45",
+            "backdrop-blur-md",
+            "@<lg:hidden",
+            "animate-pulse",
+            "transition-colors",
+            "focus:outline-none",
+            "shadow-2xl",
+            "w-p-50",
+            "translate-x-4",
+            "@(max-width:200px):hidden",
+            "border-woodsmoke-800",
+        ]))
     })
 }
 
@@ -232,6 +217,7 @@ fn stat_cell(value: &str, label: &str) -> Dom {
 fn bento_features() -> Dom {
     html!("section", {
         .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 p-t-20 w-full")
+        .apply(reveal_on_scroll)
         .child(section_header("features", "Everything the compiler can prove"))
         .child(html!("div", {
             .dwclass!("grid grid-cols-6 gap-4 m-t-8")
@@ -246,7 +232,7 @@ fn bento_features() -> Dom {
     })
 }
 
-fn section_header(kicker: &str, title: &str) -> Dom {
+pub fn section_header(kicker: &str, title: &str) -> Dom {
     html!("div", {
         .dwclass!("flex flex-col gap-2")
         .child(html!("div", {
@@ -257,6 +243,7 @@ fn section_header(kicker: &str, title: &str) -> Dom {
         .child(html!("h2", {
             .class("font-display")
             .dwclass!("@sm:text-4xl @<sm:text-2xl font-bold text-woodsmoke-50 m-0")
+            .style("letter-spacing", "-0.02em")
             .text(title)
         }))
     })
@@ -264,8 +251,10 @@ fn section_header(kicker: &str, title: &str) -> Dom {
 
 fn bento_tile(span_large: bool, children: Vec<Dom>) -> Dom {
     html!("div", {
-        .dwclass!("rounded-lg border border-woodsmoke-800 p-6 flex flex-col gap-3 transition-all")
+        .class("dw-glass")
+        .dwclass!("rounded-lg border border-woodsmoke-800 p-6 flex flex-col gap-3")
         .dwclass!("hover:border-candlelight-700")
+        .apply(spotlight_tilt(2.5))
         .apply(move |b| {
             if span_large {
                 dwclass!(b, "@md:col-span-4 @<md:col-span-6")
@@ -273,7 +262,6 @@ fn bento_tile(span_large: bool, children: Vec<Dom>) -> Dom {
                 dwclass!(b, "@md:col-span-2 @<md:col-span-6")
             }
         })
-        .style("background", "rgba(18, 18, 21, 0.55)")
         .children(children)
     })
 }
@@ -351,10 +339,12 @@ fn bento_tile_themes() -> Dom {
         tile_text("Components read CSS variables — swap palettes at runtime, light and dark included."),
         html!("div", {
             .dwclass!("flex flex-row gap-2 m-t-2")
-            .children(["#D5B65F", "#5FB0D5", "#75D55F", "#D55FA8", "#BD4C4C"].map(|c| {
+            .children(["#D5B65F", "#5FB0D5", "#75D55F", "#D55FA8", "#BD4C4C"].into_iter().enumerate().map(|(i, c)| {
                 html!("span", {
-                    .dwclass!("w-6 h-6 rounded-full border border-woodsmoke-700")
+                    .dwclass!("w-6 h-6 rounded-full border border-woodsmoke-700 transition-all")
+                    .dwclass!("hover:scale-125")
                     .style("background-color", c)
+                    .style("animation", &format!("dwind-fade-up 600ms {}ms ease-out both", i * 60))
                 })
             }))
         }),
@@ -394,6 +384,7 @@ fn components_preview() -> Dom {
 
     html!("section", {
         .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 p-t-20 w-full")
+        .apply(reveal_on_scroll)
         .child(section_header("components", "A component library that ships with the stack"))
         .child(html!("p", {
             .dwclass!("text-woodsmoke-400 m-t-4 m-b-8")
@@ -458,6 +449,7 @@ fn components_preview() -> Dom {
             .dwclass!("flex justify-center m-t-8")
             .child(html!("div", {
                 .dwclass!("w-64")
+                .apply(magnetic(6.0))
                 .child(button!({
                     .button_type(ButtonType::Border)
                     .content(Some(text("Browse all components →")))
@@ -472,8 +464,9 @@ fn components_preview() -> Dom {
 
 fn preview_card(label: &str, children: Vec<Dom>) -> Dom {
     html!("div", {
-        .dwclass!("rounded-lg border border-woodsmoke-800 p-6 flex flex-col gap-5 transition-all hover:border-candlelight-700")
-        .style("background", "rgba(18, 18, 21, 0.55)")
+        .class("dw-glass")
+        .dwclass!("rounded-lg border border-woodsmoke-800 p-6 flex flex-col gap-5 hover:border-candlelight-700")
+        .apply(spotlight)
         .child(html!("div", {
             .class("font-code")
             .dwclass!("text-xs text-woodsmoke-500")
@@ -490,15 +483,17 @@ fn preview_card(label: &str, children: Vec<Dom>) -> Dom {
 fn final_cta() -> Dom {
     html!("section", {
         .dwclass!("w-full p-t-20")
+        .style("position", "relative")
+        .apply(reveal_on_scroll)
         .child(html!("div", {
             .dwclass!("m-x-auto max-w-3xl p-l-4 p-r-4 flex flex-col gap-6 align-items-center")
             .child(html!("h2", {
                 .class("font-display")
                 .dwclass!("@sm:text-5xl @<sm:text-3xl font-extrabold text-woodsmoke-50 m-0 text-center")
+                .style("letter-spacing", "-0.03em")
                 .child(text("Build interfaces in "))
                 .child(html!("span", {
-                    .dwclass!("text-candlelight-300")
-                    .style("text-shadow", "0 0 40px rgba(213, 182, 95, 0.35)")
+                    .class("dw-sheen")
                     .text("Rust")
                 }))
                 .child(text("."))
@@ -511,15 +506,17 @@ fn final_cta() -> Dom {
                 .dwclass!("flex @sm:flex-row @<sm:flex-col gap-4 m-t-2")
                 .child(html!("div", {
                     .dwclass!("w-44")
+                    .apply(magnetic(7.0))
                     .child(button!({
                         .content(Some(text("Read the docs")))
                         .on_click(|_: events::Click| {
-                            go_to_url("#/docs/colors");
+                            go_to_url("#/docs/getting-started");
                         })
                     }))
                 }))
                 .child(html!("div", {
                     .dwclass!("w-44")
+                    .apply(magnetic(7.0))
                     .child(button!({
                         .button_type(ButtonType::Border)
                         .content(Some(text("Open the gallery")))
@@ -528,6 +525,15 @@ fn final_cta() -> Dom {
                         })
                     }))
                 }))
+            }))
+            .child(html!("div", {
+                .class("font-code")
+                .dwclass!("text-xs text-woodsmoke-600 m-t-4 flex flex-row gap-2 align-items-center")
+                .child(html!("kbd", {
+                    .dwclass!("border border-woodsmoke-800 rounded-md p-l-2 p-r-2 p-t-1 p-b-1")
+                    .text("⌘K")
+                }))
+                .child(html!("span", { .text("opens the command palette from anywhere") }))
             }))
         }))
     })
