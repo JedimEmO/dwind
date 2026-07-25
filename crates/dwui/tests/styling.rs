@@ -323,6 +323,29 @@ async fn arbitrary_values_may_be_non_ascii() {
 }
 
 #[wasm_bindgen_test]
+async fn quoted_values_may_contain_brackets() {
+    // `[content:'[']` is valid CSS. The parser has to know that a bracket inside
+    // a string is content rather than a delimiter.
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .attr("id", "probe-bracket")
+            .dwclass!("relative before:[content:'['] before:absolute")
+        }),
+    );
+    wait_frame().await;
+
+    let doc = web_sys::window().unwrap().document().unwrap();
+    let el = doc.get_element_by_id("probe-bracket").unwrap();
+
+    let content = computed_pseudo(&el, "::before", "content");
+    assert!(content.contains('['), "got {content:?}");
+    assert_eq!(computed_pseudo(&el, "::before", "position"), "absolute");
+}
+
+#[wasm_bindgen_test]
 async fn pseudo_classes_do_not_gain_content() {
     let tc = TestContainer::new();
 
@@ -486,4 +509,45 @@ async fn content_utilities_reach_the_pseudo_element() {
     let el = doc.get_element_by_id("probe-content-none").unwrap();
 
     assert_eq!(computed_pseudo(&el, "::before", "content"), "none");
+}
+
+// dwgenerate! must be able to alias any class — a plain utility, and one minted
+// by dwkeyframes!. Aliasing a bare class never worked before (the generated
+// static tried to hold a `&String` in a `String`), and the AnimationDecl change
+// added a second error on the same path.
+dwind_macros::dwgenerate!("aliased-flex", "flex");
+dwind_macros::dwgenerate!("aliased-anim", "animate-slide-probe");
+
+#[wasm_bindgen_test]
+async fn dwgenerate_can_alias_a_plain_class_and_an_animation() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .attr("id", "probe-alias")
+            .dwclass!("aliased-flex aliased-anim")
+        }),
+    );
+    wait_frame().await;
+
+    let doc = web_sys::window().unwrap().document().unwrap();
+    let el = doc.get_element_by_id("probe-alias").unwrap();
+    let style = web_sys::window()
+        .unwrap()
+        .get_computed_style(&el)
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(style.get_property_value("display").unwrap(), "flex");
+    // Aliasing the animation must still register its keyframes.
+    assert!(
+        style
+            .get_property_value("animation-name")
+            .unwrap()
+            .contains("slide-probe"),
+        "{:?}",
+        style.get_property_value("animation-name")
+    );
+    assert_eq!(count_keyframes("dwuitest-slide-probe"), 1);
 }

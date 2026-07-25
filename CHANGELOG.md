@@ -54,8 +54,10 @@ The escape hatch for properties with no utility, matching Tailwind:
 
 Values pass through verbatim. Spaces are legal inside the brackets — the bracket
 delimits the class, not the space — so there is no `_`-means-space convention,
-which also means `[color:var(--brand_color)]` keeps its underscore. Any character
-is allowed: `[content:'→']` works.
+which also means `[color:var(--brand_color)]` keeps its underscore. Parsing is
+quote-aware, so a value may contain any character — `[content:'→']` and
+`[content:'[']` both work, since a bracket inside a CSS string is content rather
+than a delimiter.
 
 Unambiguous against the variant syntax because a variant's `]` is always followed
 by `:`.
@@ -96,14 +98,12 @@ changes.
 `[&::before]:bg-color-[red]` compiled and silently styled the element itself.
 Generators now honour variants.
 
-### Known rough edge
+### `dwgenerate!` can alias any class
 
-`dwgenerate!("my-anim", "animate-fade-up")` — aliasing a `dwkeyframes!`-generated
-utility under a new name — no longer compiles, because the generated `*_RAW` is
-an `AnimationDecl` rather than a `&'static str` and `dwgenerate!` copies it into a
-`&str` static. It fails loudly at the offending line rather than silently, and the
-alternative (keeping `*_RAW` a plain `&str`) reintroduces the far worse bug of
-variants referencing keyframes that were never injected. Use the class directly.
+`dwgenerate!("my-flex", "flex")` never compiled — the generated static tried to
+hold a `&String` in a `String`, so only generator-based selectors worked. Aliasing
+now works for a plain utility and for a `dwkeyframes!` animation alike, and an
+aliased animation still registers its keyframes.
 
 ### New utilities
 

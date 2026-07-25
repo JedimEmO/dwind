@@ -118,24 +118,50 @@ pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector
         Span::call_site(),
     );
 
-    let raw = if class.is_generator() {
+    let is_generator = class.is_generator();
+
+    // A generator's body is a `const_format!` call, so it stays a `&'static str`.
+    // An alias copies another class's body, and that body is only `&'static str`
+    // some of the time — a `dwkeyframes!` utility emits an `AnimationDecl` so
+    // that reading it registers the rule. Deref covers both, but not in a const
+    // initialiser, so the alias case becomes a `Lazy`.
+    let raw_decl = if is_generator {
         let generator_call = render_generator_call(&class);
 
-        quote! { #generator_call }
+        quote! {
+            #[doc(hidden)]
+            pub static #raw_ident: &str = #generator_call;
+        }
     } else {
-        quote! { #raw_inner_ident }
+        quote! {
+            #[doc(hidden)]
+            pub static #raw_ident: once_cell::sync::Lazy<String> =
+                once_cell::sync::Lazy::new(|| (&* #raw_inner_ident).to_string());
+        }
     };
 
-    let doc_str = format!("generator call: `{}`", raw);
+    let doc_str = format!("dwgenerate: `{class_name}`");
 
-    let rendered_class = render_dwind_class(class).0;
+    // `render_dwind_class` returns a bare reference for a plain class and a
+    // built `class!` for anything with a variant, pseudo-class or generator.
+    // Only the former needs promoting to an owned `String`.
+    let (rendered_class, builds_own_class) = {
+        let rendered = render_dwind_class(class);
+
+        (rendered.0, rendered.2)
+    };
+
+    let class_body = if builds_own_class {
+        rendered_class
+    } else {
+        quote! { (#rendered_class).clone() }
+    };
 
     quote! {
-        #[doc(hidden)]
-        pub static #raw_ident: &str = #raw;
+        #raw_decl
         #[doc = #doc_str]
         pub static #ident: once_cell::sync::Lazy<String> = once_cell::sync::Lazy::new(|| {
-            #rendered_class
+            #class_body
         });
     }
 }

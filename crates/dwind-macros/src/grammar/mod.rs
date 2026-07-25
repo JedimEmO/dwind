@@ -265,16 +265,63 @@ const CHARS_EXT: [char; 13] = [
 /// Any character that is not structural to the bracket grammar.
 ///
 /// A CSS value can contain essentially anything — `→` in a `content`, a `°` in a
-/// gradient angle, a `字` in a font stack. So this is a deny-list of the four
-/// delimiters the parser needs to track, not an allow-list of what CSS is
+/// gradient angle, a `字` in a font stack. So this is a deny-list of the
+/// delimiters the parser has to track, not an allow-list of what CSS is
 /// permitted. An allow-list here also silently truncated at any non-ASCII byte,
 /// because `nom`'s `is_alphanumeric` takes a `u8`.
+///
+/// Quotes stop a run so that [`quoted_string`] can take over; brackets inside a
+/// string are content, not structure.
 fn is_declaration_char(c: char) -> bool {
-    !matches!(c, '[' | ']' | '(' | ')')
+    !matches!(c, '[' | ']' | '(' | ')' | '\'' | '"')
+}
+
+/// A CSS string, consumed whole so that anything inside it — `[`, `)`, a quote
+/// of the other kind — is treated as content.
+///
+/// Without this, `[content:'[']` is valid CSS that the parser could not read.
+fn quoted_string(input: &str) -> IResult<&str, String> {
+    let quote = match input.chars().next() {
+        Some(c @ ('\'' | '"')) => c,
+        _ => {
+            return Err(nom::Err::Error(nom::error::Error::new(
+                input,
+                nom::error::ErrorKind::Tag,
+            )))
+        }
+    };
+
+    let mut escaped = false;
+
+    for (i, c) in input.char_indices().skip(1) {
+        if escaped {
+            escaped = false;
+            continue;
+        }
+
+        match c {
+            // A CSS escape, `\'` or `\\`.
+            '\\' => escaped = true,
+            c if c == quote => {
+                let end = i + c.len_utf8();
+
+                return Ok((&input[end..], input[..end].to_string()));
+            }
+            _ => {}
+        }
+    }
+
+    // Unterminated — let the caller report the whole declaration as unparseable
+    // rather than silently swallowing the rest of the class string.
+    Err(nom::Err::Error(nom::error::Error::new(
+        input,
+        nom::error::ErrorKind::Tag,
+    )))
 }
 
 fn declaration_body<'a>(input: &'a str) -> IResult<&'a str, String> {
     many0(alt((
+        quoted_string,
         bracketed("(", ")", declaration_body),
         |v: &'a str| take_while1(is_declaration_char)(v).map(move |v| (v.0, v.1.to_string())),
     )))(input)
@@ -648,6 +695,23 @@ mod test {
             parsed[0].arbitrary,
             Some("color:var(--brand_color)".to_string())
         );
+
+        // Brackets and parens inside a CSS string are content, not structure.
+        let parsed = parse_class_string("before:[content:'['] flex").unwrap();
+        assert_eq!(parsed.len(), 2, "{parsed:?}");
+        assert_eq!(parsed[0].arbitrary, Some("content:'['".to_string()));
+        assert_eq!(parsed[1].class_name, "flex");
+
+        let parsed = parse_class_string(r#"[content:"a]b(c"]"#).unwrap();
+        assert_eq!(parsed[0].arbitrary, Some(r#"content:"a]b(c""#.to_string()));
+
+        // An escaped quote does not end the string.
+        let parsed = parse_class_string(r"[content:'it\'s']").unwrap();
+        assert_eq!(parsed[0].arbitrary, Some(r"content:'it\'s'".to_string()));
+
+        // An unterminated string is a parse failure, not a silent swallow of
+        // everything after it.
+        assert!(std::panic::catch_unwind(|| parse_class_string("[content:'oops] flex")).is_err());
 
         // Real spaces work inside the brackets.
         let parsed = parse_class_string("[transition:opacity 650ms ease] flex").unwrap();
