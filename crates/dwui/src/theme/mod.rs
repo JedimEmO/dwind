@@ -99,8 +99,8 @@ pub fn apply_style_sheet(colors: Option<crate::theme::colors::ColorsCssVariables
     controls::apply_controls_stylesheet();
 }
 
-/// Native-control chrome that can only be styled through vendor
-/// pseudo-elements (slider track/thumb).
+/// Native-control chrome that can only be styled through stylesheet rules:
+/// vendor pseudo-elements (slider track/thumb) and the select's option popup.
 ///
 /// Every vendor pseudo-element lives in its own rule, and `-moz` rules are
 /// only inserted in Firefox while `-webkit` rules are kept away from it:
@@ -122,6 +122,25 @@ pub mod controls {
 
             stylesheet!(".dwui-slider", {
                 .raw("appearance: none; -webkit-appearance: none; background: transparent;")
+            });
+
+            // The select's option popup is native chrome: it ignores the
+            // classes on the element, and takes its light/dark rendering from
+            // the element's color-scheme. Without this, a dark-themed select
+            // gets a light popup with the select's light-gray text — unreadable.
+            stylesheet!(".dwui-select", {
+                .raw("color-scheme: dark;")
+            });
+            stylesheet!(".light .dwui-select", {
+                .raw("color-scheme: light;")
+            });
+            // Engines that render the popup themselves (Firefox, Chrome on
+            // some platforms) honor explicit option colors too.
+            stylesheet!(".dwui-select option", {
+                .raw("background-color: var(--dwui-void-900); color: var(--dwui-text-on-primary-200);")
+            });
+            stylesheet!(".light .dwui-select option", {
+                .raw("background-color: var(--dwui-void-50); color: var(--dwui-text-on-primary-900);")
             });
 
             // Track: filled up to --dwui-slider-fill, muted after it.

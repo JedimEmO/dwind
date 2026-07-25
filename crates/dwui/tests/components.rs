@@ -1831,3 +1831,45 @@ async fn toaster_pushes_auto_dismisses_and_manually_dismisses() {
 
     handle.discard();
 }
+
+#[wasm_bindgen_test]
+async fn select_popup_is_theme_colored() {
+    dwui::theme::apply_style_sheet(None);
+
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        select!({
+            .label("Fruit".to_string())
+            .options(vec![("a".to_string(), "Apple".to_string())])
+        }),
+    );
+    wait_frames(2).await;
+
+    let select = tc.query("select").unwrap();
+    assert!(select.class_list().contains("dwui-select"));
+
+    // The popup follows the element's color-scheme, and engines that paint
+    // options themselves honor the explicit option colors.
+    let style = web_sys::window()
+        .unwrap()
+        .get_computed_style(&select)
+        .unwrap()
+        .unwrap();
+    assert_eq!(style.get_property_value("color-scheme").unwrap(), "dark");
+
+    let option = tc.query("option").unwrap();
+    let option_style = web_sys::window()
+        .unwrap()
+        .get_computed_style(&option)
+        .unwrap()
+        .unwrap();
+    assert!(
+        !option_style
+            .get_property_value("background-color")
+            .unwrap()
+            .is_empty(),
+        "option should have an explicit background"
+    );
+}

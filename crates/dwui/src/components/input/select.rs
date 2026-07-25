@@ -65,6 +65,7 @@ pub fn select(props: SelectProps) -> Dom {
             ))
             .child(html!("select" => HtmlSelectElement, {
                 .attr("id", &select_id)
+                .class("dwui-select")
                 .dwclass!("w-full h-full bg-transparent border-none text-base p-l-3 p-r-8 p-t-3 cursor-pointer")
                 .dwclass!("dwui-text-on-primary-200 is(.light *):dwui-text-on-primary-900")
                 .dwclass_signal!("cursor-not-allowed", disabled.signal())
