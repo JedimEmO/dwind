@@ -1,9 +1,65 @@
+use crate::theme::layers;
 use crate::theme::prelude::*;
-use dominator::{clone, events, html, Dom};
+use dominator::{clone, events, html, svg, with_node, Dom, EventOptions};
 use dwind::prelude::*;
 use futures_signals::signal::{Mutable, SignalExt};
 use futures_signals_component_macro::component;
 use std::sync::Arc;
+use web_sys::wasm_bindgen::JsCast;
+
+/// Keeps Tab/Shift-Tab cycling within `container`'s focusable elements.
+pub(crate) fn trap_focus(container: &web_sys::HtmlElement, e: &events::KeyDown) {
+    const FOCUSABLE: &str = "a[href], button:not([disabled]), input:not([disabled]), \
+        select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
+
+    if e.key() != "Tab" {
+        return;
+    }
+
+    let Ok(focusables) = container.query_selector_all(FOCUSABLE) else {
+        return;
+    };
+
+    let count = focusables.length();
+
+    if count == 0 {
+        e.prevent_default();
+        return;
+    }
+
+    let element_at = |index: u32| -> Option<web_sys::HtmlElement> {
+        focusables.item(index)?.dyn_into().ok()
+    };
+
+    let Some(first) = element_at(0) else { return };
+    let Some(last) = element_at(count - 1) else {
+        return;
+    };
+
+    let active = web_sys::window()
+        .and_then(|w| w.document())
+        .and_then(|d| d.active_element());
+
+    let active_inside = active
+        .as_ref()
+        .map(|a| container.contains(Some(a)))
+        .unwrap_or(false);
+
+    let is_active = |element: &web_sys::HtmlElement| {
+        let element: &web_sys::Element = element.as_ref();
+        active.as_ref() == Some(element)
+    };
+
+    if e.shift_key() {
+        if is_active(&first) || !active_inside {
+            e.prevent_default();
+            let _ = last.focus();
+        }
+    } else if is_active(&last) || !active_inside {
+        e.prevent_default();
+        let _ = first.focus();
+    }
+}
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum ModalSize {
@@ -77,17 +133,17 @@ pub fn modal(props: ModalProps) -> Dom {
         .style("display", "flex")
         .style("justify-content", "center")
         .style("align-items", "center")
-        .style("z-index", "50")
+        .style("z-index", layers::MODAL)
 
         // Backdrop
         .child_signal(close_on_backdrop_click.map(clone!(on_close => move |clickable| {
             Some(html!("div", {
+                .dwclass!("dwui-scrim")
                 .style("position", "absolute")
                 .style("top", "0")
                 .style("left", "0")
                 .style("width", "100%")
                 .style("height", "100%")
-                .style("background-color", "rgba(0, 0, 0, 0.6)")
                 .style("backdrop-filter", "blur(4px)")
                 .style("animation", "dwui-fade-in 150ms ease-out")
                 .style("z-index", "1")
@@ -116,12 +172,18 @@ pub fn modal(props: ModalProps) -> Dom {
             .style("z-index", "10")
             .style("pointer-events", "auto")
             .dwclass!("dwui-focusable")
+            // Focus trap: Tab and Shift-Tab wrap within the dialog
+            .with_node!(dialog_node => {
+                .event_with_options(&EventOptions::preventable(), clone!(dialog_node => move |e: events::KeyDown| {
+                    trap_focus(&dialog_node, &e);
+                }))
+            })
 
             // Size classes
             .style_signal("width", size.signal().map(|s| match s {
                 ModalSize::Small => "24rem",
-                ModalSize::Medium => "600px",
-                ModalSize::Large => "900px",
+                ModalSize::Medium => "37.5rem",
+                ModalSize::Large => "56.25rem",
                 ModalSize::Full => "90vw",
             }))
             .style_signal("height", size.signal().map(|s| match s {
@@ -150,9 +212,19 @@ pub fn modal(props: ModalProps) -> Dom {
                 .dwclass!("bg-transparent border-none")
                 .style("padding", "0")
                 .style("margin", "0")
-                .text("×")
-                .style("font-size", "24px")
-                .style("line-height", "1")
+                .child(svg!("svg", {
+                    .attr("viewBox", "0 0 14 14")
+                    .attr("width", "14")
+                    .attr("height", "14")
+                    .attr("fill", "none")
+                    .attr("aria-hidden", "true")
+                    .child(svg!("path", {
+                        .attr("d", "M2 2 L12 12 M12 2 L2 12")
+                        .attr("stroke", "currentColor")
+                        .attr("stroke-width", "1.5")
+                        .attr("stroke-linecap", "round")
+                    }))
+                }))
                 .style("z-index", "20")
                 .event(clone!(on_close => move |e: events::Click| {
                     e.stop_propagation();

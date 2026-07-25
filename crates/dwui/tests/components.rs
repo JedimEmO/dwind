@@ -1458,3 +1458,124 @@ async fn checkbox_and_switch_use_the_on_accent_token() {
         .unwrap();
     assert!(transform.contains("translateX"), "got {transform:?}");
 }
+
+// ---------------------------------------------------------------------------
+// Surfaces
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn heading_renders_without_a_wrapper() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        heading!({
+            .content(text("Bare"))
+            .level(HeadingLevel::H3)
+        }),
+    );
+    wait_frame().await;
+
+    // The heading is the component's root element, not nested in a div.
+    let h3 = tc.query("h3").unwrap();
+    assert_eq!(
+        h3.parent_element().unwrap().get_attribute("style").as_deref().map(|s| s.contains("width:800px")),
+        Some(true),
+        "expected the heading to be a direct child of the test container"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn card_defaults_to_padded_content() {
+    dwui::theme::apply_style_sheet(None);
+
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        card!({
+            .content(text("padded"))
+        }),
+    );
+    wait_frames(2).await;
+
+    let card = tc.dom_element().first_element_child().unwrap();
+    let style = web_sys::window()
+        .unwrap()
+        .get_computed_style(&card)
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(style.get_property_value("padding-left").unwrap(), "16px");
+}
+
+#[wasm_bindgen_test]
+async fn modal_traps_tab_focus() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        modal!({
+            .open(true)
+            .aria_label("Trap test".to_string())
+            .content(Some(html!("div", {
+                .child(html!("button", { .attr("id", "trap-inner") .text("Inner") }))
+            })))
+        }),
+    );
+    wait_frames(2).await;
+
+    let dialog = tc.query("[role=dialog]").unwrap();
+    let inner: web_sys::HtmlElement = tc
+        .query("[id=trap-inner]")
+        .unwrap()
+        .dyn_into()
+        .unwrap();
+
+    // Focus the last focusable element (the inner button), then Tab: the trap
+    // must wrap focus around to the dialog's first focusable (the close
+    // button) instead of leaving the dialog.
+    inner.focus().unwrap();
+
+    let event = web_sys::KeyboardEvent::new_with_keyboard_event_init_dict("keydown", &{
+        let dict = web_sys::KeyboardEventInit::new();
+        dict.set_key("Tab");
+        dict.set_bubbles(true);
+        dict.set_cancelable(true);
+        dict
+    })
+    .unwrap();
+    dialog.dispatch_event(&event).unwrap();
+    wait_frame().await;
+
+    let active = web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .active_element()
+        .unwrap();
+
+    assert_eq!(
+        active.get_attribute("aria-label").as_deref(),
+        Some("Close dialog"),
+        "Tab from the last focusable should wrap to the close button"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn alert_dismiss_button_is_an_icon_with_a_label() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        alert!({
+            .title("Closable".to_string())
+            .dismissible(true)
+        }),
+    );
+    wait_frame().await;
+
+    let dismiss = tc.query("button[aria-label=Dismiss]").unwrap();
+    assert!(dismiss.query_selector("svg").unwrap().is_some());
+    assert!(!dismiss.text_content().unwrap().contains('×'));
+}

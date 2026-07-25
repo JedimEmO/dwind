@@ -1,7 +1,6 @@
+use crate::theme::prelude::*;
 use dominator::{html, Dom};
-use dwind::flexbox_and_grid::*;
-use dwind::sizing::*;
-use dwind::typography::*;
+use dwind::prelude::*;
 use futures_signals::signal::{option, SignalExt};
 use futures_signals_component_macro::component;
 
@@ -78,15 +77,14 @@ pub fn heading(props: HeadingProps) -> Dom {
     } = props;
 
     let size = size.broadcast();
-    html!("div", {
+
+    html!(level.tag_name(), {
+        .dwclass_signal!("text-base", size.signal().eq(TextSize::Base))
+        .dwclass_signal!("text-l", size.signal().eq(TextSize::Large))
+        .dwclass_signal!("text-xl", size.signal().eq(TextSize::ExtraLarge))
+        .dwclass!("w-auto font-semibold m-0")
+        .dwclass!("dwui-text-on-primary-100 is(.light *):dwui-text-on-primary-900")
         .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))
-        .dwclass!("w-auto font-semibold h-12 align-items-center flex")
-        .child(html!(level.tag_name(), {
-            .dwclass_signal!("text-base", size.signal().eq(TextSize::Base))
-            .dwclass_signal!("text-l", size.signal().eq(TextSize::Large))
-            .dwclass_signal!("text-xl", size.signal().eq(TextSize::ExtraLarge))
-            .dwclass!("w-auto font-semibold")
-            .child_signal(option(content))
-        }))
+        .child_signal(option(content))
     })
 }

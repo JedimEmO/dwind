@@ -75,13 +75,12 @@ pub fn alert(props: AlertProps) -> Dom {
             AlertVariant::Warning | AlertVariant::Error => "alert",
             _ => "status",
         }))
-        .dwclass!("flex flex-row gap-3 p-4 rounded-md border w-full")
-        .dwclass_signal!("dwui-border-primary-700 is(.light *):dwui-border-primary-300", variant.signal().map(|v| v == AlertVariant::Info))
-        .dwclass_signal!("dwui-border-success-700 is(.light *):dwui-border-success-400", variant.signal().map(|v| v == AlertVariant::Success))
-        .dwclass_signal!("dwui-border-warning-600 is(.light *):dwui-border-warning-400", variant.signal().map(|v| v == AlertVariant::Warning))
-        .dwclass_signal!("dwui-border-error-700 is(.light *):dwui-border-error-400", variant.signal().map(|v| v == AlertVariant::Error))
-        .dwclass_signal!("dwui-border-void-700 is(.light *):dwui-border-void-300", variant.signal().map(|v| v == AlertVariant::Neutral))
-        .dwclass!("dwui-bg-void-900 is(.light *):dwui-bg-void-100")
+        .dwclass!("flex flex-row gap-3 p-4 rounded-lg border w-full")
+        .dwclass_signal!("dwui-border-primary-700 dwui-surface-info is(.light *):dwui-border-primary-300", variant.signal().map(|v| v == AlertVariant::Info))
+        .dwclass_signal!("dwui-border-success-700 dwui-surface-success is(.light *):dwui-border-success-400", variant.signal().map(|v| v == AlertVariant::Success))
+        .dwclass_signal!("dwui-border-warning-600 dwui-surface-warning is(.light *):dwui-border-warning-400", variant.signal().map(|v| v == AlertVariant::Warning))
+        .dwclass_signal!("dwui-border-error-700 dwui-surface-error is(.light *):dwui-border-error-400", variant.signal().map(|v| v == AlertVariant::Error))
+        .dwclass_signal!("dwui-border-void-700 dwui-bg-void-900 is(.light *):dwui-border-void-300 is(.light *):dwui-bg-void-100", variant.signal().map(|v| v == AlertVariant::Neutral))
         .dwclass!("dwui-text-on-primary-100 is(.light *):dwui-text-on-primary-900")
         // Icon
         .child(html!("div", {
@@ -141,7 +140,19 @@ pub fn alert(props: AlertProps) -> Dom {
                 .dwclass!("bg-transparent border-none dwui-text-on-primary-300 is(.light *):dwui-text-on-primary-700")
                 .dwclass!("hover:dwui-bg-void-800 is(.light *):hover:dwui-bg-void-200 transition-colors")
                 .dwclass!("dwui-focusable")
-                .text("×")
+                .child(svg!("svg", {
+                    .attr("viewBox", "0 0 12 12")
+                    .attr("width", "12")
+                    .attr("height", "12")
+                    .attr("fill", "none")
+                    .attr("aria-hidden", "true")
+                    .child(svg!("path", {
+                        .attr("d", "M2 2 L10 10 M10 2 L2 10")
+                        .attr("stroke", "currentColor")
+                        .attr("stroke-width", "1.5")
+                        .attr("stroke-linecap", "round")
+                    }))
+                }))
                 .event(clone!(dismissed, on_dismiss => move |_: events::Click| {
                     dismissed.set(true);
                     (on_dismiss)();
