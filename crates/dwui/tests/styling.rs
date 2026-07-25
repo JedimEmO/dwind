@@ -551,3 +551,86 @@ async fn dwgenerate_can_alias_a_plain_class_and_an_animation() {
     );
     assert_eq!(count_keyframes("dwuitest-slide-probe"), 1);
 }
+
+// ---------------------------------------------------------------------------
+// Selector forms
+// ---------------------------------------------------------------------------
+
+// A selector the engine cannot parse is not ignored: `insertRule` throws and
+// dominator panics ("selectors are incorrect"), taking the whole app down at
+// load. A raw stylesheet would have dropped the rule silently, so moving a
+// selector into `dwclass!` makes an unsupported one fatal.
+//
+// These pin the shapes the example webpage actually applies. CI runs both
+// Firefox and Chrome, so an engine that rejects any of them fails the build
+// rather than the page.
+
+#[wasm_bindgen_test]
+async fn pointer_spotlight_selectors_insert() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .dwclass!("relative isolate [transition:transform 400ms cubic-bezier(0.16, 1, 0.3, 1), border-color 300ms ease]")
+            .dwclass!("[&::before]:absolute [&::before]:inset-0 [&::before]:[z-index:-1] \
+                [&::before]:[border-radius:inherit] [&::before]:opacity-0 \
+                [&::before]:[transition:opacity 320ms ease] [&.hot::before]:opacity-100 \
+                [&::before]:[background:radial-gradient(22rem circle at var(--sx, 50%) var(--sy, 50%), rgba(213, 182, 95, 0.13), transparent 62%)]")
+            .dwclass!("[&::after]:absolute [&::after]:inset-0 [&::after]:[z-index:-1] \
+                [&::after]:[border-radius:inherit] [&::after]:[padding:1px] \
+                [&::after]:opacity-0 [&::after]:[transition:opacity 320ms ease] [&.hot::after]:opacity-100 \
+                [&::after]:[-webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)] \
+                [&::after]:[-webkit-mask-composite:xor] \
+                [&::after]:[mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)] \
+                [&::after]:[mask-composite:exclude]")
+        }),
+    );
+    wait_frame().await;
+}
+
+#[wasm_bindgen_test]
+async fn child_and_state_variant_selectors_insert() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            // The scroll-reveal cascade: parent-state plus :nth-child stagger.
+            .dwclass!("[& > *]:opacity-0 [& > *]:[transform:translateY(26px)] \
+                [& > *]:[transition:opacity 650ms cubic-bezier(0.16, 1, 0.3, 1), transform 650ms cubic-bezier(0.16, 1, 0.3, 1)]")
+            .dwclass!("[& > *:nth-child(2)]:delay-75 [& > *:nth-child(5)]:[transition-delay:280ms]")
+            .dwclass!("[&.reveal-in > *]:opacity-100")
+            // Hover the parent, animate the child — the marquee pause.
+            .dwclass!("[&:hover > *]:[animation-play-state:paused]")
+        }),
+    );
+    wait_frame().await;
+}
+
+#[wasm_bindgen_test]
+async fn scrollbar_styling_uses_standard_properties_only() {
+    // `[&::-webkit-scrollbar-thumb:hover]:` panics in Firefox: the engine
+    // tolerates the unknown pseudo-element on its own but rejects it with a
+    // pseudo-class appended. The standard properties cover both engines.
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .attr("id", "probe-scrollbar")
+            .dwclass!("[scrollbar-width:thin] [scrollbar-color:#26262C transparent]")
+        }),
+    );
+    wait_frame().await;
+
+    let doc = web_sys::window().unwrap().document().unwrap();
+    let el = doc.get_element_by_id("probe-scrollbar").unwrap();
+    let style = web_sys::window()
+        .unwrap()
+        .get_computed_style(&el)
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(style.get_property_value("scrollbar-width").unwrap(), "thin");
+}
