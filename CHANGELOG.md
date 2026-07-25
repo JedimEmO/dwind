@@ -96,6 +96,15 @@ changes.
 `[&::before]:bg-color-[red]` compiled and silently styled the element itself.
 Generators now honour variants.
 
+### Known rough edge
+
+`dwgenerate!("my-anim", "animate-fade-up")` — aliasing a `dwkeyframes!`-generated
+utility under a new name — no longer compiles, because the generated `*_RAW` is
+an `AnimationDecl` rather than a `&'static str` and `dwgenerate!` copies it into a
+`&str` static. It fails loudly at the offending line rather than silently, and the
+alternative (keeping `*_RAW` a plain `&str`) reintroduces the far worse bug of
+variants referencing keyframes that were never injected. Use the class directly.
+
 ### New utilities
 
 `delay-0`…`delay-1000`, `underline` / `overline` / `line-through` /

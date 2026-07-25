@@ -434,3 +434,56 @@ async fn newly_added_utilities_apply() {
         "none"
     );
 }
+
+#[wasm_bindgen_test]
+async fn pseudo_content_composes_in_either_order() {
+    // --dw-content is order-independent by construction, but that is the whole
+    // claim, so measure it rather than reason about it.
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .child(html!("div", {
+                .attr("id", "order-a")
+                .dwclass!("relative before:[content:'a'] before:absolute")
+            }))
+            .child(html!("div", {
+                .attr("id", "order-b")
+                .dwclass!("relative before:absolute before:[content:'b']")
+            }))
+        }),
+    );
+    wait_frame().await;
+
+    let doc = web_sys::window().unwrap().document().unwrap();
+
+    for (id, want) in [("order-a", 'a'), ("order-b", 'b')] {
+        let el = doc.get_element_by_id(id).unwrap();
+        let content = computed_pseudo(&el, "::before", "content");
+
+        assert!(content.contains(want), "{id}: got {content:?}");
+        assert_eq!(computed_pseudo(&el, "::before", "position"), "absolute");
+    }
+}
+
+#[wasm_bindgen_test]
+async fn content_utilities_reach_the_pseudo_element() {
+    // `content-none` has to suppress the generated default, or a utility that
+    // only wants to hide a pseudo-element cannot.
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .attr("id", "probe-content-none")
+            .dwclass!("relative before:absolute before:content-none")
+        }),
+    );
+    wait_frame().await;
+
+    let doc = web_sys::window().unwrap().document().unwrap();
+    let el = doc.get_element_by_id("probe-content-none").unwrap();
+
+    assert_eq!(computed_pseudo(&el, "::before", "content"), "none");
+}
