@@ -34,8 +34,9 @@ pub fn pseudo_class_themes() -> Dom {
         .child(html!("p", {
             .dwclass!("text-woodsmoke-300 leading-relaxed m-t-4 m-b-2")
             .text(r#"::before and ::after are variants like any other. dwind adds the content: "" they
-             need in order to render, so a utility is enough on its own — and because declarations are
-             appended in source order, your own content utility later in the same class still wins."#)
+             need in order to render, so a utility is enough on its own. It goes through a
+             --dw-content custom property, so composing several before: utilities keeps whichever
+             content you wrote rather than the last one winning."#)
         }))
         .child(example_box(pseudo_elements(), false))
         .child(code(&PSEUDO_ELEMENTS_EXAMPLE_HTML_MAP))
@@ -50,8 +51,9 @@ pub fn pseudo_class_themes() -> Dom {
         }))
         .child(html!("p", {
             .dwclass!("text-woodsmoke-400 leading-relaxed m-0 m-b-2")
-            .text("Underscores in the value become spaces, since a class string is space-separated. \
-                   Modifiers go first: hover:[color:red], not [color:red]:hover.")
+            .text("Values pass through untouched — spaces are fine inside the brackets, and so is \
+                   any character, so [content:'→'] works. Modifiers go first: hover:[color:red], \
+                   not [color:red]:hover.")
         }))
         .child(example_box(arbitrary_declarations(), false))
         .child(code(&ARBITRARY_DECLARATIONS_EXAMPLE_HTML_MAP))

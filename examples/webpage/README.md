@@ -86,4 +86,6 @@ write as it happens, next to a re-render count that stays at zero.
 - <kbd>↑</kbd> <kbd>↓</kbd> — move through results, <kbd>⏎</kbd> to open, <kbd>Esc</kbd> to dismiss
 
 Everything interactive is reachable by keyboard, and `prefers-reduced-motion` is
-honoured throughout — the marquee, sheen, tilt, and reveal animations all stop.
+honoured throughout. CSS handles the animations and transitions; the pointer tilt
+and the magnetic drift are `style_signal` writes, which no `@media` block can
+stop, so they read the preference as a signal and skip the transform outright.

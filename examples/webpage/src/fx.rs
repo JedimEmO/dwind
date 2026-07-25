@@ -9,7 +9,7 @@ use crate::keyframes::*;
 use dominator::{events, html, Dom, DomBuilder};
 use dwind::prelude::*;
 use dwind_macros::dwclass;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use web_sys::HtmlElement;
 
 /// Normalised pointer position inside an element, plus whether it is hovered.
@@ -115,9 +115,20 @@ pub fn spotlight(builder: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     track_pointer(builder, &PointerState::new())
 }
 
+/// Whether the reader has asked for less motion.
+///
+/// A CSS `@media` block can shorten a transition, but it cannot stop a
+/// `style_signal` from writing a transform in the first place. The effects below
+/// are driven from Rust, so the preference has to be read in Rust too — as a
+/// signal, so it also tracks a change made while the page is open.
+fn prefers_reduced_motion() -> impl Signal<Item = bool> {
+    dominator::media_query("(prefers-reduced-motion: reduce)")
+}
+
 /// A spotlight card that also tips towards the cursor in 3D.
 ///
-/// `strength` is the maximum rotation in degrees.
+/// `strength` is the maximum rotation in degrees. The tilt is suppressed
+/// entirely under `prefers-reduced-motion`.
 pub fn spotlight_tilt(
     strength: f64,
 ) -> impl Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
@@ -129,8 +140,9 @@ pub fn spotlight_tilt(
             "transform",
             futures_signals::map_ref! {
                 let (x, y) = pos.signal(),
-                let hot = hot.signal() => move {
-                    if *hot {
+                let hot = hot.signal(),
+                let still = prefers_reduced_motion() => move {
+                    if *hot && !*still {
                         format!(
                             "perspective(1100px) rotateX({:.2}deg) rotateY({:.2}deg) translateZ(6px)",
                             (0.5 - *y) * strength * 2.0,
