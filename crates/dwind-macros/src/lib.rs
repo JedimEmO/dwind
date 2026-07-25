@@ -274,12 +274,18 @@ pub fn dwclass_signal(input: TokenStream) -> TokenStream {
 /// - `#[animation("1s linear infinite")]` — mint an `animate-<name>` utility
 ///   with this shorthand. Omit it if you only want the handle.
 ///
-/// # Lazy injection has one hole
+/// # Injection is lazy, but not conditional
 ///
-/// A rule is injected when its class or its [`Display`](std::fmt::Display) is
-/// first used. Reaching for the generated `*_RAW` constant directly — which is
-/// what `dwclass!("[&::before]:animate-fade-up")` does internally — bypasses
-/// that. Call `.ensure()` or use `#![register_fn]` if you need the guarantee.
+/// A rule reaches the document the first time anything reads its declaration or
+/// its name: the generated class, a modified form of it
+/// (`hover:animate-fade-up`, `[&::before]:animate-fade-up`), or the handle's
+/// [`Display`](std::fmt::Display). That covers every path `dwclass!` can take,
+/// because the generated `*_RAW` value is an `AnimationDecl` whose `Deref`
+/// registers rather than a plain `&str`.
+///
+/// Use `#![register_fn]` if you want the rules present regardless of which
+/// classes get instantiated — dwind and dwui both do, to keep their existing
+/// eager behaviour.
 #[proc_macro]
 pub fn dwkeyframes(input: TokenStream) -> TokenStream {
     let input = match syn::parse::<keyframes::DwKeyframesInput>(input) {

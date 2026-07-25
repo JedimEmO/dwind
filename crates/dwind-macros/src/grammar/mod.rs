@@ -79,7 +79,19 @@ impl DwindClassSelector {
 }
 
 pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
-    let (_, classes) = selectors(input).unwrap();
+    let (rest, classes) = selectors(input).unwrap();
+
+    // `many0` stops at the first thing it cannot parse and reports success with
+    // the remainder untouched. Ignoring that remainder meant a single malformed
+    // class silently discarded itself *and every class after it* — the exact
+    // failure mode dwclass! exists to prevent. Refuse instead.
+    if !rest.trim().is_empty() {
+        panic!(
+            "dwclass!: could not parse {rest:?} in {input:?}.\n\
+             Classes are separated by whitespace. An arbitrary declaration needs \
+             a property and a value in square brackets, like `[mask-composite:exclude]`."
+        );
+    }
 
     Ok(classes
         .into_iter()
@@ -120,6 +132,12 @@ pub fn parse_class_string(input: &str) -> Result<Vec<DwindClassSelector>, ()> {
         .collect())
 }
 
+/// Any run of whitespace between classes. Not `tag(" ")`, so that a class string
+/// broken over several source lines parses the same as a single-spaced one.
+fn whitespace(input: &str) -> IResult<&str, &str> {
+    nom::bytes::complete::take_while(|c: char| c.is_whitespace())(input)
+}
+
 /// What sits in the class-name position: either a utility name, or an arbitrary
 /// declaration written inline.
 #[derive(Debug)]
@@ -139,26 +157,25 @@ fn class_body(input: &str) -> IResult<&str, ClassBody<'_>> {
     ))(input)
 }
 
-fn selectors(
-    input: &str,
-) -> IResult<
-    &str,
-    Vec<(
-        Option<String>,
-        Vec<String>,
-        ClassBody<'_>,
-        Option<Vec<&str>>,
-    )>,
-> {
+/// One parsed selector: `(variant, prefixes, class body, generator params)`.
+type ParsedSelector<'a> = (
+    Option<String>,
+    Vec<String>,
+    ClassBody<'a>,
+    Option<Vec<&'a str>>,
+);
+
+fn selectors(input: &str) -> IResult<&str, Vec<ParsedSelector<'_>>> {
     let prefixes = many0(pseudo_selector);
-    let parser = terminated(
+    let parser = nom::sequence::delimited(
+        whitespace,
         nom::sequence::tuple((
             variant_selector,
             prefixes,
             class_body,
             opt(generator_parameters),
         )),
-        opt(tag(" ")),
+        whitespace,
     );
     many0(parser)(input)
 }
@@ -245,22 +262,21 @@ const CHARS_EXT: [char; 13] = [
     '_', '-', '@', ',', '<', '>', '*', ' ', '.', ' ', ':', '#', '&',
 ];
 
-/// Characters permitted inside an arbitrary declaration, `[prop:value]`.
+/// Any character that is not structural to the bracket grammar.
 ///
-/// Deliberately a separate set from [`CHARS_EXT`]: selectors never need `%`,
-/// `/`, `+`, `=`, quotes or `;`, and declaration values need all of them.
-const DECL_CHARS: [char; 22] = [
-    '_', '-', '.', '#', '%', '/', '+', '=', '"', '\'', ',', ':', ';', '@', '*', '<', '>', '&', '$',
-    '!', '~', ' ',
-];
+/// A CSS value can contain essentially anything — `→` in a `content`, a `°` in a
+/// gradient angle, a `字` in a font stack. So this is a deny-list of the four
+/// delimiters the parser needs to track, not an allow-list of what CSS is
+/// permitted. An allow-list here also silently truncated at any non-ASCII byte,
+/// because `nom`'s `is_alphanumeric` takes a `u8`.
+fn is_declaration_char(c: char) -> bool {
+    !matches!(c, '[' | ']' | '(' | ')')
+}
 
 fn declaration_body<'a>(input: &'a str) -> IResult<&'a str, String> {
     many0(alt((
         bracketed("(", ")", declaration_body),
-        |v: &'a str| {
-            take_while1(is_extended_alphanumeric(DECL_CHARS.to_vec()))(v)
-                .map(move |v| (v.0, v.1.to_string()))
-        },
+        |v: &'a str| take_while1(is_declaration_char)(v).map(move |v| (v.0, v.1.to_string())),
     )))(input)
     .map(|r| (r.0, r.1.join("")))
 }
@@ -597,6 +613,50 @@ mod test {
             Some("mask-composite:exclude".to_string())
         );
         assert_eq!(parsed[2].class_name, "bar");
+    }
+
+    #[test]
+    fn unparseable_input_is_rejected_rather_than_dropped() {
+        // `many0` succeeds with an untouched remainder, so anything the grammar
+        // cannot handle used to discard itself *and every class after it*.
+        let err = std::panic::catch_unwind(|| parse_class_string("foo ((bad)) bar"));
+        assert!(err.is_err(), "malformed input should not parse silently");
+    }
+
+    #[test]
+    fn classes_may_be_separated_by_any_whitespace() {
+        // Multi-line `dwclass!` strings and double spaces used to hit the silent
+        // truncation path above.
+        let parsed = parse_class_string("foo  bar\n  baz\tqux").unwrap();
+        let names = parsed.into_iter().map(|v| v.class_name).collect::<Vec<_>>();
+
+        assert_eq!(names, ["foo", "bar", "baz", "qux"]);
+    }
+
+    #[test]
+    fn arbitrary_declarations_accept_any_css_value() {
+        // Non-ASCII: the old allow-list truncated at the first multi-byte char,
+        // because `nom`'s `is_alphanumeric` takes a `u8`.
+        let parsed = parse_class_string("before:[content:'→'] before:m-r-2").unwrap();
+        assert_eq!(parsed.len(), 2, "{parsed:?}");
+        assert_eq!(parsed[0].arbitrary, Some("content:'→'".to_string()));
+        assert_eq!(parsed[1].class_name, "m_r_2");
+
+        // Underscores are not touched — rewriting them would corrupt this.
+        let parsed = parse_class_string("[color:var(--brand_color)]").unwrap();
+        assert_eq!(
+            parsed[0].arbitrary,
+            Some("color:var(--brand_color)".to_string())
+        );
+
+        // Real spaces work inside the brackets.
+        let parsed = parse_class_string("[transition:opacity 650ms ease] flex").unwrap();
+        assert_eq!(parsed.len(), 2);
+        assert_eq!(
+            parsed[0].arbitrary,
+            Some("transition:opacity 650ms ease".to_string())
+        );
+        assert_eq!(parsed[1].class_name, "flex");
     }
 
     #[test]

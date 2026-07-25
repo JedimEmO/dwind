@@ -248,9 +248,15 @@
 .list-decimal { list-style-type: decimal; }
 
 /* generated content -------------------------------------------------------- */
+/*
+    These set --dw-content rather than content, because a `before:`/`after:`
+    variant emits `content: var(--dw-content, "")`. Going through the property
+    is what lets two pseudo-element utilities compose without one clobbering the
+    other's content. See `generated_content` in dwind-macros.
+*/
 
-.content-empty { content: ""; }
-.content-none { content: none; }
+.content-empty { --dw-content: ""; }
+.content-none { --dw-content: none; }
 
 /* inheritance -------------------------------------------------------------- */
 

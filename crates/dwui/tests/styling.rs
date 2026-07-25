@@ -32,6 +32,20 @@ dwkeyframes! {
         "from" => "opacity: 0;",
         "to" => "opacity: 1;",
     }
+
+    /// Only ever reached through a `hover:` variant.
+    #[animation("1s linear infinite")]
+    hover_probe {
+        "from" => "opacity: 0.4;",
+        "to" => "opacity: 1;",
+    }
+
+    /// Only ever reached through a `[&::before]:` variant.
+    #[animation("1s linear infinite")]
+    before_probe {
+        "from" => "opacity: 0.4;",
+        "to" => "opacity: 1;",
+    }
 }
 
 struct TestContainer {
@@ -178,6 +192,36 @@ async fn dwui_keyframes_survived_the_migration() {
     }
 }
 
+#[wasm_bindgen_test]
+async fn modified_animation_utilities_still_register_their_keyframes() {
+    // A variant compiles the declaration text into a fresh class and never
+    // touches the generated utility, so registration has to hang off the text.
+    assert_eq!(count_keyframes("dwuitest-hover-probe"), 0);
+    assert_eq!(count_keyframes("dwuitest-before-probe"), 0);
+
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .dwclass!("hover:animate-hover-probe")
+            .child(html!("span", { .dwclass!("relative [&::before]:animate-before-probe") }))
+        }),
+    );
+    wait_frame().await;
+
+    assert_eq!(
+        count_keyframes("dwuitest-hover-probe"),
+        1,
+        "hover:animate-* did not inject its @keyframes"
+    );
+    assert_eq!(
+        count_keyframes("dwuitest-before-probe"),
+        1,
+        "[&::before]:animate-* did not inject its @keyframes"
+    );
+}
+
 // ---------------------------------------------------------------------------
 // Pseudo-element variants
 // ---------------------------------------------------------------------------
@@ -226,6 +270,56 @@ async fn before_shorthand_matches_the_bracket_form() {
 
     assert!(computed_pseudo(&el, "::before", "content") != "none");
     assert_eq!(computed_pseudo(&el, "::before", "position"), "absolute");
+}
+
+#[wasm_bindgen_test]
+async fn explicit_pseudo_content_survives_composition() {
+    // Each utility is its own class, so a literal `content: ""` from
+    // `before:absolute` would be decided against `before:[content:'x']` by rule
+    // order. Routing through --dw-content removes the ordering question.
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .attr("id", "probe-compose")
+            .dwclass!("relative before:[content:'x'] before:absolute before:opacity-100")
+        }),
+    );
+    wait_frame().await;
+
+    let doc = web_sys::window().unwrap().document().unwrap();
+    let el = doc.get_element_by_id("probe-compose").unwrap();
+
+    let content = computed_pseudo(&el, "::before", "content");
+    assert!(
+        content.contains('x'),
+        "composed pseudo-element lost its content (got {content:?})"
+    );
+    assert_eq!(computed_pseudo(&el, "::before", "position"), "absolute");
+}
+
+#[wasm_bindgen_test]
+async fn arbitrary_values_may_be_non_ascii() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .attr("id", "probe-unicode")
+            .dwclass!("relative before:[content:'→'] before:m-r-2")
+        }),
+    );
+    wait_frame().await;
+
+    let doc = web_sys::window().unwrap().document().unwrap();
+    let el = doc.get_element_by_id("probe-unicode").unwrap();
+
+    let content = computed_pseudo(&el, "::before", "content");
+    assert!(content.contains('→'), "got {content:?}");
+    // The class after the Unicode one must survive too — an unparsed remainder
+    // used to discard it silently.
+    assert_eq!(computed_pseudo(&el, "::before", "margin-right"), "8px");
 }
 
 #[wasm_bindgen_test]

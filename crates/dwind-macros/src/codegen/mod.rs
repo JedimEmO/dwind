@@ -75,17 +75,23 @@ fn needs_generated_content(selector: &str) -> bool {
     last_compound.contains("::before") || last_compound.contains("::after")
 }
 
-/// `::before` and `::after` do not render without a `content`. dwind emits an
-/// empty one so the utility is enough on its own.
+/// The custom property that carries a pseudo-element's generated content.
 ///
-/// This lands *before* the class body, and `DomBuilder::raw` appends rather than
-/// replaces, so a user's own `content` declaration later in the same class still
-/// wins. That is why this needs none of Tailwind's `--tw-content` indirection —
-/// Tailwind needs it because its variants are static stylesheet rules with fixed
-/// source order.
+/// Every `before:`/`after:` utility has to emit a `content`, or the
+/// pseudo-element never renders. But each utility compiles to its own class with
+/// its own rule, so a plain `content: ""` from `before:absolute` would win by
+/// source order over the `content: "x"` from `before:[content:'x']` — composing
+/// two pseudo-element utilities would clobber the author's content.
+///
+/// Routing through a custom property removes the ordering question entirely: the
+/// `content` declaration is identical in every class, and the *value* is set
+/// once by whichever utility the author wrote. This is what Tailwind's
+/// `--tw-content` does, and the reason it is needed here too.
+pub(crate) const CONTENT_VAR: &str = "--dw-content";
+
 fn generated_content(selector: &str) -> TokenStream {
     if needs_generated_content(selector) {
-        quote! { .raw("content: \"\";") }
+        quote! { .raw("content: var(--dw-content, \"\");") }
     } else {
         quote! {}
     }
@@ -136,11 +142,15 @@ pub fn render_generate_dwind_class(class_name: String, class: DwindClassSelector
 
 /// Turns `mask-composite:exclude` into `mask-composite: exclude;`.
 ///
-/// Underscores in the *value* become spaces, the way Tailwind handles arbitrary
-/// values — a class string is space-separated, so a literal space cannot appear
-/// there. The property is left alone, since custom properties such as
-/// `--my_var` legitimately contain underscores.
-fn normalise_declaration(declaration: &str) -> String {
+/// Values are passed through verbatim. Spaces are legal inside the brackets — the
+/// bracket is what delimits the class, not the space — so there is no need for
+/// Tailwind's `_`-means-space convention, and rewriting underscores would corrupt
+/// legitimate identifiers like `var(--brand_color)`.
+///
+/// Under a pseudo-element target, a `content` declaration is redirected to
+/// [`CONTENT_VAR`] so it composes with the generated default. See
+/// [`generated_content`].
+fn normalise_declaration(declaration: &str, pseudo_element: bool) -> String {
     let Some((property, value)) = declaration.split_once(':') else {
         panic!(
             "`[{declaration}]` is not a CSS declaration — expected `[property:value]`, \
@@ -150,11 +160,17 @@ fn normalise_declaration(declaration: &str) -> String {
     };
 
     let property = property.trim();
-    let value = value.trim().replace('_', " ");
+    let value = value.trim();
 
     if property.is_empty() || value.is_empty() {
         panic!("`[{declaration}]` has an empty property or value");
     }
+
+    let property = if pseudo_element && property == "content" {
+        CONTENT_VAR
+    } else {
+        property
+    };
 
     format!("{property}: {value};")
 }
@@ -183,10 +199,11 @@ pub fn render_dwind_class(
     let breakpoint = class.get_breakpoint();
 
     if let Some(declaration) = &class.arbitrary {
-        let css = normalise_declaration(declaration);
         let class_prefix = declaration_prefix(declaration);
 
         let tokens = if class.pseudo_classes.is_empty() && class.variant.is_none() {
+            let css = normalise_declaration(declaration, false);
+
             quote! {
                 dominator::class! {
                     # ! [prefix=#class_prefix]
@@ -196,6 +213,7 @@ pub fn render_dwind_class(
         } else {
             let pseudo_selector = build_pseudo_selector(&class.variant, &class.pseudo_classes);
             let content = generated_content(&pseudo_selector);
+            let css = normalise_declaration(declaration, needs_generated_content(&pseudo_selector));
 
             quote! {
                 dominator::class! {
@@ -400,19 +418,52 @@ mod test {
     }
 
     #[test]
-    fn arbitrary_declaration_underscores_become_spaces_in_the_value_only() {
-        // A class string is space-separated, so a literal space cannot appear
-        // in one; `_` is the Tailwind-compatible stand-in.
-        let rendered = render("[transition:opacity_650ms_ease]");
+    fn arbitrary_declaration_values_pass_through_verbatim() {
+        // Spaces are legal inside the brackets — the bracket delimits the class,
+        // not the space — so there is no `_`-means-space convention to apply.
+        let rendered = render("[transition:opacity 650ms ease]");
         assert!(
             rendered.contains("\"transition: opacity 650ms ease;\""),
             "{rendered}"
         );
 
-        // Custom properties legitimately contain underscores, so the property
-        // side is left alone.
-        let rendered = render("[--my_var:red]");
-        assert!(rendered.contains("\"--my_var: red;\""), "{rendered}");
+        // And rewriting underscores would corrupt legitimate identifiers: this
+        // must not become `var(--brand color)`.
+        let rendered = render("[color:var(--brand_color)]");
+        assert!(
+            rendered.contains("\"color: var(--brand_color);\""),
+            "{rendered}"
+        );
+    }
+
+    #[test]
+    fn arbitrary_declarations_accept_non_ascii_values() {
+        // A character-class allow-list silently truncated here, because `nom`'s
+        // `is_alphanumeric` takes a `u8`. A CSS value can hold any character.
+        let rendered = render("[content:'→']");
+        assert!(rendered.contains('→'), "{rendered}");
+
+        let rendered = render("[transform:rotate(45deg)]");
+        assert!(
+            rendered.contains("\"transform: rotate(45deg);\""),
+            "{rendered}"
+        );
+    }
+
+    #[test]
+    fn pseudo_element_content_goes_through_the_custom_property() {
+        // Composition is the point: `before:[content:'x'] before:absolute` has to
+        // keep the author's content, and since each utility is its own class a
+        // literal `content` would be decided by rule order instead.
+        let rendered = render("before:[content:'x']");
+        assert!(rendered.contains("--dw-content: 'x';"), "{rendered}");
+        assert!(rendered.contains("content: var(--dw-content"), "{rendered}");
+
+        // Outside a pseudo-element there is nothing to compose with, so the
+        // property is left exactly as written.
+        let rendered = render("[content:'x']");
+        assert!(rendered.contains("\"content: 'x';\""), "{rendered}");
+        assert!(!rendered.contains("--dw-content"), "{rendered}");
     }
 
     #[test]

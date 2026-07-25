@@ -28,9 +28,12 @@ html!("div", { .dwclass!("animate-fade-up") })
 
 - Emits the at-rule *and* a compile-time-checked `animate-*` utility, so a typo
   in the class name is still a build error.
-- The rule is injected the first time the class — or the handle's `Display` —
-  is used, and never twice. `format!("{FADE_UP_KEYFRAMES} 600ms {delay}ms")`
-  registers as a side effect, for shorthands composed at runtime.
+- The rule is injected the first time anything reads the declaration or the name,
+  and never twice. That includes modified forms — `hover:animate-fade-up`,
+  `[&::before]:animate-fade-up` — which compile the declaration text into a fresh
+  class and never touch the generated one; the emitted `*_RAW` is an
+  `AnimationDecl` whose `Deref` registers, so those paths are covered too.
+  `format!("{FADE_UP_KEYFRAMES} 600ms {delay}ms")` registers as well.
 - Names are namespaced by the consuming crate by default (`#![prefix = "..."]`
   to override, `#[name = "..."]` to pin an exact name). Registering one name with
   two different bodies now panics in debug builds instead of silently winning.
@@ -49,24 +52,36 @@ The escape hatch for properties with no utility, matching Tailwind:
 .dwclass!("[mask-composite:exclude] [--sx:50%] hover:[color:red]")
 ```
 
-Underscores in the value become spaces (`[transition:opacity_650ms_ease]`), since
-a class string is space-separated. The property side is left alone so custom
-properties keep their underscores.
+Values pass through verbatim. Spaces are legal inside the brackets — the bracket
+delimits the class, not the space — so there is no `_`-means-space convention,
+which also means `[color:var(--brand_color)]` keeps its underscore. Any character
+is allowed: `[content:'→']` works.
 
 Unambiguous against the variant syntax because a variant's `]` is always followed
-by `:`. Previously a bracket group *without* a trailing colon failed every parser
-and was silently discarded **along with every class after it** — so
-`dwclass!("foo [a:b] bar")` yielded one class, not three. That truncation is
-fixed, and a bracket group with no colon at all is now a compile error with a
-message instead of silence.
+by `:`.
+
+**`dwclass!` no longer discards what it cannot parse.** `many0` stops at the first
+unparseable class and reports success with the remainder untouched, and that
+remainder was ignored — so one malformed class silently deleted itself *and every
+class after it*. `dwclass!("foo [a:b] bar")` yielded one class, not three. The
+parser now rejects a non-whitespace remainder with a message naming the offending
+text, and classes may be separated by any whitespace, so multi-line class strings
+parse instead of truncating.
 
 ### Pseudo-elements that actually render
 
 `[&::before]:` variants already parsed, but a `::before` with no `content` never
 generates a box, so the utility did nothing on its own. dwind now emits
-`content: ""` for any variant whose last compound targets `::before`/`::after`.
-Because `DomBuilder::raw` appends rather than replaces, your own `content-[...]`
-later in the same class still wins — no `--tw-content` indirection needed.
+`content: var(--dw-content, "")` for any variant whose last compound targets
+`::before`/`::after`, and redirects a `content` declaration written under such a
+variant to that property.
+
+The indirection is load-bearing: each utility compiles to its own class with its
+own rule, so a literal `content: ""` from `before:absolute` would win by source
+order over the `content: 'x'` from `before:[content:'x']`. Going through the
+property means the `content` declaration is identical everywhere and only the
+value varies, so `before:[content:'x'] before:absolute` composes. The
+`content-empty` / `content-none` utilities set the property for the same reason.
 
 Added shorthands: `before:`, `after:`, `placeholder:`, `marker:`, `selection:`,
 `backdrop:`, `first-letter:`, `first-line:`.

@@ -98,6 +98,42 @@ impl std::fmt::Display for Keyframes {
     }
 }
 
+/// The declaration body of a generated `animate-*` utility.
+///
+/// This exists because registration has to hang off the *declaration text*
+/// rather than off the utility class. `dwclass!` compiles a bare
+/// `animate-fade-up` into a reference to the class, but a modified
+/// `hover:animate-fade-up` or `[&::before]:animate-fade-up` builds a fresh class
+/// out of the declaration text alone and never touches the original. Attaching
+/// the side effect here is what makes every one of those paths inject the rule.
+///
+/// Reading the value — which `.raw(&*DECL)` does — registers.
+pub struct AnimationDecl {
+    keyframes: &'static Keyframes,
+    css: &'static str,
+}
+
+impl AnimationDecl {
+    pub const fn new(keyframes: &'static Keyframes, css: &'static str) -> Self {
+        Self { keyframes, css }
+    }
+}
+
+impl std::ops::Deref for AnimationDecl {
+    type Target = str;
+
+    fn deref(&self) -> &str {
+        self.keyframes.ensure();
+        self.css
+    }
+}
+
+impl std::fmt::Display for AnimationDecl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self)
+    }
+}
+
 /// Injects `@keyframes {name} { {body} }` unless `name` is already registered.
 ///
 /// Registering the same name twice with different bodies is a bug — two crates

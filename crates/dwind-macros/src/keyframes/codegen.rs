@@ -25,11 +25,7 @@ pub fn render(input: DwKeyframesInput) -> TokenStream {
         .collect::<Vec<_>>();
 
     let register_fn = input.register_fn.as_ref().map(|fn_ident| {
-        let handles = input
-            .entries
-            .iter()
-            .map(|entry| handle_ident(entry))
-            .collect::<Vec<_>>();
+        let handles = input.entries.iter().map(handle_ident).collect::<Vec<_>>();
 
         let doc = format!(
             "Eagerly injects the {} `@keyframes` rule(s) declared in this module.",
@@ -126,16 +122,20 @@ fn render_entry(entry: &KeyframesEntry, prefix: Option<&str>, path: &Path) -> To
         );
 
         quote! {
+            // An `AnimationDecl` rather than a plain `&str`, so that reading the
+            // declaration registers the `@keyframes`. `dwclass!` reads this
+            // directly for any modified form — `hover:animate-x`,
+            // `[&::before]:animate-x` — which never touches the class below.
             #[doc(hidden)]
-            pub static #raw_ident: &str = concat!("animation: ", #name_expr, #shorthand);
+            pub static #raw_ident: #path::AnimationDecl =
+                #path::AnimationDecl::new(&#handle, concat!("animation: ", #name_expr, #shorthand));
 
             #[doc = #class_doc]
             pub static #class_ident: once_cell::sync::Lazy<String> =
                 once_cell::sync::Lazy::new(|| {
-                    #handle.ensure();
                     dominator::class! {
                         # ! [prefix = #class_prefix]
-                        .raw(#raw_ident)
+                        .raw(&* #raw_ident)
                     }
                 });
         }
@@ -152,5 +152,129 @@ fn render_entry(entry: &KeyframesEntry, prefix: Option<&str>, path: &Path) -> To
         pub static #handle: #path::Keyframes = #path::Keyframes::new(#name_ident, #body_ident);
 
         #animation
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::keyframes::DwKeyframesInput;
+
+    fn render_str(input: &str) -> String {
+        let parsed: DwKeyframesInput = syn::parse_str(input).expect("failed to parse");
+
+        render(parsed).to_string()
+    }
+
+    #[test]
+    fn stops_become_one_keyframes_body() {
+        let out = render_str(
+            r#"
+            fade_up {
+                "from" => "opacity: 0;",
+                "to" => "opacity: 1;",
+            }
+            "#,
+        );
+
+        assert!(
+            out.contains(r#""from { opacity: 0; } to { opacity: 1; }""#),
+            "{out}"
+        );
+        assert!(out.contains("FADE_UP_KEYFRAMES"), "{out}");
+        // No `#[animation(...)]`, so no utility class is minted.
+        assert!(!out.contains("ANIMATE_FADE_UP"), "{out}");
+    }
+
+    #[test]
+    fn comma_separated_percentage_stops_survive_verbatim() {
+        // The reason every fragment is a string literal: `0%` and `-8%` do not
+        // round-trip through Rust's lexer.
+        let out = render_str(
+            r#"
+            aurora {
+                "0%, 100%" => "transform: translate3d(0, 0, 0) scale(1);",
+                "33%" => "transform: translate3d(6%, -8%, 0) scale(1.15);",
+            }
+            "#,
+        );
+
+        assert!(out.contains("0%, 100% {"), "{out}");
+        assert!(out.contains("translate3d(6%, -8%, 0) scale(1.15)"), "{out}");
+    }
+
+    #[test]
+    fn animation_attribute_mints_a_utility_class() {
+        let out = render_str(
+            r#"
+            #[animation("900ms ease-out both")]
+            fade_up { "from" => "opacity: 0;" }
+            "#,
+        );
+
+        assert!(out.contains("ANIMATE_FADE_UP_RAW"), "{out}");
+        assert!(out.contains("ANIMATE_FADE_UP :"), "{out}");
+        assert!(out.contains(r#"" 900ms ease-out both;""#), "{out}");
+        // The declaration is an AnimationDecl, not a `&str`, so that reading it
+        // from a variant registers the keyframes.
+        assert!(out.contains("AnimationDecl"), "{out}");
+    }
+
+    #[test]
+    fn names_are_namespaced_by_default_and_pinnable() {
+        let out = render_str(r#"fade_up { "from" => "opacity: 0;" }"#);
+        assert!(out.contains("CARGO_CRATE_NAME"), "{out}");
+        assert!(out.contains(r#""-fade-up""#), "{out}");
+
+        let out = render_str(r#"#![prefix = "app"] fade_up { "from" => "opacity: 0;" }"#);
+        assert!(out.contains(r#""app-fade-up""#), "{out}");
+        assert!(!out.contains("CARGO_CRATE_NAME"), "{out}");
+
+        // `#[name]` pins the exact CSS name, which is how dwind keeps `spin`.
+        let out = render_str(r#"#[name = "spin"] spin { "from" => "opacity: 0;" }"#);
+        assert!(out.contains(r#""spin""#), "{out}");
+        assert!(!out.contains("CARGO_CRATE_NAME"), "{out}");
+    }
+
+    #[test]
+    fn register_fn_ensures_every_declared_rule() {
+        let out = render_str(
+            r#"
+            #![register_fn = "app_keyframes"]
+            a { "from" => "opacity: 0;" }
+            b { "from" => "opacity: 0;" }
+            "#,
+        );
+
+        assert!(out.contains("fn app_keyframes"), "{out}");
+        assert!(out.contains("A_KEYFRAMES . ensure ()"), "{out}");
+        assert!(out.contains("B_KEYFRAMES . ensure ()"), "{out}");
+    }
+
+    #[test]
+    fn raw_bodies_pass_through_untouched() {
+        let out = render_str(r#"marquee = "from { left: 0; } to { left: -50%; }";"#);
+
+        assert!(
+            out.contains(r#""from { left: 0; } to { left: -50%; }""#),
+            "{out}"
+        );
+    }
+
+    #[test]
+    fn an_empty_block_is_rejected() {
+        assert!(syn::parse_str::<DwKeyframesInput>("empty { }").is_err());
+    }
+
+    #[test]
+    fn unknown_options_are_rejected() {
+        assert!(syn::parse_str::<DwKeyframesInput>(
+            r#"#![nonsense = "x"] a { "from" => "opacity: 0;" }"#
+        )
+        .is_err());
+        assert!(syn::parse_str::<DwKeyframesInput>(
+            r#"#[nonsense = "x"] a { "from" => "opacity: 0;" }"#
+        )
+        .is_err());
     }
 }
