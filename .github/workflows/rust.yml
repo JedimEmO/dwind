@@ -1,8 +1,16 @@
 name: Code checking and unit testing
 
 on:
-  pull_request:
+  # main was never tested directly: the only trigger was a pull request, so
+  # anything that reached main by another route — a merge whose checks had not
+  # finished, a direct push — went unverified.
+  push:
     branches: [ main ]
+  # No branch filter. Restricting to `branches: [main]` skipped every stacked
+  # pull request, because a PR based on another feature branch does not match.
+  # Those are exactly the changes that most want checking before the base lands.
+  pull_request:
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
