@@ -1,9 +1,9 @@
 mod fx;
+mod keyframes;
 mod pages;
 mod palette;
 mod reveal;
 mod router;
-mod styles;
 
 #[macro_use]
 extern crate log;
@@ -15,6 +15,7 @@ extern crate dominator;
 extern crate dwui;
 
 use crate::fx::magnetic;
+use crate::keyframes::*;
 use crate::pages::components_page::components_page;
 use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
@@ -23,7 +24,6 @@ use crate::pages::dwind_examples::dwind_examples_page;
 use crate::pages::home::home_page;
 use crate::palette::Palette;
 use crate::router::make_app_router;
-use crate::styles::APP_STYLES;
 use dominator::routing::go_to_url;
 use dominator::{body, events, Dom};
 use dwind::prelude::*;
@@ -49,7 +49,6 @@ fn main_view() -> Dom {
         &DWIND_COLORS["woodsmoke"],
         &DWIND_COLORS["red"],
     )));
-    dominator::stylesheet_raw(APP_STYLES);
 
     let palette = palette::global();
     let page = make_app_router().signal().broadcast();
@@ -59,10 +58,10 @@ fn main_view() -> Dom {
     let scrolled = Mutable::new(0.0f64);
 
     html!("div", {
-        .class("dw-scrollbar")
+        .apply(crate::fx::slim_scrollbar)
         .dwclass!("text-woodsmoke-100 bg-woodsmoke-950")
         .dwclass!("h-full overflow-y-auto overflow-x-hidden")
-        .style("position", "relative")
+        .dwclass!("relative")
         .apply(palette.shortcuts())
         .with_node!(element => {
             .event(clone!(scrolled => move |_: events::Scroll| {
@@ -74,11 +73,11 @@ fn main_view() -> Dom {
         .child(scroll_progress(scrolled.clone()))
         .child(top_nav(&palette, page.signal()))
         .child(html!("main", {
-            .style("position", "relative")
+            .dwclass!("relative")
             .style("z-index", "1")
             .child_signal(page.signal().map(|page| {
                 Some(html!("div", {
-                    .class("dw-route")
+                    .dwclass!("animate-route-in")
                     .after_inserted(|_| scroll_to_top())
                     .child(match page {
                         DocPage::Home => home_page(),
@@ -105,19 +104,19 @@ fn scroll_to_top() {
 fn scroll_progress(scrolled: Mutable<f64>) -> Dom {
     html!("div", {
         .attr("aria-hidden", "true")
-        .style("position", "fixed")
+        .dwclass!("fixed")
         .style("top", "0")
         .style("left", "0")
         .style("right", "0")
         .style("height", "2px")
         .style("z-index", "60")
-        .style("pointer-events", "none")
+        .dwclass!("pointer-events-none")
         .child(html!("div", {
             .style("height", "100%")
             .style("background", "linear-gradient(90deg, #A88735, #D5B65F 45%, #FFF3CF)")
             .style("box-shadow", "0 0 12px rgba(213, 182, 95, 0.6)")
             .style("transform-origin", "left center")
-            .style("will-change", "transform")
+            .dwclass!("will-change-transform")
             .style_signal("transform", scrolled.signal().map(|p| {
                 format!("scaleX({:.4})", p.max(0.001))
             }))
@@ -174,7 +173,7 @@ fn pager_link(page: Option<DocPage>, hint: &str, left: bool) -> Dom {
 
     html!("button", {
         .attr("type", "button")
-        .class("dw-glass")
+        .apply(crate::fx::glass)
         .dwclass!("flex flex-col gap-1 rounded-lg border border-woodsmoke-800 p-4 grow cursor-pointer")
         .dwclass!("hover:border-candlelight-700 transition-all")
         .apply(fx::spotlight)
@@ -184,7 +183,7 @@ fn pager_link(page: Option<DocPage>, hint: &str, left: bool) -> Dom {
             dwclass!(b, "text-right align-items-end")
         })
         .style("color", "inherit")
-        .style("font", "inherit")
+        .dwclass!("font-inherit")
         .child(html!("span", {
             .class("font-code")
             .dwclass!("text-xs text-woodsmoke-500")
@@ -218,7 +217,7 @@ fn top_nav(
                 .attr("href", "#/")
                 .class("font-code")
                 .dwclass!("flex align-items-center gap-1 text-l font-bold text-woodsmoke-50 cursor-pointer")
-                .style("text-decoration", "none")
+                .dwclass!("no-underline")
                 .apply(magnetic(5.0))
                 .child(html!("span", {
                     .dwclass!("text-candlelight-400")
@@ -227,7 +226,7 @@ fn top_nav(
                 .child(html!("span", { .text("dwind") }))
                 .child(html!("span", {
                     .dwclass!("text-candlelight-400")
-                    .style("animation", "dwind-cursor-blink 1.2s step-end infinite")
+                    .dwclass!("animate-cursor-blink")
                     .text("_")
                 }))
             }))
@@ -261,7 +260,7 @@ fn palette_trigger(palette: &Palette) -> Dom {
         .dwclass!("text-woodsmoke-400 hover:text-candlelight-300 hover:border-candlelight-700")
         .dwclass!("@<sm:hidden text-xs")
         .style("background", "rgba(18, 18, 21, 0.6)")
-        .style("font", "inherit")
+        .dwclass!("font-inherit")
         .style("font-size", "0.72rem")
         .child(html!("span", { .text("⌘") }))
         .child(html!("span", { .text("K") }))
@@ -281,8 +280,8 @@ fn nav_link(
         .attr("href", &href)
         .dwclass!("cursor-pointer transition-colors select-none")
         .dwclass!("text-woodsmoke-300 hover:text-candlelight-300")
-        .style("text-decoration", "none")
-        .style("position", "relative")
+        .dwclass!("no-underline")
+        .dwclass!("relative")
         .style_signal("color", active.signal().map(|a| {
             if a { Some("#E5CE8F") } else { None }
         }))
@@ -290,7 +289,7 @@ fn nav_link(
         // an underline that grows in when the route becomes active
         .child(html!("span", {
             .attr("aria-hidden", "true")
-            .style("position", "absolute")
+            .dwclass!("absolute")
             .style("left", "0")
             .style("right", "0")
             .style("bottom", "-6px")
@@ -317,7 +316,7 @@ fn nav_external(label: &str, url: &str) -> Dom {
         .attr("rel", "noopener")
         .dwclass!("cursor-pointer transition-colors select-none")
         .dwclass!("text-woodsmoke-300 hover:text-candlelight-300")
-        .style("text-decoration", "none")
+        .dwclass!("no-underline")
         .text(label)
         .event(move |_: events::Click| {
             window()
@@ -331,7 +330,7 @@ fn nav_external(label: &str, url: &str) -> Dom {
 fn footer() -> Dom {
     html!("footer", {
         .dwclass!("border-t border-woodsmoke-800 w-full m-t-20")
-        .style("position", "relative")
+        .dwclass!("relative")
         .style("z-index", "1")
         .child(html!("div", {
             .dwclass!("m-x-auto max-w-6xl p-l-4 p-r-4 p-t-12 p-b-12")
@@ -386,7 +385,7 @@ fn footer_column(title: &str, links: Vec<(&str, &str)>) -> Dom {
                 .attr("href", &href)
                 .apply_if(external, |b| b.attr("target", "_blank").attr("rel", "noopener"))
                 .dwclass!("text-woodsmoke-300 hover:text-candlelight-300 text-sm transition-colors cursor-pointer")
-                .style("text-decoration", "none")
+                .dwclass!("no-underline")
                 .text(label)
             })
         }))

@@ -62,7 +62,7 @@ fn shadows_example() -> Dom {
         .child(html!("button", {
             .dwclass!("w-28 h-16 rounded-lg bg-woodsmoke-800 border-none cursor-pointer text-woodsmoke-200")
             .dwclass!("focus-visible:ring-2 ring-picton-blue-400")
-            .style("outline", "none")
+            .dwclass!("outline-hidden")
             .text("tab to me")
         }))
     })

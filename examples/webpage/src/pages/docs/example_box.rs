@@ -13,7 +13,7 @@ pub fn example_box(child: Dom, resizeable: bool) -> Dom {
     let dragging = Mutable::new(false);
 
     html!("div", {
-        .class("dw-glass")
+        .apply(crate::fx::glass)
         .dwclass!("m-t-6 rounded-lg border border-woodsmoke-800 overflow-hidden w-full")
         .apply(crate::fx::spotlight)
         // header bar

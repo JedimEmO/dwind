@@ -6,6 +6,7 @@
 //! single `global_event_preventable`. No component framework, no store, no
 //! effect hooks.
 
+use crate::keyframes::*;
 use crate::pages::docs::{doc_sections, DocPage};
 use dominator::routing::go_to_url;
 use dominator::{events, html, Dom, DomBuilder, EventOptions};
@@ -293,14 +294,13 @@ impl Palette {
             .attr("role", "dialog")
             .attr("aria-modal", "true")
             .attr("aria-label", "Command palette")
-            .style("position", "fixed")
-            .style("inset", "0")
+            .dwclass!("fixed")
+            .dwclass!("inset-0")
             .style("z-index", "9999")
             .child(html!("div", {
-                .class("dw-palette-scrim")
-                .style("position", "absolute")
-                .style("inset", "0")
-                .style("background", "rgba(2, 2, 3, 0.7)")
+                .dwclass!("absolute inset-0 animate-scrim-in \
+                    [background:rgba(2, 2, 3, 0.7)] \
+                    [backdrop-filter:blur(6px) saturate(0.7)]")
                 .event({
                     let this = this.clone();
                     move |_: events::Click| this.close()
@@ -310,15 +310,15 @@ impl Palette {
             // `transform`, and a fill-mode animation beats an inline style.
             .child(html!("div", {
                 .dwclass!("flex justify-center w-full")
-                .style("position", "absolute")
+                .dwclass!("absolute")
                 .style("top", "14vh")
                 .style("left", "0")
                 .style("padding", "0 1rem")
                 .child(html!("div", {
-                    .class("dw-palette")
-                    .dwclass!("rounded-lg overflow-hidden flex flex-col w-full")
-                    .style("max-width", "38rem")
-                    .style("background", "rgba(12, 12, 15, 0.86)")
+                    .dwclass!("rounded-lg overflow-hidden flex flex-col w-full animate-palette-in")
+                    .dwclass!("[max-width:38rem] [background:rgba(12, 12, 15, 0.86)] \
+                        [backdrop-filter:blur(20px) saturate(1.4)] \
+                        [box-shadow:0 32px 80px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(213, 182, 95, 0.14), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)]")
                     .child(this.search_row())
                     .child(this.results())
                     .child(this.hint_row())
@@ -338,7 +338,9 @@ impl Palette {
                 .text("⌘")
             }))
             .child(html!("input" => web_sys::HtmlInputElement, {
-                .class("dw-palette-input")
+                .dwclass!("w-full [background:transparent] [border:none] [outline:none] \
+                    [color:#F5F5F6] [font-size:1.05rem] font-inherit \
+                    [&::placeholder]:[color:#55555F]")
                 .attr("type", "text")
                 .attr("placeholder", "Jump to a page, a utility group, the repo…")
                 .attr("aria-label", "Search")
@@ -366,7 +368,7 @@ impl Palette {
         let this = self.clone();
 
         html!("div", {
-            .class("dw-scrollbar")
+            .apply(crate::fx::slim_scrollbar)
             .dwclass!("flex flex-col p-2 overflow-y-auto")
             .style("max-height", "min(24rem, 50vh)")
             .child_signal(map_ref! {
@@ -403,7 +405,7 @@ impl Palette {
             .dwclass!("rounded-md p-l-3 p-r-3 p-t-2 p-b-2 border-none cursor-pointer transition-colors")
             .style("background", if active { "rgba(213, 182, 95, 0.10)" } else { "transparent" })
             .style("color", "inherit")
-            .style("font", "inherit")
+            .dwclass!("font-inherit")
             .child(html!("span", {
                 .class("font-code")
                 .dwclass!("text-xs flex-none w-4")
