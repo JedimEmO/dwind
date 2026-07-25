@@ -125,6 +125,35 @@ fn prefers_reduced_motion() -> impl Signal<Item = bool> {
     dominator::media_query("(prefers-reduced-motion: reduce)")
 }
 
+/// The 3D tilt transform for a card, or the resting one.
+///
+/// Split out from the signal wiring so the reduced-motion rule is a plain
+/// assertion rather than something only a browser can check.
+fn tilt_transform(x: f64, y: f64, hot: bool, still: bool, strength: f64) -> String {
+    if !hot || still {
+        return "perspective(1100px) rotateX(0deg) rotateY(0deg) translateZ(0)".to_string();
+    }
+
+    format!(
+        "perspective(1100px) rotateX({:.2}deg) rotateY({:.2}deg) translateZ(6px)",
+        (0.5 - y) * strength * 2.0,
+        (x - 0.5) * strength * 2.0,
+    )
+}
+
+/// The magnetic offset for a control, or the resting one.
+fn magnetic_transform(x: f64, y: f64, hot: bool, still: bool, pull: f64) -> String {
+    if !hot || still {
+        return "translate3d(0, 0, 0)".to_string();
+    }
+
+    format!(
+        "translate3d({:.2}px, {:.2}px, 0)",
+        (x - 0.5) * pull * 2.0,
+        (y - 0.5) * pull * 2.0,
+    )
+}
+
 /// A spotlight card that also tips towards the cursor in 3D.
 ///
 /// `strength` is the maximum rotation in degrees. The tilt is suppressed
@@ -141,17 +170,8 @@ pub fn spotlight_tilt(
             futures_signals::map_ref! {
                 let (x, y) = pos.signal(),
                 let hot = hot.signal(),
-                let still = prefers_reduced_motion() => move {
-                    if *hot && !*still {
-                        format!(
-                            "perspective(1100px) rotateX({:.2}deg) rotateY({:.2}deg) translateZ(6px)",
-                            (0.5 - *y) * strength * 2.0,
-                            (*x - 0.5) * strength * 2.0,
-                        )
-                    } else {
-                        "perspective(1100px) rotateX(0deg) rotateY(0deg) translateZ(0)".to_string()
-                    }
-                }
+                let still = prefers_reduced_motion() =>
+                    move { tilt_transform(*x, *y, *hot, *still, strength) }
             },
         )
     }
@@ -159,6 +179,10 @@ pub fn spotlight_tilt(
 
 /// A control that drifts toward the cursor while hovered — the classic
 /// "magnetic button", in about twenty lines of signal plumbing.
+///
+/// Suppressed under `prefers-reduced-motion`, for the same reason as
+/// [`spotlight_tilt`]: this is a `style_signal` write, so no `@media` block can
+/// stop it.
 pub fn magnetic(pull: f64) -> impl Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
     move |builder| {
         let pos = Mutable::new((0.5f64, 0.5f64));
@@ -193,17 +217,9 @@ pub fn magnetic(pull: f64) -> impl Fn(DomBuilder<HtmlElement>) -> DomBuilder<Htm
             "transform",
             futures_signals::map_ref! {
                 let (x, y) = pos.signal(),
-                let hot = hot.signal() => move {
-                    if *hot {
-                        format!(
-                            "translate3d({:.2}px, {:.2}px, 0)",
-                            (*x - 0.5) * pull * 2.0,
-                            (*y - 0.5) * pull * 2.0,
-                        )
-                    } else {
-                        "translate3d(0, 0, 0)".to_string()
-                    }
-                }
+                let hot = hot.signal(),
+                let still = prefers_reduced_motion() =>
+                    move { magnetic_transform(*x, *y, *hot, *still, pull) }
             },
         )
     }
@@ -474,4 +490,39 @@ pub fn slim_scrollbar(builder: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElemen
          [&::-webkit-scrollbar-thumb:hover]:[background:#3A3A44] \
          [&::-webkit-scrollbar-thumb:hover]:[background-clip:content-box]"
     )
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    // `prefers-reduced-motion` is honoured in CSS for animations and
+    // transitions, but these two effects are `style_signal` writes that no
+    // `@media` block can reach — so the rule lives in Rust and is asserted here.
+
+    #[test]
+    fn tilt_is_suppressed_under_reduced_motion() {
+        let moving = tilt_transform(0.2, 0.25, true, false, 4.0);
+        let still = tilt_transform(0.2, 0.25, true, true, 4.0);
+        let resting = tilt_transform(0.2, 0.25, false, false, 4.0);
+
+        assert!(moving.contains("rotateX(2.00deg)"), "{moving}");
+        assert_eq!(still, resting);
+        assert!(still.contains("rotateX(0deg)"), "{still}");
+        assert!(still.contains("rotateY(0deg)"), "{still}");
+    }
+
+    #[test]
+    fn magnetic_drift_is_suppressed_under_reduced_motion() {
+        let moving = magnetic_transform(1.0, 1.0, true, false, 7.0);
+        let still = magnetic_transform(1.0, 1.0, true, true, 7.0);
+        let resting = magnetic_transform(1.0, 1.0, false, false, 7.0);
+
+        assert!(
+            moving.contains("translate3d(7.00px, 7.00px, 0)"),
+            "{moving}"
+        );
+        assert_eq!(still, "translate3d(0, 0, 0)");
+        assert_eq!(still, resting);
+    }
 }
