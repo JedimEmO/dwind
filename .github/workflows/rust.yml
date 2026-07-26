@@ -55,7 +55,11 @@ jobs:
         run: RUST_BACKTRACE=1 CHROMEDRIVER_ARGS="--verbose --log-path=/tmp/chromedriver.log" CHROMEDRIVER=/usr/local/share/chromedriver-linux64/chromedriver cargo test --target wasm32-unknown-unknown
       - name: Chromedriver log on failure
         if: failure()
-        run: tail -c 60000 /tmp/chromedriver.log || true
+        run: |
+          echo "=== page-level events (console, exceptions, crashes, loading failures)"
+          grep -aiE "consoleAPICalled|exceptionThrown|entryAdded|targetCrashed|targetDestroyed|loadingFailed|Runtime.exception" /tmp/chromedriver.log | head -60 || true
+          echo "=== first 40kB of the driver log"
+          head -c 40000 /tmp/chromedriver.log || true
       - name: Run firefox tests
         run: RUST_BACKTRACE=1 GECKODRIVER=$GECKOWEBDRIVER/geckodriver cargo test --target wasm32-unknown-unknown
       - name: clippy checks
