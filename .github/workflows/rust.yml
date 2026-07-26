@@ -16,9 +16,9 @@ env:
   CARGO_TERM_COLOR: always
   # The browser gets this many seconds to load the test module and report back.
   # The default 20s is measured against a debug wasm that grows with every
-  # component, and a two-core runner is slower than any dev machine — the
-  # components suite hit that ceiling and CI reported "Failed to detect test as
-  # having been run" without a single test failing.
+  # component and a runner slower than any dev machine, so raise it: a suite
+  # that has merely outgrown the budget should show up as a slow run, never as
+  # "Failed to detect test as having been run".
   WASM_BINDGEN_TEST_TIMEOUT: 120
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
           # Optional version of wasm-bindgen to install (eg. "0.2.68", "latest").
           # Must match the wasm-bindgen version in Cargo.lock, or the
           # wasm test runner refuses the produced wasm artifacts.
-          version: 0.2.105
+          version: 0.2.126
       - name: rust-toolchain
         # You may pin to the exact commit or the version.
         # uses: actions-rs/toolchain@b2417cde72dcf67f306c0ae8e0828a81bf0b189f
@@ -46,20 +46,8 @@ jobs:
           # Rust toolchain name.
           toolchain: stable
           target: wasm32-unknown-unknown
-      - name: Chrome and driver versions
-        run: |
-          google-chrome --version || true
-          /usr/local/share/chromedriver-linux64/chromedriver --version || true
-          nproc; free -m; df -h /tmp | tail -1
       - name: Run chrome tests
-        run: RUST_BACKTRACE=1 CHROMEDRIVER_ARGS="--verbose --log-path=/tmp/chromedriver.log" CHROMEDRIVER=/usr/local/share/chromedriver-linux64/chromedriver cargo test --target wasm32-unknown-unknown
-      - name: Chromedriver log on failure
-        if: failure()
-        run: |
-          echo "=== page-level events (console, exceptions, crashes, loading failures)"
-          grep -aiE "consoleAPICalled|exceptionThrown|entryAdded|targetCrashed|targetDestroyed|loadingFailed|Runtime.exception" /tmp/chromedriver.log | head -60 || true
-          echo "=== first 40kB of the driver log"
-          head -c 40000 /tmp/chromedriver.log || true
+        run: RUST_BACKTRACE=1 CHROMEDRIVER=/usr/local/share/chromedriver-linux64/chromedriver cargo test --target wasm32-unknown-unknown
       - name: Run firefox tests
         run: RUST_BACKTRACE=1 GECKODRIVER=$GECKOWEBDRIVER/geckodriver cargo test --target wasm32-unknown-unknown
       - name: clippy checks
