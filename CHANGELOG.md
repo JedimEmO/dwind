@@ -1,10 +1,17 @@
 # dwind changelog
 
-## dwui 0.10.0 - 2026-07-25
+## dwui 0.10.0 - 2026-07-26
 
 A visual and accessibility overhaul of the whole component suite, plus eight
 new components. Breaking where it needed to be — dwui is 0.x and the gallery
 app migrates in the same commit series.
+
+Ships together with the dwind 0.8.0 entry below, and carries the dwui 0.9.1
+changes from it — 0.9.1 was never published, so 0.10.0 supersedes it.
+
+Requires wasm-bindgen 0.2.126 or newer: 0.2.105 could derive the same JS
+identifier for two closure shims, which left the generated module unparseable
+depending on the exact symbols the compiler emitted.
 
 ### Design-language foundation
 
