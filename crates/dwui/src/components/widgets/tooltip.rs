@@ -70,27 +70,27 @@ pub fn tooltip(props: TooltipProps) -> Dom {
             .dwclass!("dwui-bg-void-700 dwui-text-on-primary-50")
             .dwclass!("is(.light *):dwui-bg-void-800 is(.light *):dwui-text-on-primary-50")
             .style("position", "absolute")
-            .style("z-index", "40")
+            .style("z-index", crate::theme::layers::TOOLTIP)
             .style("width", "max-content")
             .style("max-width", "16rem")
             .style("transition", "opacity 100ms ease-out")
             .style_signal("opacity", visible.signal().map(|v| if v { "1" } else { "0" }))
             .style_signal("top", position.signal().map(|p| match p {
                 TooltipPosition::Top => Some("auto"),
-                TooltipPosition::Bottom => Some("calc(100% + 6px)"),
+                TooltipPosition::Bottom => Some("calc(100% + 0.375rem)"),
                 TooltipPosition::Left | TooltipPosition::Right => Some("50%"),
             }))
             .style_signal("bottom", position.signal().map(|p| match p {
-                TooltipPosition::Top => Some("calc(100% + 6px)"),
+                TooltipPosition::Top => Some("calc(100% + 0.375rem)"),
                 _ => None,
             }))
             .style_signal("left", position.signal().map(|p| match p {
                 TooltipPosition::Top | TooltipPosition::Bottom => Some("50%"),
-                TooltipPosition::Right => Some("calc(100% + 6px)"),
+                TooltipPosition::Right => Some("calc(100% + 0.375rem)"),
                 TooltipPosition::Left => None,
             }))
             .style_signal("right", position.signal().map(|p| match p {
-                TooltipPosition::Left => Some("calc(100% + 6px)"),
+                TooltipPosition::Left => Some("calc(100% + 0.375rem)"),
                 _ => None,
             }))
             .style_signal("transform", position.signal().map(|p| match p {

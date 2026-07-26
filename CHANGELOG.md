@@ -1,5 +1,83 @@
 # dwind changelog
 
+## dwui 0.10.0 - 2026-07-26
+
+A visual and accessibility overhaul of the whole component suite, plus eight
+new components. Breaking where it needed to be — dwui is 0.x and the gallery
+app migrates in the same commit series.
+
+Ships together with the dwind 0.8.0 entry below, and carries the dwui 0.9.1
+changes from it — 0.9.1 was never published, so 0.10.0 supersedes it.
+
+Requires wasm-bindgen 0.2.126 or newer: 0.2.105 could derive the same JS
+identifier for two closure shims, which left the generated module unparseable
+depending on the exact symbols the compiler emitted.
+
+### Design-language foundation
+
+- The global `*:focus { outline: none }` reset is gone. Interactive elements
+  now carry `dwui-focusable` (an outline-based `:focus-visible` ring) and field
+  wrappers carry `dwui-field-surface` (`:focus-within` ring). Because the ring
+  is an outline, it can no longer be silently defeated by `shadow-*` utilities
+  or inline box-shadows — the box-shadow-based `dwui-ring-*` maps are removed.
+  Text inputs, selects, sliders, the date-picker field, and breadcrumb links
+  are keyboard-visible for the first time.
+- New semantic tokens: `--dwui-on-accent` (color painted on primary-filled
+  controls; `ColorsCssVariables::with_on_accent` to override), tinted
+  `dwui-surface-{info,success,warning,error}` backgrounds via `color-mix`, and
+  a `dwui-scrim` backdrop. Hard-coded whites (switch knob, checkbox check,
+  badge text) and the modal's rgba backdrop now follow the theme.
+- Documented radius / control-height / padding / transition scales and a
+  `theme::layers` z-index scale (tooltip 30, overlay 40, modal 50, toast 60).
+
+### Field system
+
+- `labelled_rect_mixin` (the notched outline measured as `label.len() * 9px`)
+  is replaced by `mixins::field_mixin::{field_surface_mixin, field_error_row}`:
+  a filled surface with a floating label positioned purely by transform, and an
+  always-present error row so validation never shifts layout. The invalid
+  text input no longer shrinks from h-10 to h-6.
+- `text_input`, `select`, and `slider` gain a `disabled` prop; `slider` gains a
+  real `is_valid` prop; `select`'s `render_function=` oddity is now
+  `render_fn=`.
+
+### Control chrome
+
+- Slider track and thumb are properly themed (per-vendor pseudo-element rules,
+  UA-gated so neither engine sees the other's selectors), with the filled
+  portion driven by `--dwui-slider-fill`. Select drops native chrome for a
+  themed chevron. The switch knob animates by transform.
+
+### Surfaces and widgets
+
+- Card: default `p-4` padding (`CardPadding` to adjust), dead
+  `ColorScheme::Secondary` removed, Primary scheme completed for light mode.
+- Modal: scrim token, rem-based sizes, and a Tab/Shift-Tab focus trap.
+- Alert: per-variant tinted surfaces; dismiss button is an icon, not `×`.
+- Heading: renders the bare `h1`-`h6` (no wrapper div, no fixed height) and
+  takes theme colors.
+- Button: **no longer forces `w-full`** (opt back in via `apply`) and uses
+  `rounded-md` instead of `rounded-full`; tab underline is a real border so it
+  coexists with focus rings; spinner sizes moved to the rem scale.
+
+### New components
+
+`text_area!`, `number_input!`, `radio_group!`, `pagination!`, `popover!`,
+`dropdown_menu!`, `drawer!`, and `toasts!` + `Toaster` — all themeable,
+keyboard-accessible, and covered by the headless browser suite. dwui now
+depends on `gloo-timers` and `wasm-bindgen-futures` for toast auto-dismiss and
+menu focus management.
+
+### Overlays portal to the body
+
+`modal!`, `drawer!`, and `toasts!` render their fixed-position layer as a
+direct child of `document.body` (falling back to the document element when an
+app has replaced `<body>` wholesale). `position: fixed` resolves against the
+nearest transformed ancestor, so overlays rendered in place broke inside
+anything with a transform, filter, or page-transition animation — the gallery's
+own route transition captured them. The component's mount point now only hosts
+an invisible placeholder; unmounting it tears the portal down.
+
 ## dwind 0.8.0 / dwind-macros 0.5.0 / dwind-base 0.1.2 / dwui 0.9.1 - 2026-07-25
 
 Everything here is additive. The theme: raw CSS in an application was almost

@@ -66,10 +66,9 @@ pub fn button(props: ButtonProps) -> Dom {
         .dwclass_signal!("h-12 text-l", size.signal().map(|v| v == ButtonSize::Large))
         .dwclass!("disabled:dwui-text-on-primary-500 disabled:hover:dwui-border-primary-800 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100")
         .dwclass!("is(.light *):disabled:dwui-text-on-primary-600 is(.light *):disabled:hover:dwui-border-primary-200")
-        .dwclass!("w-full font-bold p-l-3 p-r-3 cursor-pointer rounded-full pointer-events-auto")
-        .dwclass!("transition-all duration-150")
-        .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400 is(.light *):focus-visible:dwui-ring-primary-600")
-        .style("outline", "none")
+        .dwclass!("font-bold p-l-3 p-r-3 cursor-pointer rounded-md pointer-events-auto")
+        .style("transition", "filter 150ms ease, background-color 150ms ease, border-color 150ms ease, color 150ms ease")
+        .dwclass!("dwui-focusable")
         .apply_if(apply.is_some(), move |b| {
             b.apply(apply.unwrap())
         })

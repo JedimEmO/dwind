@@ -78,6 +78,16 @@ fn click(element: &web_sys::Element) {
         .click();
 }
 
+/// Query the whole document — used for overlays that portal to `body`.
+fn doc_query(selector: &str) -> Option<web_sys::Element> {
+    web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .query_selector(selector)
+        .unwrap()
+}
+
 #[wasm_bindgen_test]
 async fn button_is_a_real_button_and_handles_clicks() {
     let tc = TestContainer::new();
@@ -379,10 +389,12 @@ async fn progress_indeterminate_omits_valuenow() {
 
 #[wasm_bindgen_test]
 async fn modal_has_dialog_semantics_and_closes() {
+    use discard::Discard;
+
     let tc = TestContainer::new();
     let open = Mutable::new(true);
 
-    dominator::append_dom(
+    let handle = dominator::append_dom(
         &tc.dom_element(),
         modal!({
             .open_signal(open.signal())
@@ -395,18 +407,23 @@ async fn modal_has_dialog_semantics_and_closes() {
     );
     wait_frame().await;
 
-    let dialog = tc.query("[role=dialog]").unwrap();
+    // The modal portals to the body, so query the document
+    let dialog = doc_query("[role=dialog]").unwrap();
     assert_eq!(dialog.get_attribute("aria-modal").as_deref(), Some("true"));
     assert_eq!(
         dialog.get_attribute("aria-label").as_deref(),
         Some("Example dialog")
     );
 
-    let close_button = tc.query("button[aria-label='Close dialog']").unwrap();
+    let close_button = doc_query("button[aria-label='Close dialog']").unwrap();
     click(&close_button);
     wait_frame().await;
 
     assert!(!open.get());
+
+    handle.discard();
+    wait_frame().await;
+    assert!(doc_query("[role=dialog]").is_none(), "the portal should clean up");
 }
 
 #[wasm_bindgen_test]
@@ -1050,4 +1067,809 @@ async fn date_picker_navigates_months() {
     click(&tc.query("button[aria-label='Next month']").unwrap());
     wait_frames(2).await;
     assert_eq!(month_label.text_content().unwrap(), "January 2026");
+}
+
+// ---------------------------------------------------------------------------
+// Focus standard
+// ---------------------------------------------------------------------------
+
+/// Asserts the element carries the `dwui-focusable` marker class, i.e. it
+/// participates in the outline-based `:focus-visible` ring standard.
+fn assert_focusable(element: &web_sys::Element) {
+    let class = element.get_attribute("class").unwrap_or_default();
+
+    assert!(
+        class
+            .split_whitespace()
+            .any(|c| c.starts_with("dwui_focusable_")),
+        "expected a dwui-focusable marker class, got: {class:?}"
+    );
+}
+
+/// Every style-rule selector across all document stylesheets.
+fn stylesheet_selectors() -> Vec<String> {
+    let doc = web_sys::window().unwrap().document().unwrap();
+    let sheets = doc.style_sheets();
+    let mut out = vec![];
+
+    for i in 0..sheets.length() {
+        let Some(sheet) = sheets.item(i) else { continue };
+        let Ok(sheet) = sheet.dyn_into::<web_sys::CssStyleSheet>() else {
+            continue;
+        };
+        let Ok(rules) = sheet.css_rules() else { continue };
+
+        for r in 0..rules.length() {
+            let Some(rule) = rules.item(r) else { continue };
+
+            if let Ok(style_rule) = rule.dyn_into::<web_sys::CssStyleRule>() {
+                out.push(style_rule.selector_text());
+            }
+        }
+    }
+
+    out
+}
+
+#[wasm_bindgen_test]
+async fn focus_standard_replaces_the_global_reset() {
+    dwui::theme::apply_style_sheet(None);
+
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        button!({ .content(Some(text("Focus me"))) }),
+    );
+    wait_frame().await;
+
+    assert_focusable(&tc.query("button").unwrap());
+
+    let selectors = stylesheet_selectors();
+
+    // The old blanket reset removed every native focus indicator; it must be gone.
+    assert!(
+        !selectors.iter().any(|s| s == "*:focus"),
+        "the global *:focus reset is still injected"
+    );
+
+    // The marker class carries the outline-based focus-visible ring.
+    assert!(
+        selectors
+            .iter()
+            .any(|s| s.contains("dwui_focusable") && s.contains(":focus-visible")),
+        "no :focus-visible rule found for dwui-focusable"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn interactive_controls_carry_the_focusable_marker() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .child(checkbox!({ .label("Check".to_string()) }))
+            .child(switch!({ .label("Toggle".to_string()) }))
+        }),
+    );
+    wait_frame().await;
+
+    assert_focusable(&tc.query("[role=checkbox]").unwrap());
+    assert_focusable(&tc.query("[role=switch]").unwrap());
+}
+
+// ---------------------------------------------------------------------------
+// Field system
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn field_reserves_error_space_and_keeps_height() {
+    let tc = TestContainer::new();
+    let validity = Mutable::new(ValidationResult::Valid);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        text_input!({
+            .label("Email".to_string())
+            .is_valid_signal(validity.signal_cloned())
+        }),
+    );
+    wait_frames(2).await;
+
+    let input = tc.query("input").unwrap();
+    let input_id = input.get_attribute("id").unwrap();
+
+    // The message row exists (and reserves space) before any error appears.
+    let error_row = tc.query(&format!("[id='{}-error']", input_id)).unwrap();
+    assert_eq!(error_row.text_content().unwrap(), "");
+
+    let surface_height = input.parent_element().unwrap().client_height();
+
+    validity.set(ValidationResult::Invalid {
+        message: "Nope".to_string(),
+    });
+    wait_frames(2).await;
+
+    // Turning invalid must not change the field surface height.
+    assert_eq!(
+        input.parent_element().unwrap().client_height(),
+        surface_height,
+        "field surface changed height when it became invalid"
+    );
+    assert_eq!(error_row.text_content().unwrap(), "Nope");
+}
+
+#[wasm_bindgen_test]
+async fn text_input_and_select_support_disabled() {
+    let tc = TestContainer::new();
+    let disabled = Mutable::new(false);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .child(text_input!({
+                .label("Name".to_string())
+                .disabled_signal(disabled.signal())
+            }))
+            .child(select!({
+                .label("Fruit".to_string())
+                .disabled_signal(disabled.signal())
+                .options(vec![("a".to_string(), "Apple".to_string())])
+            }))
+            .child(slider!({
+                .label("Volume".to_string())
+                .disabled_signal(disabled.signal())
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    assert!(!tc.query("input").unwrap().has_attribute("disabled"));
+    assert!(!tc.query("select").unwrap().has_attribute("disabled"));
+
+    disabled.set(true);
+    wait_frame().await;
+
+    assert!(tc.query("input").unwrap().has_attribute("disabled"));
+    assert!(tc.query("select").unwrap().has_attribute("disabled"));
+    assert!(tc
+        .query("input[type=range]")
+        .unwrap()
+        .has_attribute("disabled"));
+}
+
+// ---------------------------------------------------------------------------
+// text_area!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn text_area_syncs_value_and_reports_invalid() {
+    let tc = TestContainer::new();
+    let value = Mutable::new("hello".to_string());
+    let validity = Mutable::new(ValidationResult::Valid);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        text_area!({
+            .value(value.clone())
+            .label("Bio".to_string())
+            .rows(6u32)
+            .is_valid_signal(validity.signal_cloned())
+        }),
+    );
+    wait_frames(2).await;
+
+    let textarea: web_sys::HtmlTextAreaElement =
+        tc.query("textarea").unwrap().dyn_into().unwrap();
+
+    assert_eq!(textarea.value(), "hello");
+    assert_eq!(textarea.get_attribute("rows").as_deref(), Some("6"));
+
+    let label = tc.query("label").unwrap();
+    assert_eq!(
+        label.get_attribute("for").unwrap(),
+        textarea.get_attribute("id").unwrap()
+    );
+
+    value.set("world".to_string());
+    wait_frames(2).await;
+    assert_eq!(textarea.value(), "world");
+
+    validity.set(ValidationResult::Invalid {
+        message: "Too short".to_string(),
+    });
+    wait_frames(2).await;
+
+    assert_eq!(
+        textarea.get_attribute("aria-invalid").as_deref(),
+        Some("true")
+    );
+    let alert = tc.query("[role=alert]").unwrap();
+    assert_eq!(alert.text_content().unwrap(), "Too short");
+}
+
+// ---------------------------------------------------------------------------
+// number_input!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn number_input_steps_and_clamps() {
+    let tc = TestContainer::new();
+    let value = Mutable::new(5.0f64);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        number_input!({
+            .value(value.clone())
+            .label("Amount".to_string())
+            .min(Some(0.0))
+            .max(Some(6.0))
+            .step(2.0)
+        }),
+    );
+    wait_frames(2).await;
+
+    let input = tc.query("input[type=number]").unwrap();
+    assert_eq!(input.get_attribute("min").as_deref(), Some("0"));
+    assert_eq!(input.get_attribute("max").as_deref(), Some("6"));
+    assert_eq!(input.get_attribute("step").as_deref(), Some("2"));
+    assert_eq!(input.get_attribute("inputmode").as_deref(), Some("decimal"));
+
+    // The steppers are decorative: not tabbable, hidden from AT.
+    let steppers = tc.query_all("button[tabindex='-1'][aria-hidden=true]");
+    assert_eq!(steppers.length(), 2);
+
+    let up: web_sys::Element = steppers.item(0).unwrap().dyn_into().unwrap();
+    let down: web_sys::Element = steppers.item(1).unwrap().dyn_into().unwrap();
+
+    click(&up);
+    wait_frame().await;
+    // 5 + 2 clamps to max 6
+    assert_eq!(value.get(), 6.0);
+
+    click(&down);
+    wait_frame().await;
+    assert_eq!(value.get(), 4.0);
+}
+
+// ---------------------------------------------------------------------------
+// radio_group!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn radio_group_selection_and_roving_tabindex() {
+    let tc = TestContainer::new();
+    let value = Mutable::new("b".to_string());
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        radio_group!({
+            .label("Flavor".to_string())
+            .value_signal(value.signal_cloned())
+            .options(vec![
+                ("a".to_string(), "Almond".to_string()),
+                ("b".to_string(), "Butterscotch".to_string()),
+                ("c".to_string(), "Cinnamon".to_string()),
+            ])
+            .on_change(clone!(value => move |key| {
+                value.set(key);
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    let group = tc.query("[role=radiogroup]").unwrap();
+    let label_id = group.get_attribute("aria-labelledby").unwrap();
+    assert_eq!(
+        tc.query(&format!("[id='{}']", label_id))
+            .unwrap()
+            .text_content()
+            .unwrap(),
+        "Flavor"
+    );
+
+    let radios = tc.query_all("[role=radio]");
+    assert_eq!(radios.length(), 3);
+
+    let radio = |i: u32| -> web_sys::Element { radios.item(i).unwrap().dyn_into().unwrap() };
+
+    // Roving tabindex: only the checked option is a tab stop
+    assert_eq!(radio(0).get_attribute("tabindex").as_deref(), Some("-1"));
+    assert_eq!(radio(1).get_attribute("tabindex").as_deref(), Some("0"));
+    assert_eq!(radio(1).get_attribute("aria-checked").as_deref(), Some("true"));
+
+    click(&radio(2));
+    wait_frames(2).await;
+
+    assert_eq!(value.get_cloned(), "c");
+    assert_eq!(radio(2).get_attribute("aria-checked").as_deref(), Some("true"));
+    assert_eq!(radio(2).get_attribute("tabindex").as_deref(), Some("0"));
+    assert_eq!(radio(1).get_attribute("tabindex").as_deref(), Some("-1"));
+
+    // ArrowDown moves selection (selection follows focus)
+    let event = web_sys::KeyboardEvent::new_with_keyboard_event_init_dict("keydown", &{
+        let dict = web_sys::KeyboardEventInit::new();
+        dict.set_key("ArrowDown");
+        dict.set_bubbles(true);
+        dict.set_cancelable(true);
+        dict
+    })
+    .unwrap();
+    radio(2).dispatch_event(&event).unwrap();
+    wait_frames(2).await;
+
+    assert_eq!(value.get_cloned(), "a", "ArrowDown should wrap to the first option");
+}
+
+// ---------------------------------------------------------------------------
+// Control chrome
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn slider_chrome_tracks_fill_percentage() {
+    dwui::theme::apply_style_sheet(None);
+
+    let tc = TestContainer::new();
+    let value = Mutable::new(25.0f32);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        slider!({
+            .value(value.clone())
+            .label("Volume".to_string())
+            .min(0.0f32)
+            .max(100.0f32)
+        }),
+    );
+    wait_frames(2).await;
+
+    let range = tc.query("input[type=range]").unwrap();
+    assert!(range.class_list().contains("dwui-slider"));
+
+    let fill = |el: &web_sys::Element| {
+        el.dyn_ref::<web_sys::HtmlElement>()
+            .unwrap()
+            .style()
+            .get_property_value("--dwui-slider-fill")
+            .unwrap()
+    };
+
+    assert_eq!(fill(&range).trim(), "25%");
+
+    value.set(50.0);
+    wait_frames(2).await;
+    assert_eq!(fill(&range).trim(), "50%");
+}
+
+#[wasm_bindgen_test]
+async fn checkbox_and_switch_use_the_on_accent_token() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        html!("div", {
+            .child(checkbox!({ .checked(true) .label("Check".to_string()) }))
+            .child(switch!({ .checked(true) .label("Toggle".to_string()) }))
+        }),
+    );
+    wait_frames(2).await;
+
+    // Checkmark stroke is themed, not hard-coded white
+    let check_path = tc.query("[role=checkbox] path").unwrap();
+    assert!(check_path
+        .get_attribute("style")
+        .unwrap()
+        .contains("--dwui-on-accent"));
+    assert!(!check_path.has_attribute("stroke"));
+
+    // The switch knob is themed and moves by transform
+    let knob = tc.query("[role=switch] span").unwrap();
+    assert!(!knob.class_list().contains("bg-white"));
+
+    let transform = knob
+        .dyn_ref::<web_sys::HtmlElement>()
+        .unwrap()
+        .style()
+        .get_property_value("transform")
+        .unwrap();
+    assert!(transform.contains("translateX"), "got {transform:?}");
+}
+
+// ---------------------------------------------------------------------------
+// Surfaces
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn heading_renders_without_a_wrapper() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        heading!({
+            .content(text("Bare"))
+            .level(HeadingLevel::H3)
+        }),
+    );
+    wait_frame().await;
+
+    // The heading is the component's root element, not nested in a div.
+    let h3 = tc.query("h3").unwrap();
+    assert_eq!(
+        h3.parent_element().unwrap().get_attribute("style").as_deref().map(|s| s.contains("width:800px")),
+        Some(true),
+        "expected the heading to be a direct child of the test container"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn card_defaults_to_padded_content() {
+    dwui::theme::apply_style_sheet(None);
+
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        card!({
+            .content(text("padded"))
+        }),
+    );
+    wait_frames(2).await;
+
+    let card = tc.dom_element().first_element_child().unwrap();
+    let style = web_sys::window()
+        .unwrap()
+        .get_computed_style(&card)
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(style.get_property_value("padding-left").unwrap(), "16px");
+}
+
+#[wasm_bindgen_test]
+async fn modal_traps_tab_focus() {
+    use discard::Discard;
+
+    let tc = TestContainer::new();
+
+    let handle = dominator::append_dom(
+        &tc.dom_element(),
+        modal!({
+            .open(true)
+            .aria_label("Trap test".to_string())
+            .content(Some(html!("div", {
+                .child(html!("button", { .attr("id", "trap-inner") .text("Inner") }))
+            })))
+        }),
+    );
+    wait_frames(2).await;
+
+    let dialog = doc_query("[role=dialog]").unwrap();
+    let inner: web_sys::HtmlElement = doc_query("[id=trap-inner]")
+        .unwrap()
+        .dyn_into()
+        .unwrap();
+
+    // Focus the last focusable element (the inner button), then Tab: the trap
+    // must wrap focus around to the dialog's first focusable (the close
+    // button) instead of leaving the dialog.
+    inner.focus().unwrap();
+
+    let event = web_sys::KeyboardEvent::new_with_keyboard_event_init_dict("keydown", &{
+        let dict = web_sys::KeyboardEventInit::new();
+        dict.set_key("Tab");
+        dict.set_bubbles(true);
+        dict.set_cancelable(true);
+        dict
+    })
+    .unwrap();
+    dialog.dispatch_event(&event).unwrap();
+    wait_frame().await;
+
+    let active = web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .active_element()
+        .unwrap();
+
+    assert_eq!(
+        active.get_attribute("aria-label").as_deref(),
+        Some("Close dialog"),
+        "Tab from the last focusable should wrap to the close button"
+    );
+
+    handle.discard();
+}
+
+#[wasm_bindgen_test]
+async fn alert_dismiss_button_is_an_icon_with_a_label() {
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        alert!({
+            .title("Closable".to_string())
+            .dismissible(true)
+        }),
+    );
+    wait_frame().await;
+
+    let dismiss = tc.query("button[aria-label=Dismiss]").unwrap();
+    assert!(dismiss.query_selector("svg").unwrap().is_some());
+    assert!(!dismiss.text_content().unwrap().contains('×'));
+}
+
+// ---------------------------------------------------------------------------
+// pagination!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn pagination_renders_window_and_aria_current() {
+    let tc = TestContainer::new();
+    let page = Mutable::new(5usize);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        pagination!({
+            .page_signal(page.signal())
+            .total_pages(10usize)
+            .on_page_change(clone!(page => move |p| {
+                page.set(p);
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    // 1 … 4 5 6 … 10 plus prev/next arrows
+    assert_eq!(tc.query_all("button").length(), 7);
+    assert_eq!(tc.query_all("span[aria-hidden=true]").length(), 2);
+
+    let current = tc.query("[aria-current=page]").unwrap();
+    assert_eq!(current.text_content().unwrap(), "5");
+
+    click(&tc.query("button[aria-label='Next page']").unwrap());
+    wait_frames(2).await;
+    assert_eq!(page.get(), 6);
+
+    click(&tc.query("button[aria-label='Page 10']").unwrap());
+    wait_frames(2).await;
+    assert_eq!(page.get(), 10);
+
+    // At the last page the next arrow is disabled
+    assert!(tc
+        .query("button[aria-label='Next page']")
+        .unwrap()
+        .has_attribute("disabled"));
+}
+
+// ---------------------------------------------------------------------------
+// dropdown_menu! / popover!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn dropdown_menu_opens_selects_and_closes() {
+    let tc = TestContainer::new();
+    let selected: Mutable<Option<String>> = Mutable::new(None);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        dropdown_menu!({
+            .label("Actions".to_string())
+            .items(vec![
+                ("copy".to_string(), "Copy".to_string(), false),
+                ("paste".to_string(), "Paste".to_string(), true),
+                ("delete".to_string(), "Delete".to_string(), false),
+            ])
+            .on_select(clone!(selected => move |key| {
+                selected.set(Some(key));
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    let trigger = tc.query("button[aria-haspopup=menu]").unwrap();
+    assert_eq!(trigger.get_attribute("aria-expanded").as_deref(), Some("false"));
+
+    let menu = tc.query("[role=menu]").unwrap();
+
+    click(&trigger);
+    wait_frames(2).await;
+
+    assert_eq!(trigger.get_attribute("aria-expanded").as_deref(), Some("true"));
+    assert_eq!(tc.query_all("[role=menuitem]").length(), 3);
+
+    let disabled_item = tc.query("[role=menuitem][aria-disabled=true]").unwrap();
+    assert_eq!(disabled_item.text_content().unwrap(), "Paste");
+
+    click(&tc.query(&format!("[id='{}-item-delete']", menu.get_attribute("id").unwrap())).unwrap());
+    wait_frames(2).await;
+
+    assert_eq!(selected.get_cloned().as_deref(), Some("delete"));
+    assert_eq!(trigger.get_attribute("aria-expanded").as_deref(), Some("false"));
+}
+
+#[wasm_bindgen_test]
+async fn popover_opens_and_closes_on_escape() {
+    let tc = TestContainer::new();
+    let open = Mutable::new(false);
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        popover!({
+            .open_signal(open.signal())
+            .anchor(Some(html!("button", { .attr("id", "pop-trigger") .text("Open") })))
+            .content(Some(text("Popover body")))
+            .on_close(clone!(open => move || {
+                open.set(false);
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    open.set(true);
+    wait_frames(2).await;
+
+    let event = web_sys::KeyboardEvent::new_with_keyboard_event_init_dict("keydown", &{
+        let dict = web_sys::KeyboardEventInit::new();
+        dict.set_key("Escape");
+        dict.set_bubbles(true);
+        dict
+    })
+    .unwrap();
+    web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .body()
+        .unwrap()
+        .dispatch_event(&event)
+        .unwrap();
+    wait_frames(2).await;
+
+    assert!(!open.get(), "Escape should have closed the popover");
+}
+
+// ---------------------------------------------------------------------------
+// drawer!
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn drawer_opens_from_a_side_and_closes() {
+    use discard::Discard;
+
+    let tc = TestContainer::new();
+    let open = Mutable::new(true);
+
+    let handle = dominator::append_dom(
+        &tc.dom_element(),
+        drawer!({
+            .open_signal(open.signal())
+            .side(DrawerSide::Left)
+            .aria_label("Settings".to_string())
+            .content(Some(text("Drawer body")))
+            .on_close(clone!(open => move || {
+                open.set(false);
+            }))
+        }),
+    );
+    wait_frames(2).await;
+
+    let dialog = doc_query("[role=dialog]").unwrap();
+    assert_eq!(dialog.get_attribute("aria-label").as_deref(), Some("Settings"));
+    assert_eq!(dialog.get_attribute("aria-modal").as_deref(), Some("true"));
+
+    let style = dialog.get_attribute("style").unwrap_or_default();
+    assert!(style.contains("left: 0"), "left drawer should pin to the left edge, got {style:?}");
+
+    click(&doc_query("button[aria-label='Close drawer']").unwrap());
+    wait_frames(2).await;
+
+    assert!(!open.get());
+
+    handle.discard();
+}
+
+// ---------------------------------------------------------------------------
+// toasts! / Toaster
+// ---------------------------------------------------------------------------
+
+#[wasm_bindgen_test]
+async fn toaster_pushes_auto_dismisses_and_manually_dismisses() {
+    use discard::Discard;
+
+    let tc = TestContainer::new();
+    let toaster = Toaster::default();
+
+    let handle = dominator::append_dom(
+        &tc.dom_element(),
+        toasts!({
+            .toaster(toaster.clone())
+        }),
+    );
+    wait_frame().await;
+
+    let host = doc_query("[aria-live=polite]").unwrap();
+    assert_eq!(host.child_element_count(), 0);
+
+    // Auto-dismissing toast
+    toaster.push(ToastOptions {
+        title: "Saved".to_string(),
+        variant: ToastVariant::Success,
+        duration_ms: Some(80),
+        ..Default::default()
+    });
+
+    // Sticky error toast
+    let sticky = toaster.push(ToastOptions {
+        title: "Broken".to_string(),
+        variant: ToastVariant::Error,
+        duration_ms: None,
+        ..Default::default()
+    });
+
+    wait_frame().await;
+    assert_eq!(host.child_element_count(), 2);
+    assert!(doc_query("[role=alert]").is_some(), "error toasts announce assertively");
+
+    gloo_timers::future::TimeoutFuture::new(300).await;
+    assert_eq!(host.child_element_count(), 1, "the timed toast should have auto-dismissed");
+
+    // Dismiss the sticky one via its button
+    click(&host.query_selector("button[aria-label=Dismiss]").unwrap().unwrap());
+    wait_frame().await;
+    assert_eq!(host.child_element_count(), 0);
+
+    // And the handle API can clear directly
+    toaster.push(ToastOptions::default());
+    wait_frame().await;
+    assert_eq!(host.child_element_count(), 1);
+    toaster.dismiss(sticky + 1);
+    toaster.clear();
+    wait_frame().await;
+    assert_eq!(host.child_element_count(), 0);
+
+    handle.discard();
+}
+
+#[wasm_bindgen_test]
+async fn select_popup_is_theme_colored() {
+    dwui::theme::apply_style_sheet(None);
+
+    let tc = TestContainer::new();
+
+    dominator::append_dom(
+        &tc.dom_element(),
+        select!({
+            .label("Fruit".to_string())
+            .options(vec![("a".to_string(), "Apple".to_string())])
+        }),
+    );
+    wait_frames(2).await;
+
+    let select = tc.query("select").unwrap();
+    assert!(select.class_list().contains("dwui-select"));
+
+    // The popup follows the element's color-scheme, and engines that paint
+    // options themselves honor the explicit option colors.
+    let style = web_sys::window()
+        .unwrap()
+        .get_computed_style(&select)
+        .unwrap()
+        .unwrap();
+    assert_eq!(style.get_property_value("color-scheme").unwrap(), "dark");
+
+    let option = tc.query("option").unwrap();
+    let option_style = web_sys::window()
+        .unwrap()
+        .get_computed_style(&option)
+        .unwrap()
+        .unwrap();
+    assert!(
+        !option_style
+            .get_property_value("background-color")
+            .unwrap()
+            .is_empty(),
+        "option should have an explicit background"
+    );
 }

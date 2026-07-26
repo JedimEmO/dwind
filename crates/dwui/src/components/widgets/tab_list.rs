@@ -80,22 +80,16 @@ pub fn tab_list(props: TabListProps) -> Dom {
                         .attr("id", &tab_dom_id(&key))
                         .attr_signal("aria-selected", is_selected.signal().map(|v| if v { "true" } else { "false" }))
                         .attr_signal("tabindex", is_selected.signal().map(|v| if v { "0" } else { "-1" }))
-                        .dwclass!("h-10 p-l-4 p-r-4 cursor-pointer font-medium text-base transition-all bg-transparent border-none")
-                        .dwclass!("rounded-t-sm")
-                        .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400 is(.light *):focus-visible:dwui-ring-primary-600")
+                        .dwclass!("h-10 p-l-4 p-r-4 cursor-pointer font-medium text-base transition-colors bg-transparent")
+                        .dwclass!("rounded-t-md border-b-2")
+                        .dwclass!("dwui-focusable")
                         .dwclass_signal!("dwui-text-on-primary-50 is(.light *):dwui-text-on-primary-950", is_selected.signal())
+                        .dwclass_signal!("dwui-border-primary-400 is(.light *):dwui-border-primary-600", is_selected.signal())
                         .dwclass_signal!(
                             "dwui-text-on-primary-400 hover:dwui-text-on-primary-200 is(.light *):dwui-text-on-primary-600 is(.light *):hover:dwui-text-on-primary-800",
                             is_selected.signal().map(|v| !v)
                         )
-                        .style("outline", "none")
-                        .style_signal("box-shadow", is_selected.signal().map(|v| {
-                            if v {
-                                Some("inset 0 -2px 0 0 var(--dwui-primary-400)")
-                            } else {
-                                None
-                            }
-                        }))
+                        .dwclass_signal!("border-transparent", is_selected.signal().map(|v| !v))
                         .text(label)
                         .event(clone!(on_select, key => move |_: events::Click| {
                             (on_select)(key.clone());

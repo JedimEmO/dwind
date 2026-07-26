@@ -260,3 +260,31 @@
 .dwui-bg-warning-950 {
     background-color: var(--dwui-warning-950);
 }
+
+.dwui-bg-on-accent {
+    background-color: var(--dwui-on-accent);
+}
+
+.dwui-text-on-accent {
+    color: var(--dwui-on-accent);
+}
+
+.dwui-surface-info {
+    background-color: color-mix(in srgb, var(--dwui-primary-500) 12%, transparent);
+}
+
+.dwui-surface-success {
+    background-color: color-mix(in srgb, var(--dwui-success-500) 12%, transparent);
+}
+
+.dwui-surface-warning {
+    background-color: color-mix(in srgb, var(--dwui-warning-500) 12%, transparent);
+}
+
+.dwui-surface-error {
+    background-color: color-mix(in srgb, var(--dwui-error-500) 12%, transparent);
+}
+
+.dwui-scrim {
+    background-color: color-mix(in srgb, var(--dwui-void-950) 60%, transparent);
+}

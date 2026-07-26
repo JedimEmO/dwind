@@ -12,11 +12,12 @@ crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+console_error_panic_hook = "0.1.7"
 const_format = { workspace = true }
 dominator = { workspace = true }
 dwind = { path = "../../crates/dwind", version = "0.8.0" }
 dwind-macros = { path = "../../crates/dwind-macros", version = "0.5.0" }
-dwui = { path = "../../crates/dwui", version = "0.9.1" }
+dwui = { path = "../../crates/dwui", version = "0.10.0" }
 example-html-highlight-macro = { path = "../../crates/example-html-macro", version = "0.1.1" }
 futures = { workspace = true }
 futures-signals = { workspace = true }

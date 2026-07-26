@@ -71,6 +71,7 @@ fn hero() -> Dom {
                         .dwclass!("w-44")
                         .apply(magnetic(7.0))
                         .child(button!({
+                            .apply(|b| dwclass!(b, "w-full"))
                             .content(Some(text("Get started")))
                             .on_click(|_: events::Click| {
                                 go_to_url("#/docs/getting-started");
@@ -81,6 +82,7 @@ fn hero() -> Dom {
                         .dwclass!("w-44")
                         .apply(magnetic(7.0))
                         .child(button!({
+                            .apply(|b| dwclass!(b, "w-full"))
                             .button_type(ButtonType::Border)
                             .content(Some(text("Components")))
                             .on_click(|_: events::Click| {
@@ -390,7 +392,7 @@ fn components_preview() -> Dom {
         .child(html!("p", {
             .dwclass!("text-woodsmoke-400 m-t-4 m-b-8")
             .style("max-width", "40rem")
-            .text("Buttons, forms, tables, dialogs, date pickers, virtualized lists — 24 themeable building blocks, \
+            .text("Buttons, forms, tables, dialogs, drawers, toasts, date pickers, virtualized lists — over 30 themeable building blocks, \
                    each with ARIA semantics and keyboard support baked in.")
         }))
         .child(html!("div", {
@@ -433,7 +435,7 @@ fn components_preview() -> Dom {
                         }))
                         .child(badge!({
                             .variant(BadgeVariant::Outline)
-                            .content(Some(text("v0.9.0")))
+                            .content(Some(text("v0.10.0")))
                         }))
                     }),
                     breadcrumbs!({
@@ -452,6 +454,7 @@ fn components_preview() -> Dom {
                 .dwclass!("w-64")
                 .apply(magnetic(6.0))
                 .child(button!({
+                    .apply(|b| dwclass!(b, "w-full"))
                     .button_type(ButtonType::Border)
                     .content(Some(text("Browse all components →")))
                     .on_click(|_: events::Click| {
@@ -509,6 +512,7 @@ fn final_cta() -> Dom {
                     .dwclass!("w-44")
                     .apply(magnetic(7.0))
                     .child(button!({
+                        .apply(|b| dwclass!(b, "w-full"))
                         .content(Some(text("Read the docs")))
                         .on_click(|_: events::Click| {
                             go_to_url("#/docs/getting-started");
@@ -519,6 +523,7 @@ fn final_cta() -> Dom {
                     .dwclass!("w-44")
                     .apply(magnetic(7.0))
                     .child(button!({
+                        .apply(|b| dwclass!(b, "w-full"))
                         .button_type(ButtonType::Border)
                         .content(Some(text("Open the gallery")))
                         .on_click(|_: events::Click| {

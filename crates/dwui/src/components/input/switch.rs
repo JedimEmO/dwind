@@ -60,17 +60,19 @@ pub fn switch(props: SwitchProps) -> Dom {
             .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
             .dwclass!("w-11 h-6 rounded-full cursor-pointer transition-colors flex-none border-none p-0")
             .dwclass!("disabled:cursor-not-allowed disabled:opacity-60")
-            .dwclass!("focus-visible:ring-2 focus-visible:dwui-ring-primary-400 is(.light *):focus-visible:dwui-ring-primary-600")
+            .dwclass!("dwui-focusable")
             .dwclass_signal!("dwui-bg-primary-500 is(.light *):dwui-bg-primary-400", checked.signal())
             .dwclass_signal!("dwui-bg-void-600 is(.light *):dwui-bg-void-300", checked.signal().map(|v| !v))
-            .style("outline", "none")
             .style("position", "relative")
             .child(html!("span", {
-                .dwclass!("w-5 h-5 rounded-full bg-white block shadow-md")
+                .dwclass!("w-5 h-5 rounded-full dwui-bg-on-accent block shadow-md")
                 .style("position", "absolute")
                 .style("top", "2px")
-                .style("transition", "left 150ms ease-out")
-                .style_signal("left", checked.signal().map(|v| if v { "22px" } else { "2px" }))
+                .style("left", "2px")
+                .style("transition", "transform 150ms ease-out")
+                .style_signal("transform", checked.signal().map(|v| {
+                    if v { "translateX(1.25rem)" } else { "translateX(0)" }
+                }))
             }))
             .event(clone!(checked_state => move |_: events::Click| {
                 (on_change)(!checked_state.get());

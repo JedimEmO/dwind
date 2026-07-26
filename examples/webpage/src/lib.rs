@@ -36,6 +36,7 @@ use web_sys::window;
 #[cfg(not(test))]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]
 async fn main() {
+    console_error_panic_hook::set_once();
     wasm_log::init(Default::default());
 
     dominator::replace_dom(&body().parent_node().unwrap(), &body(), main_view());

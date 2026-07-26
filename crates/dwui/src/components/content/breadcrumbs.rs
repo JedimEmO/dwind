@@ -56,7 +56,7 @@ pub fn breadcrumbs(props: BreadcrumbsProps) -> Dom {
                                 b.child(html!("a", {
                                     .attr("href", &href)
                                     .dwclass!("dwui-text-on-primary-400 hover:dwui-text-primary-300 is(.light *):dwui-text-on-primary-600 is(.light *):hover:dwui-text-primary-700")
-                                    .dwclass!("transition-colors")
+                                    .dwclass!("transition-colors dwui-focusable")
                                     .style("text-decoration", "none")
                                     .text(&label)
                                 }))

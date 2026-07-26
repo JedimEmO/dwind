@@ -131,8 +131,7 @@ pub fn data_table(props: DataTableProps) -> Dom {
                                         .dwclass!("bg-transparent border-none font-bold text-sm")
                                         .dwclass!("dwui-text-on-primary-200 hover:dwui-text-primary-300")
                                         .dwclass!("is(.light *):dwui-text-on-primary-800 is(.light *):hover:dwui-text-primary-700")
-                                        .dwclass!("transition-colors focus-visible:ring-2 focus-visible:dwui-ring-primary-400")
-                                        .style("outline", "none")
+                                        .dwclass!("transition-colors dwui-focusable")
                                         .child(html!("span", { .text(&column.label) }))
                                         .child(html!("span", {
                                             .dwclass!("inline-flex align-items-center")

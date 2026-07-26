@@ -8,15 +8,19 @@ use dwind::prelude::*;
 use futures_signals::map_ref;
 use futures_signals::signal::{and, not, or, Mutable, SignalExt};
 use futures_signals_component_macro::component;
-use web_sys::HtmlInputElement;
+use web_sys::HtmlTextAreaElement;
 
-pub enum TextInputType {
-    Text,
-    Password,
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum TextAreaResize {
+    None,
+    Vertical,
+    Both,
 }
 
-#[component(render_fn=text_input)]
-struct TextInput {
+/// A multi-line text field sharing the labelled field surface of
+/// [`text_input`](crate::components::input::text_input::text_input).
+#[component(render_fn = text_area)]
+struct TextArea {
     #[default(Box::new(Mutable::new("".to_string())))]
     value: dyn InputValueWrapper + 'static,
 
@@ -29,29 +33,25 @@ struct TextInput {
     label: String,
 
     #[signal]
+    #[default(4)]
+    rows: u32,
+
+    #[signal]
     #[default(false)]
     disabled: bool,
 
-    #[default(Box::new(|| {}))]
-    on_submit: dyn (FnMut() -> ()) + 'static,
-
-    #[signal]
-    #[default(TextInputType::Text)]
-    input_type: TextInputType,
-
-    #[default(false)]
-    claim_focus: bool,
+    #[default(TextAreaResize::Vertical)]
+    resize: TextAreaResize,
 }
 
-pub fn text_input(props: TextInputProps) -> Dom {
-    let TextInputProps {
+pub fn text_area(props: TextAreaProps) -> Dom {
+    let TextAreaProps {
         value,
         is_valid,
         label,
+        rows,
         disabled,
-        mut on_submit,
-        input_type,
-        claim_focus,
+        resize,
         apply,
     } = props;
 
@@ -59,7 +59,6 @@ pub fn text_input(props: TextInputProps) -> Dom {
     let disabled = disabled.broadcast();
 
     let has_label = label.signal_ref(|v| v.len() > 0);
-
     let has_value = value.value_signal_cloned().map(|v| v.len() > 0);
 
     let is_focused = Mutable::new(false);
@@ -88,26 +87,34 @@ pub fn text_input(props: TextInputProps) -> Dom {
         or(or(is_focused.signal(), has_value), not(is_valid.signal())),
     );
 
-    let input_id = component_id("text-input");
+    let input_id = component_id("text-area");
     let error_id = format!("{}-error", input_id);
 
     html!("div", {
         .dwclass!("flex flex-col w-full")
         .child(html!("div", {
-            .dwclass!("h-10 flex-none")
+            .dwclass!("flex-none")
             .dwclass_signal!("opacity-60", disabled.signal())
+            .style("--dwui-field-label-top", "1.25rem")
             .apply(field_surface_mixin(
                 label.signal_cloned(),
                 raise_label,
                 validation_signal.signal_cloned(),
                 input_id.clone(),
             ))
-            .child(html!("input" => HtmlInputElement, {
+            .child(html!("textarea" => HtmlTextAreaElement, {
                 .attr("id", &input_id)
-                .dwclass!("w-full h-full bg-transparent border-none text-base p-l-3 p-r-3 p-t-3")
+                .dwclass!("w-full bg-transparent border-none text-base p-l-3 p-r-3 p-t-5 p-b-2 block")
                 .dwclass!("dwui-text-on-primary-200 is(.light *):dwui-text-on-primary-900")
                 .dwclass_signal!("cursor-not-allowed", disabled.signal())
                 .style("outline", "none")
+                .style("font-family", "inherit")
+                .style("resize", match resize {
+                    TextAreaResize::None => "none",
+                    TextAreaResize::Vertical => "vertical",
+                    TextAreaResize::Both => "both",
+                })
+                .attr_signal("rows", rows.map(|v| v.to_string()))
                 .attr_signal("disabled", disabled.signal().map(|v| if v { Some("disabled") } else { None }))
                 .attr_signal("aria-invalid", is_valid.signal().map(|valid| if valid { None } else { Some("true") }))
                 .attr_signal("aria-describedby", is_valid.signal().map(clone!(error_id => move |valid| {
@@ -117,13 +124,6 @@ pub fn text_input(props: TextInputProps) -> Dom {
                         Some(error_id.clone())
                     }
                 })))
-                .focused(claim_focus)
-                .attr_signal("type", input_type.map(|t| {
-                    match t {
-                        TextInputType::Text => { "text" }
-                        TextInputType::Password => { "password" }
-                    }
-                }))
                 .with_node!(element => {
                     .future(value.value_signal_cloned().for_each(clone!(element => move |v| {
                         element.set_value(&v);
@@ -143,14 +143,9 @@ pub fn text_input(props: TextInputProps) -> Dom {
                 .event(clone!(is_focused => move |_: events::Focus| {
                     is_focused.set(true);
                 }))
-                .event(move |event: events::KeyDown| {
-                    if event.key() == "Enter" {
-                        on_submit()
-                    }
-                })
             }))
         }))
         .child(field_error_row(validation_signal.signal_cloned(), &input_id))
-        .apply_if(apply.is_some(),|b| b.apply(apply.unwrap()))
+        .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))
     })
 }

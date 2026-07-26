@@ -52,3 +52,14 @@ web-sys = { version = "0.3", features = [
     "Window",
     "HtmlSelectElement",
 ] }
+
+# Debug info dominates a wasm test binary: the components suite compiled to
+# 149 MB with full debug info, of which only ~3 MB was code. Line tables keep
+# panic backtraces pointing at real files and lines while taking the binary to
+# 28 MB, so every browser test run fetches and instantiates a fifth of the
+# bytes.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.test]
+debug = "line-tables-only"

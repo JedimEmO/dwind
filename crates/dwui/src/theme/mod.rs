@@ -41,8 +41,52 @@ dwkeyframes! {
         "0%, 100%" => "opacity: 1;",
         "50%" => "opacity: 0.45;",
     }
+
+    #[name = "dwui-toast-in"]
+    toast_in {
+        "from" => "opacity: 0; transform: translateY(0.5rem);",
+        "to" => "opacity: 1; transform: translateY(0);",
+    }
+
+    #[name = "dwui-slide-in-right"]
+    slide_in_right {
+        "from" => "transform: translateX(100%);",
+        "to" => "transform: translateX(0);",
+    }
+
+    #[name = "dwui-slide-in-left"]
+    slide_in_left {
+        "from" => "transform: translateX(-100%);",
+        "to" => "transform: translateX(0);",
+    }
 }
 
+/// Layering scale for overlaid components. Every dwui z-index comes from here
+/// so overlays always stack predictably: tooltips under transient overlays
+/// (popovers, dropdowns), overlays under modals/drawers, toasts above all.
+pub mod layers {
+    pub const TOOLTIP: &str = "30";
+    pub const OVERLAY: &str = "40";
+    pub const MODAL: &str = "50";
+    pub const TOAST: &str = "60";
+}
+
+// Design-language scales
+// ----------------------
+// Radius: containers (card, modal, alert, popovers) `rounded-lg`; controls and
+//   fields (buttons, inputs, tabs, checkbox, list rows) `rounded-md`; pills
+//   (badge, switch track, avatar) `rounded-full`.
+// Control heights: sm/md/lg = `h-8`/`h-10`/`h-12`; field surfaces are always
+//   `h-10` in every state (validation must never change field height).
+// Padding: modal `p-6`; card and alert `p-4`; table cells `p-3`; field
+//   horizontal padding `p-l-3 p-r-3`.
+// Transitions: `transition-colors duration-150` is the standard; transform and
+//   opacity animations use explicit inline transitions. `transition-all` is
+//   banned in components.
+// Focus: interactive elements take the `dwui-focusable` class (outline-based
+//   `:focus-visible` ring); field wrappers take `dwui-field-surface`
+//   (`:focus-within` ring). Never use box-shadow based rings — they collide
+//   with `shadow-*` utilities.
 pub fn apply_style_sheet(colors: Option<crate::theme::colors::ColorsCssVariables>) {
     stylesheet!(":root", {
         .raw(colors.unwrap_or_default().to_style_sheet_raw())
@@ -52,6 +96,77 @@ pub fn apply_style_sheet(colors: Option<crate::theme::colors::ColorsCssVariables
 
     base::apply_base_stylesheet();
     colors::apply_colors_stylesheet();
+    controls::apply_controls_stylesheet();
+}
+
+/// Native-control chrome that can only be styled through stylesheet rules:
+/// vendor pseudo-elements (slider track/thumb) and the select's option popup.
+///
+/// Every vendor pseudo-element lives in its own rule, and `-moz` rules are
+/// only inserted in Firefox while `-webkit` rules are kept away from it:
+/// dominator panics when `insertRule` rejects a selector, and each engine
+/// rejects (some of) the other's vendor selectors. Never combine vendors in
+/// one rule, and never append a pseudo-class to a vendor pseudo-element.
+pub mod controls {
+    use dominator::stylesheet;
+    use std::sync::Once;
+
+    pub fn apply_controls_stylesheet() {
+        static ONCE: Once = Once::new();
+
+        ONCE.call_once(|| {
+            let is_firefox = web_sys::window()
+                .and_then(|w| w.navigator().user_agent().ok())
+                .map(|ua| ua.to_lowercase().contains("firefox"))
+                .unwrap_or(false);
+
+            stylesheet!(".dwui-slider", {
+                .raw("appearance: none; -webkit-appearance: none; background: transparent;")
+            });
+
+            // The select's option popup is native chrome: it ignores the
+            // classes on the element, and takes its light/dark rendering from
+            // the element's color-scheme. Without this, a dark-themed select
+            // gets a light popup with the select's light-gray text — unreadable.
+            stylesheet!(".dwui-select", {
+                .raw("color-scheme: dark;")
+            });
+            stylesheet!(".light .dwui-select", {
+                .raw("color-scheme: light;")
+            });
+            // Engines that render the popup themselves (Firefox, Chrome on
+            // some platforms) honor explicit option colors too.
+            stylesheet!(".dwui-select option", {
+                .raw("background-color: var(--dwui-void-900); color: var(--dwui-text-on-primary-200);")
+            });
+            stylesheet!(".light .dwui-select option", {
+                .raw("background-color: var(--dwui-void-50); color: var(--dwui-text-on-primary-900);")
+            });
+
+            // Track: filled up to --dwui-slider-fill, muted after it.
+            let track = "height: 0.25rem; border-radius: 9999px; \
+                background: linear-gradient(to right, \
+                var(--dwui-primary-400) var(--dwui-slider-fill, 0%), \
+                var(--dwui-void-600) var(--dwui-slider-fill, 0%));";
+
+            let thumb = "box-sizing: border-box; appearance: none; -webkit-appearance: none; \
+                width: 1rem; height: 1rem; border-radius: 9999px; \
+                background: var(--dwui-on-accent); \
+                border: 2px solid var(--dwui-primary-400); cursor: pointer;";
+
+            if is_firefox {
+                stylesheet!(".dwui-slider::-moz-range-track", { .raw(track) });
+                stylesheet!(".dwui-slider::-moz-range-thumb", { .raw(thumb) });
+            } else {
+                stylesheet!(".dwui-slider::-webkit-slider-runnable-track", { .raw(track) });
+                // WebKit renders the thumb inside the track's box, so it has
+                // to be pulled up to center on the 0.25rem track.
+                stylesheet!(".dwui-slider::-webkit-slider-thumb", {
+                    .raw(&format!("{} margin-top: -0.375rem;", thumb))
+                });
+            }
+        });
+    }
 }
 
 pub mod prelude {
@@ -90,6 +205,15 @@ pub mod colors {
             )
         }
 
+        /// Overrides the `--dwui-on-accent` color: the color painted *on top
+        /// of* primary-filled controls (switch knob, checkbox checkmark,
+        /// filled badge text). Defaults to near-white, which suits most
+        /// primary palettes; set a dark value when the primary ramp is light.
+        pub fn with_on_accent(mut self, on_accent: impl Into<String>) -> Self {
+            self.dwui_on_accent = on_accent.into();
+            self
+        }
+
         /// Like [`Self::new`], but with explicit success and warning palettes.
         pub fn with_status_colors(
             primary: &BTreeMap<u32, String>,
@@ -100,6 +224,8 @@ pub mod colors {
             warning: &BTreeMap<u32, String>,
         ) -> Self {
             Self {
+                dwui_on_accent: "#fafafa".to_string(),
+
                 dwui_success_50: success.get(&50).unwrap().clone(),
                 dwui_success_100: success.get(&100).unwrap().clone(),
                 dwui_success_200: success.get(&200).unwrap().clone(),
@@ -282,44 +408,7 @@ pub mod colors {
     use dwind::border_color_generator;
     use dwind::gradient_from_generator;
     use dwind::gradient_to_generator;
-    use dwind::ring_generator;
     use dwind::text_color_generator;
-
-    dwgenerate_map!(
-        "dwui-ring-primary",
-        "ring-",
-        [
-            ("50", "var(--dwui-primary-50)"),
-            ("100", "var(--dwui-primary-100)"),
-            ("200", "var(--dwui-primary-200)"),
-            ("300", "var(--dwui-primary-300)"),
-            ("400", "var(--dwui-primary-400)"),
-            ("500", "var(--dwui-primary-500)"),
-            ("600", "var(--dwui-primary-600)"),
-            ("700", "var(--dwui-primary-700)"),
-            ("800", "var(--dwui-primary-800)"),
-            ("900", "var(--dwui-primary-900)"),
-            ("950", "var(--dwui-primary-950)")
-        ]
-    );
-
-    dwgenerate_map!(
-        "dwui-ring-error",
-        "ring-",
-        [
-            ("50", "var(--dwui-error-50)"),
-            ("100", "var(--dwui-error-100)"),
-            ("200", "var(--dwui-error-200)"),
-            ("300", "var(--dwui-error-300)"),
-            ("400", "var(--dwui-error-400)"),
-            ("500", "var(--dwui-error-500)"),
-            ("600", "var(--dwui-error-600)"),
-            ("700", "var(--dwui-error-700)"),
-            ("800", "var(--dwui-error-800)"),
-            ("900", "var(--dwui-error-900)"),
-            ("950", "var(--dwui-error-950)")
-        ]
-    );
 
     dwgenerate_map!(
         "dwui-border-primary",

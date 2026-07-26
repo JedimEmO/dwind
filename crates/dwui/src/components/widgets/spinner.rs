@@ -11,15 +11,6 @@ pub enum SpinnerSize {
     Large,
 }
 
-impl SpinnerSize {
-    fn px(self) -> &'static str {
-        match self {
-            SpinnerSize::Small => "16",
-            SpinnerSize::Medium => "24",
-            SpinnerSize::Large => "40",
-        }
-    }
-}
 
 /// A loading spinner exposed to assistive technology as `role="status"`.
 #[component(render_fn = spinner)]
@@ -46,11 +37,14 @@ pub fn spinner(props: SpinnerProps) -> Dom {
         .dwclass!("dwui-text-primary-400 is(.light *):dwui-text-primary-600")
         .child(html!("span", {
             .dwclass!("inline-flex align-items-center justify-center")
+            .dwclass_signal!("w-4 h-4", size.signal().map(|s| s == SpinnerSize::Small))
+            .dwclass_signal!("w-6 h-6", size.signal().map(|s| s == SpinnerSize::Medium))
+            .dwclass_signal!("w-10 h-10", size.signal().map(|s| s == SpinnerSize::Large))
             .style("animation", "dwui-spin 0.8s linear infinite")
             .child(svg!("svg", {
             .attr("viewBox", "0 0 24 24")
-            .attr_signal("width", size.signal().map(|s| s.px()))
-            .attr_signal("height", size.signal().map(|s| s.px()))
+            .attr("width", "100%")
+            .attr("height", "100%")
             .attr("fill", "none")
             .attr("aria-hidden", "true")
             .child(svg!("circle", {

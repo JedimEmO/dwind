@@ -13,7 +13,7 @@ pub fn example_card_modal() -> Dom {
     card!({
         .scheme(ColorScheme::Void)
         .apply(clone!(show_modal, show_modal_small => move |b| {
-            dwclass!(b, "p-4 w-64 flex-initial flex flex-col gap-4")
+            dwclass!(b, "w-64 flex-initial flex flex-col gap-4")
             .children([
                 heading!({
                     .content(text("Modal Example"))
@@ -21,12 +21,14 @@ pub fn example_card_modal() -> Dom {
                     .level(HeadingLevel::H2)
                 }),
                 button!({
+                    .apply(|b| dwclass!(b, "w-full"))
                     .content(Some(text("Open Large Modal")))
                     .on_click(clone!(show_modal => move |_: events::Click| {
                         show_modal.set(true);
                     }))
                 }),
                 button!({
+                    .apply(|b| dwclass!(b, "w-full"))
                     .button_type(ButtonType::Border)
                     .content(Some(text("Open Small Modal")))
                     .on_click(clone!(show_modal_small => move |_: events::Click| {
