@@ -14,6 +14,12 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  # The browser gets this many seconds to load the test module and report back.
+  # The default 20s is measured against a debug wasm that grows with every
+  # component, and a two-core runner is slower than any dev machine — the
+  # components suite hit that ceiling and CI reported "Failed to detect test as
+  # having been run" without a single test failing.
+  WASM_BINDGEN_TEST_TIMEOUT: 120
 
 jobs:
   build:
