@@ -37,7 +37,7 @@ struct VirtualScroll {
     #[default(400.0)]
     height: f64,
 
-    #[default(Box::new(|_| html!("div")))]
+    #[required]
     render_item: dyn Fn(usize) -> Dom + 'static,
 
     #[default(Box::new(|| {}))]
@@ -50,6 +50,7 @@ struct VirtualScroll {
     /// Accessible name for the list
     #[signal]
     #[default("List".to_string())]
+    #[into]
     aria_label: String,
 }
 
@@ -174,7 +175,7 @@ pub fn virtual_scroll(props: VirtualScrollProps) -> Dom {
                         .child(spinner(
                             SpinnerProps::new()
                                 .size(SpinnerSize::Small)
-                                .label("Loading more".to_string()),
+                                .label("Loading more"),
                         ))
                     })
                 })

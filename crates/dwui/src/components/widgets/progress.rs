@@ -24,6 +24,7 @@ struct Progress {
     /// Accessible name for the progress bar
     #[signal]
     #[default("Progress".to_string())]
+    #[into]
     label: String,
 }
 

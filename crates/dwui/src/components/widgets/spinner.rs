@@ -22,6 +22,7 @@ struct Spinner {
     /// Accessible label announced while loading
     #[signal]
     #[default("Loading".to_string())]
+    #[into]
     label: String,
 }
 

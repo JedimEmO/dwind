@@ -22,10 +22,12 @@ pub enum TooltipPosition {
 struct Tooltip {
     #[signal]
     #[default(None)]
+    #[into]
     anchor: Option<Dom>,
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     text: String,
 
     #[signal]

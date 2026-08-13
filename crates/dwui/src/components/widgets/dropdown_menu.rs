@@ -25,6 +25,7 @@ struct DropdownMenu {
     /// Trigger button text
     #[signal]
     #[default("Menu".to_string())]
+    #[into]
     label: String,
 
     #[default(Box::new(|_|{}))]

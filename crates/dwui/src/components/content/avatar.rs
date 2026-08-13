@@ -27,11 +27,13 @@ struct Avatar {
     /// Image URL; when `None`, initials derived from `name` are shown
     #[signal]
     #[default(None)]
+    #[into]
     src: Option<String>,
 
     /// Display name; used for the `alt` text and initials fallback
     #[signal]
     #[default("".to_string())]
+    #[into]
     name: String,
 
     #[signal]

@@ -25,6 +25,7 @@ struct DatePicker {
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     label: String,
 
     #[signal]

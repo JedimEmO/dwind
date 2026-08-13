@@ -26,6 +26,7 @@ struct TabList {
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     selected: String,
 
     #[default(Box::new(|_|{}))]
@@ -34,6 +35,7 @@ struct TabList {
     /// Accessible name for the tab list
     #[signal]
     #[default("Tabs".to_string())]
+    #[into]
     aria_label: String,
 }
 

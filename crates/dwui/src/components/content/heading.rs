@@ -1,7 +1,7 @@
 use crate::theme::prelude::*;
 use dominator::{html, Dom};
 use dwind::prelude::*;
-use futures_signals::signal::{option, SignalExt};
+use futures_signals::signal::SignalExt;
 use futures_signals_component_macro::component;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -58,6 +58,7 @@ impl HeadingLevel {
 #[component(render_fn = heading)]
 struct Heading {
     #[signal]
+    #[required]
     content: Dom,
 
     #[signal]
@@ -85,6 +86,6 @@ pub fn heading(props: HeadingProps) -> Dom {
         .dwclass!("w-auto font-semibold m-0")
         .dwclass!("dwui-text-on-primary-100 is(.light *):dwui-text-on-primary-900")
         .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))
-        .child_signal(option(content))
+        .child_signal(content.map(Some))
     })
 }

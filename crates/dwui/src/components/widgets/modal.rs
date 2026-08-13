@@ -73,6 +73,7 @@ pub enum ModalSize {
 struct Modal {
     #[signal]
     #[default(None)]
+    #[into]
     content: Option<Dom>,
 
     #[signal]
@@ -93,6 +94,7 @@ struct Modal {
     /// Accessible name announced by screen readers when the dialog opens
     #[signal]
     #[default("Dialog".to_string())]
+    #[into]
     aria_label: String,
 }
 

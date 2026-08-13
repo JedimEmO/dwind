@@ -24,6 +24,7 @@ struct Accordion {
 
     /// Index of the panel that starts open
     #[default(None)]
+    #[into]
     initial_open: Option<usize>,
 }
 

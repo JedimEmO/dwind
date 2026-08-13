@@ -96,7 +96,7 @@ async fn button_is_a_real_button_and_handles_clicks() {
     dominator::append_dom(
         &tc.dom_element(),
         button!({
-            .content(Some(text("Click me")))
+            .content(text("Click me"))
             .on_click(clone!(clicked => move |_| {
                 clicked.set(clicked.get() + 1);
             }))
@@ -122,7 +122,7 @@ async fn button_disabled_signal_sets_disabled_attribute() {
     dominator::append_dom(
         &tc.dom_element(),
         button!({
-            .content(Some(text("Disabled?")))
+            .content(text("Disabled?"))
             .disabled_signal(disabled.signal())
         }),
     );
@@ -144,7 +144,7 @@ async fn text_input_associates_label_with_input() {
     dominator::append_dom(
         &tc.dom_element(),
         text_input!({
-            .label("Username".to_string())
+            .label("Username")
         }),
     );
     wait_frame().await;
@@ -166,7 +166,7 @@ async fn text_input_exposes_validation_to_assistive_technology() {
     dominator::append_dom(
         &tc.dom_element(),
         text_input!({
-            .label("Email".to_string())
+            .label("Email")
             .is_valid_signal(validity.signal_cloned())
         }),
     );
@@ -200,7 +200,7 @@ async fn text_input_writes_back_to_the_value_wrapper() {
         &tc.dom_element(),
         text_input!({
             .value(value.clone())
-            .label("Greeting".to_string())
+            .label("Greeting")
         }),
     );
     wait_frames(2).await;
@@ -221,7 +221,7 @@ async fn select_associates_label_and_renders_options() {
     dominator::append_dom(
         &tc.dom_element(),
         select!({
-            .label("Fruit".to_string())
+            .label("Fruit")
             .options(vec![
                 ("a".to_string(), "Apple".to_string()),
                 ("b".to_string(), "Banana".to_string()),
@@ -249,7 +249,7 @@ async fn slider_labels_both_inputs() {
         &tc.dom_element(),
         slider!({
             .value(value.clone())
-            .label("Volume".to_string())
+            .label("Volume")
         }),
     );
     wait_frames(2).await;
@@ -277,7 +277,7 @@ async fn switch_exposes_and_toggles_state() {
         &tc.dom_element(),
         switch!({
             .checked_signal(checked.signal())
-            .label("Notifications".to_string())
+            .label("Notifications")
             .on_change(clone!(checked => move |value| {
                 checked.set(value);
             }))
@@ -317,7 +317,7 @@ async fn checkbox_exposes_and_toggles_state() {
         &tc.dom_element(),
         checkbox!({
             .checked_signal(checked.signal())
-            .label("Accept terms".to_string())
+            .label("Accept terms")
             .on_change(clone!(checked => move |value| {
                 checked.set(value);
             }))
@@ -350,7 +350,7 @@ async fn progress_exposes_value_to_assistive_technology() {
         &tc.dom_element(),
         progress!({
             .value_signal(value.signal())
-            .label("Upload progress".to_string())
+            .label("Upload progress")
         }),
     );
     wait_frame().await;
@@ -398,11 +398,11 @@ async fn modal_has_dialog_semantics_and_closes() {
         &tc.dom_element(),
         modal!({
             .open_signal(open.signal())
-            .aria_label("Example dialog".to_string())
+            .aria_label("Example dialog")
             .on_close(clone!(open => move || {
                 open.set(false);
             }))
-            .content(Some(text("Dialog body")))
+            .content(text("Dialog body"))
         }),
     );
     wait_frame().await;
@@ -435,7 +435,7 @@ async fn tab_list_follows_the_aria_tabs_pattern() {
         &tc.dom_element(),
         tab_list!({
             .selected_signal(selected.signal_cloned())
-            .aria_label("Example tabs".to_string())
+            .aria_label("Example tabs")
             .tabs(vec![
                 ("one".to_string(), "One".to_string()),
                 ("two".to_string(), "Two".to_string()),
@@ -511,7 +511,7 @@ async fn badge_renders_content() {
     dominator::append_dom(
         &tc.dom_element(),
         badge!({
-            .content(Some(text("New")))
+            .content(text("New"))
             .variant(BadgeVariant::Primary)
         }),
     );
@@ -529,14 +529,14 @@ async fn alert_roles_match_severity() {
         &tc.dom_element(),
         alert!({
             .variant(AlertVariant::Error)
-            .title("Something failed".to_string())
+            .title("Something failed")
         }),
     );
     dominator::append_dom(
         &tc.dom_element(),
         alert!({
             .variant(AlertVariant::Success)
-            .title("All good".to_string())
+            .title("All good")
         }),
     );
     wait_frame().await;
@@ -554,7 +554,7 @@ async fn alert_dismiss_hides_and_notifies() {
         &tc.dom_element(),
         alert!({
             .variant(AlertVariant::Info)
-            .title("Heads up".to_string())
+            .title("Heads up")
             .dismissible(true)
             .on_dismiss(clone!(dismissed => move || {
                 dismissed.set(true);
@@ -650,8 +650,8 @@ async fn tooltip_is_linked_and_hidden_by_default() {
     dominator::append_dom(
         &tc.dom_element(),
         tooltip!({
-            .anchor(Some(text("hover me")))
-            .text("More information".to_string())
+            .anchor(text("hover me"))
+            .text("More information")
         }),
     );
     wait_frame().await;
@@ -673,7 +673,7 @@ async fn avatar_falls_back_to_initials() {
     dominator::append_dom(
         &tc.dom_element(),
         avatar!({
-            .name("Ada Lovelace".to_string())
+            .name("Ada Lovelace")
         }),
     );
     wait_frames(2).await;
@@ -695,7 +695,7 @@ async fn avatar_renders_image_when_src_given() {
         &tc.dom_element(),
         avatar!({
             .src(Some("data:image/gif;base64,R0lGODlhAQABAAAAACw=".to_string()))
-            .name("Grace Hopper".to_string())
+            .name("Grace Hopper")
         }),
     );
     wait_frames(2).await;
@@ -755,7 +755,7 @@ async fn spinner_announces_loading() {
     dominator::append_dom(
         &tc.dom_element(),
         spinner!({
-            .label("Crunching numbers".to_string())
+            .label("Crunching numbers")
         }),
     );
     wait_frame().await;
@@ -774,7 +774,7 @@ async fn divider_is_a_separator() {
     dominator::append_dom(
         &tc.dom_element(),
         divider!({
-            .label("or".to_string())
+            .label("or")
         }),
     );
     wait_frame().await;
@@ -791,7 +791,7 @@ async fn button_sizes_set_height_classes() {
         &tc.dom_element(),
         button!({
             .size(ButtonSize::Small)
-            .content(Some(text("Small")))
+            .content(text("Small"))
         }),
     );
     wait_frame().await;
@@ -995,7 +995,7 @@ async fn date_picker_opens_a_grid_and_selects_a_day() {
     dominator::append_dom(
         &tc.dom_element(),
         date_picker!({
-            .label("Start date".to_string())
+            .label("Start date")
             .value_signal(value.signal())
             .on_change(clone!(value => move |date| {
                 value.set(Some(date));
@@ -1047,7 +1047,7 @@ async fn date_picker_navigates_months() {
     dominator::append_dom(
         &tc.dom_element(),
         date_picker!({
-            .label("Date".to_string())
+            .label("Date")
             .value_signal(value.signal())
         }),
     );
@@ -1117,10 +1117,7 @@ async fn focus_standard_replaces_the_global_reset() {
 
     let tc = TestContainer::new();
 
-    dominator::append_dom(
-        &tc.dom_element(),
-        button!({ .content(Some(text("Focus me"))) }),
-    );
+    dominator::append_dom(&tc.dom_element(), button!({ .content(text("Focus me")) }));
     wait_frame().await;
 
     assert_focusable(&tc.query("button").unwrap());
@@ -1149,8 +1146,8 @@ async fn interactive_controls_carry_the_focusable_marker() {
     dominator::append_dom(
         &tc.dom_element(),
         html!("div", {
-            .child(checkbox!({ .label("Check".to_string()) }))
-            .child(switch!({ .label("Toggle".to_string()) }))
+            .child(checkbox!({ .label("Check") }))
+            .child(switch!({ .label("Toggle") }))
         }),
     );
     wait_frame().await;
@@ -1171,7 +1168,7 @@ async fn field_reserves_error_space_and_keeps_height() {
     dominator::append_dom(
         &tc.dom_element(),
         text_input!({
-            .label("Email".to_string())
+            .label("Email")
             .is_valid_signal(validity.signal_cloned())
         }),
     );
@@ -1209,16 +1206,16 @@ async fn text_input_and_select_support_disabled() {
         &tc.dom_element(),
         html!("div", {
             .child(text_input!({
-                .label("Name".to_string())
+                .label("Name")
                 .disabled_signal(disabled.signal())
             }))
             .child(select!({
-                .label("Fruit".to_string())
+                .label("Fruit")
                 .disabled_signal(disabled.signal())
                 .options(vec![("a".to_string(), "Apple".to_string())])
             }))
             .child(slider!({
-                .label("Volume".to_string())
+                .label("Volume")
                 .disabled_signal(disabled.signal())
             }))
         }),
@@ -1253,7 +1250,7 @@ async fn text_area_syncs_value_and_reports_invalid() {
         &tc.dom_element(),
         text_area!({
             .value(value.clone())
-            .label("Bio".to_string())
+            .label("Bio")
             .rows(6u32)
             .is_valid_signal(validity.signal_cloned())
         }),
@@ -1302,9 +1299,9 @@ async fn number_input_steps_and_clamps() {
         &tc.dom_element(),
         number_input!({
             .value(value.clone())
-            .label("Amount".to_string())
-            .min(Some(0.0))
-            .max(Some(6.0))
+            .label("Amount")
+            .min(0.0)
+            .max(6.0)
             .step(2.0)
         }),
     );
@@ -1345,7 +1342,7 @@ async fn radio_group_selection_and_roving_tabindex() {
     dominator::append_dom(
         &tc.dom_element(),
         radio_group!({
-            .label("Flavor".to_string())
+            .label("Flavor")
             .value_signal(value.signal_cloned())
             .options(vec![
                 ("a".to_string(), "Almond".to_string()),
@@ -1417,7 +1414,7 @@ async fn slider_chrome_tracks_fill_percentage() {
         &tc.dom_element(),
         slider!({
             .value(value.clone())
-            .label("Volume".to_string())
+            .label("Volume")
             .min(0.0f32)
             .max(100.0f32)
         }),
@@ -1449,8 +1446,8 @@ async fn checkbox_and_switch_use_the_on_accent_token() {
     dominator::append_dom(
         &tc.dom_element(),
         html!("div", {
-            .child(checkbox!({ .checked(true) .label("Check".to_string()) }))
-            .child(switch!({ .checked(true) .label("Toggle".to_string()) }))
+            .child(checkbox!({ .checked(true) .label("Check") }))
+            .child(switch!({ .checked(true) .label("Toggle") }))
         }),
     );
     wait_frames(2).await;
@@ -1536,10 +1533,10 @@ async fn modal_traps_tab_focus() {
         &tc.dom_element(),
         modal!({
             .open(true)
-            .aria_label("Trap test".to_string())
-            .content(Some(html!("div", {
+            .aria_label("Trap test")
+            .content(html!("div", {
                 .child(html!("button", { .attr("id", "trap-inner") .text("Inner") }))
-            })))
+            }))
         }),
     );
     wait_frames(2).await;
@@ -1589,7 +1586,7 @@ async fn alert_dismiss_button_is_an_icon_with_a_label() {
     dominator::append_dom(
         &tc.dom_element(),
         alert!({
-            .title("Closable".to_string())
+            .title("Closable")
             .dismissible(true)
         }),
     );
@@ -1655,7 +1652,7 @@ async fn dropdown_menu_opens_selects_and_closes() {
     dominator::append_dom(
         &tc.dom_element(),
         dropdown_menu!({
-            .label("Actions".to_string())
+            .label("Actions")
             .items(vec![
                 ("copy".to_string(), "Copy".to_string(), false),
                 ("paste".to_string(), "Paste".to_string(), true),
@@ -1698,8 +1695,8 @@ async fn popover_opens_and_closes_on_escape() {
         &tc.dom_element(),
         popover!({
             .open_signal(open.signal())
-            .anchor(Some(html!("button", { .attr("id", "pop-trigger") .text("Open") })))
-            .content(Some(text("Popover body")))
+            .anchor(html!("button", { .attr("id", "pop-trigger") .text("Open") }))
+            .content(text("Popover body"))
             .on_close(clone!(open => move || {
                 open.set(false);
             }))
@@ -1746,8 +1743,8 @@ async fn drawer_opens_from_a_side_and_closes() {
         drawer!({
             .open_signal(open.signal())
             .side(DrawerSide::Left)
-            .aria_label("Settings".to_string())
-            .content(Some(text("Drawer body")))
+            .aria_label("Settings")
+            .content(text("Drawer body"))
             .on_close(clone!(open => move || {
                 open.set(false);
             }))
@@ -1841,7 +1838,7 @@ async fn select_popup_is_theme_colored() {
     dominator::append_dom(
         &tc.dom_element(),
         select!({
-            .label("Fruit".to_string())
+            .label("Fruit")
             .options(vec![("a".to_string(), "Apple".to_string())])
         }),
     );

@@ -29,14 +29,17 @@ struct NumberInput {
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     label: String,
 
     #[signal]
     #[default(None)]
+    #[into]
     min: Option<f64>,
 
     #[signal]
     #[default(None)]
+    #[into]
     max: Option<f64>,
 
     #[signal]

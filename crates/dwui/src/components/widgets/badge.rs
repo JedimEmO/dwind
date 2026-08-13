@@ -17,6 +17,7 @@ pub enum BadgeVariant {
 struct Badge {
     #[signal]
     #[default(None)]
+    #[into]
     content: Option<Dom>,
 
     #[signal]

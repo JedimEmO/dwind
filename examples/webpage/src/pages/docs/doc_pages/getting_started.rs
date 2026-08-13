@@ -89,7 +89,7 @@ fn dwui_hello() -> Dom {
         .dwclass!("flex flex-col gap-4 w-full p-2")
         .child(switch!({
             .checked_signal(enabled.signal())
-            .label("Reactive demo".to_string())
+            .label("Reactive demo")
             .on_change({
                 let enabled = enabled.clone();
                 move |value| enabled.set(value)
@@ -98,7 +98,7 @@ fn dwui_hello() -> Dom {
         .child_signal(enabled.signal().map(|on| {
             Some(badge!({
                 .variant(if on { BadgeVariant::Primary } else { BadgeVariant::Void })
-                .content(Some(text(if on { "signal: true" } else { "signal: false" })))
+                .content(text(if on { "signal: true" } else { "signal: false" }))
             }))
         }))
     })

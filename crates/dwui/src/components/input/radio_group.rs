@@ -29,6 +29,7 @@ struct RadioGroup {
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     value: String,
 
     #[default(Box::new(|_|{}))]
@@ -37,6 +38,7 @@ struct RadioGroup {
     /// Visible group label
     #[signal]
     #[default("".to_string())]
+    #[into]
     label: String,
 
     #[signal]

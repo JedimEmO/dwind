@@ -29,6 +29,7 @@ pub enum DrawerSize {
 struct Drawer {
     #[signal]
     #[default(None)]
+    #[into]
     content: Option<Dom>,
 
     #[signal]
@@ -52,6 +53,7 @@ struct Drawer {
 
     #[signal]
     #[default("Drawer".to_string())]
+    #[into]
     aria_label: String,
 }
 

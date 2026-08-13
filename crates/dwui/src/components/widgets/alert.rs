@@ -40,10 +40,12 @@ struct Alert {
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     title: String,
 
     #[signal]
     #[default(None)]
+    #[into]
     content: Option<Dom>,
 
     #[signal]

@@ -30,6 +30,7 @@ struct Slider {
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     label: String,
 
     #[signal]

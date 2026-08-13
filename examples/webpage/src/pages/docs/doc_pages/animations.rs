@@ -97,7 +97,7 @@ fn animation_examples() -> Dom {
                         }))
                         .content(html!("span", {
                             .text("Toggle spinning")
-                        }).into())
+                        }))
                     }),
                     html!("div", {
                         .dwclass!("w-8 h-8 bg-red-500")
@@ -118,7 +118,7 @@ fn animation_examples() -> Dom {
                         }))
                         .content(html!("span", {
                             .text("Toggle ping")
-                        }).into())
+                        }))
                     }),
                     html!("div", {
                         .dwclass!("w-8 h-8 bg-red-500")
@@ -139,7 +139,7 @@ fn animation_examples() -> Dom {
                         }))
                         .content(html!("span", {
                             .text("Toggle pulse")
-                        }).into())
+                        }))
                     }),
                     html!("div", {
                         .dwclass!("w-8 h-8 bg-red-500")
@@ -160,7 +160,7 @@ fn animation_examples() -> Dom {
                         }))
                         .content(html!("span", {
                             .text("Toggle bounce")
-                        }).into())
+                        }))
                     }),
                     html!("div", {
                         .dwclass!("w-8 h-8 bg-red-500")

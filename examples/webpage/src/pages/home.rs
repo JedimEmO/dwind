@@ -72,7 +72,7 @@ fn hero() -> Dom {
                         .apply(magnetic(7.0))
                         .child(button!({
                             .apply(|b| dwclass!(b, "w-full"))
-                            .content(Some(text("Get started")))
+                            .content(text("Get started"))
                             .on_click(|_: events::Click| {
                                 go_to_url("#/docs/getting-started");
                             })
@@ -84,7 +84,7 @@ fn hero() -> Dom {
                         .child(button!({
                             .apply(|b| dwclass!(b, "w-full"))
                             .button_type(ButtonType::Border)
-                            .content(Some(text("Components")))
+                            .content(text("Components"))
                             .on_click(|_: events::Click| {
                                 go_to_url("#/components");
                             })
@@ -319,7 +319,7 @@ fn bento_tile_reactive() -> Dom {
                 .dwclass!("flex flex-col gap-3 m-t-2")
                 .child(switch!({
                     .checked_signal(enabled.signal())
-                    .label("Live demo".to_string())
+                    .label("Live demo")
                     .on_change({
                         let enabled = enabled.clone();
                         move |v| enabled.set(v)
@@ -328,7 +328,7 @@ fn bento_tile_reactive() -> Dom {
                 .child_signal(enabled.signal().map(|on| {
                     Some(badge!({
                         .variant(if on { BadgeVariant::Primary } else { BadgeVariant::Void })
-                        .content(Some(text(if on { "signal: true" } else { "signal: false" })))
+                        .content(text(if on { "signal: true" } else { "signal: false" }))
                     }))
                 }))
             }),
@@ -400,18 +400,18 @@ fn components_preview() -> Dom {
             .children([
                 preview_card("inputs", vec![
                     text_input!({
-                        .label("Project name".to_string())
+                        .label("Project name")
                     }),
                     slider!({
                         .value(progress_value.clone())
-                        .label("Threshold".to_string())
+                        .label("Threshold")
                     }),
                 ]),
                 preview_card("feedback", vec![
                     alert!({
                         .variant(AlertVariant::Success)
-                        .title("Deployed".to_string())
-                        .content(Some(text("Build #214 is live.")))
+                        .title("Deployed")
+                        .content(text("Build #214 is live."))
                     }),
                     html!("div", {
                         .dwclass!("flex flex-row gap-4 align-items-center")
@@ -420,7 +420,7 @@ fn components_preview() -> Dom {
                         }))
                         .child(progress!({
                             .value_signal(progress_value.signal().map(|v| v as f64))
-                            .label("Demo progress".to_string())
+                            .label("Demo progress")
                         }))
                     }),
                 ]),
@@ -428,14 +428,14 @@ fn components_preview() -> Dom {
                     html!("div", {
                         .dwclass!("flex flex-row gap-3 align-items-center")
                         .child(avatar!({
-                            .name("Ada Lovelace".to_string())
+                            .name("Ada Lovelace")
                         }))
                         .child(avatar!({
-                            .name("Grace Hopper".to_string())
+                            .name("Grace Hopper")
                         }))
                         .child(badge!({
                             .variant(BadgeVariant::Outline)
-                            .content(Some(text("v0.10.0")))
+                            .content(text("v0.10.0"))
                         }))
                     }),
                     breadcrumbs!({
@@ -456,7 +456,7 @@ fn components_preview() -> Dom {
                 .child(button!({
                     .apply(|b| dwclass!(b, "w-full"))
                     .button_type(ButtonType::Border)
-                    .content(Some(text("Browse all components →")))
+                    .content(text("Browse all components →"))
                     .on_click(|_: events::Click| {
                         go_to_url("#/components");
                     })
@@ -513,7 +513,7 @@ fn final_cta() -> Dom {
                     .apply(magnetic(7.0))
                     .child(button!({
                         .apply(|b| dwclass!(b, "w-full"))
-                        .content(Some(text("Read the docs")))
+                        .content(text("Read the docs"))
                         .on_click(|_: events::Click| {
                             go_to_url("#/docs/getting-started");
                         })
@@ -525,7 +525,7 @@ fn final_cta() -> Dom {
                     .child(button!({
                         .apply(|b| dwclass!(b, "w-full"))
                         .button_type(ButtonType::Border)
-                        .content(Some(text("Open the gallery")))
+                        .content(text("Open the gallery"))
                         .on_click(|_: events::Click| {
                             go_to_url("#/components");
                         })

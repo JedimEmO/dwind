@@ -25,10 +25,12 @@ pub enum PopoverPosition {
 struct Popover {
     #[signal]
     #[default(None)]
+    #[into]
     anchor: Option<Dom>,
 
     #[signal]
     #[default(None)]
+    #[into]
     content: Option<Dom>,
 
     #[signal]
@@ -44,6 +46,7 @@ struct Popover {
 
     #[signal]
     #[default("Popover".to_string())]
+    #[into]
     aria_label: String,
 }
 

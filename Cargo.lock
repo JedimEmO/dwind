@@ -459,9 +459,7 @@ dependencies = [
 
 [[package]]
 name = "futures-signals-component-macro"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f880902471275d8da2913632c5e794e6bee9e846bf29fddec1cbd7e3c105675c"
+version = "0.5.0"
 dependencies = [
  "convert_case",
  "dominator",

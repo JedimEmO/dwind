@@ -25,6 +25,7 @@ pub enum ButtonSize {
 struct Button {
     #[signal]
     #[default(None)]
+    #[into]
     content: Option<Dom>,
     #[default(Box::new(| _: events::Click | {}))]
     on_click: dyn Fn(events::Click) -> () + 'static,

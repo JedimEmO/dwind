@@ -9,6 +9,7 @@ use futures_signals_component_macro::component;
 struct Divider {
     #[signal]
     #[default("".to_string())]
+    #[into]
     label: String,
 }
 

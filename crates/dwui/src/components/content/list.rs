@@ -15,6 +15,7 @@ struct List {
 
     #[signal]
     #[default(None)]
+    #[into]
     selected_index: Option<usize>,
 
     #[default(Box::new(|_|{}))]

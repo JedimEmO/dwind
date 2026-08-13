@@ -12,8 +12,9 @@ pub fn example_card_modal() -> Dom {
 
     card!({
         .scheme(ColorScheme::Void)
-        .apply(clone!(show_modal, show_modal_small => move |b| {
-            dwclass!(b, "w-64 flex-initial flex flex-col gap-4")
+        .apply(|b| dwclass!(b, "w-64 flex-initial"))
+        .content(html!("div", {
+            .dwclass!("flex flex-col gap-4")
             .children([
                 heading!({
                     .content(text("Modal Example"))
@@ -22,7 +23,7 @@ pub fn example_card_modal() -> Dom {
                 }),
                 button!({
                     .apply(|b| dwclass!(b, "w-full"))
-                    .content(Some(text("Open Large Modal")))
+                    .content(text("Open Large Modal"))
                     .on_click(clone!(show_modal => move |_: events::Click| {
                         show_modal.set(true);
                     }))
@@ -30,7 +31,7 @@ pub fn example_card_modal() -> Dom {
                 button!({
                     .apply(|b| dwclass!(b, "w-full"))
                     .button_type(ButtonType::Border)
-                    .content(Some(text("Open Small Modal")))
+                    .content(text("Open Small Modal"))
                     .on_click(clone!(show_modal_small => move |_: events::Click| {
                         show_modal_small.set(true);
                     }))
@@ -38,11 +39,11 @@ pub fn example_card_modal() -> Dom {
                 modal!({
                     .open_signal(show_modal.signal())
                     .size(ModalSize::Large)
-                    .aria_label("Large modal example".to_string())
+                    .aria_label("Large modal example")
                     .on_close(clone!(show_modal => move || {
                         show_modal.set(false);
                     }))
-                    .content(Some(html!("div", {
+                    .content(html!("div", {
                         .dwclass!("flex flex-col gap-4")
                         .children([
                             heading!({
@@ -54,22 +55,22 @@ pub fn example_card_modal() -> Dom {
                                 .text("This is a large modal dialog (900px wide). You can close it by clicking the X button, clicking outside, or pressing Escape.")
                             }),
                             button!({
-                                .content(Some(text("Close Modal")))
+                                .content(text("Close Modal"))
                                 .on_click(clone!(show_modal => move |_: events::Click| {
                                     show_modal.set(false);
                                 }))
                             })
                         ])
-                    })))
+                    }))
                 }),
                 modal!({
                     .open_signal(show_modal_small.signal())
                     .size(ModalSize::Small)
-                    .aria_label("Small modal example".to_string())
+                    .aria_label("Small modal example")
                     .on_close(clone!(show_modal_small => move || {
                         show_modal_small.set(false);
                     }))
-                    .content(Some(html!("div", {
+                    .content(html!("div", {
                         .dwclass!("flex flex-col gap-4")
                         .children([
                             heading!({
@@ -81,13 +82,13 @@ pub fn example_card_modal() -> Dom {
                                 .text("This is a small modal dialog (24rem wide).")
                             }),
                             button!({
-                                .content(Some(text("Close Modal")))
+                                .content(text("Close Modal"))
                                 .on_click(clone!(show_modal_small => move |_: events::Click| {
                                     show_modal_small.set(false);
                                 }))
                             })
                         ])
-                    })))
+                    }))
                 })
             ])
         }))

@@ -26,6 +26,7 @@ struct TextInput {
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     label: String,
 
     #[signal]

@@ -20,6 +20,7 @@ struct Select {
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     label: String,
 
     #[signal]

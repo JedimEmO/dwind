@@ -206,19 +206,19 @@ fn controls(
         }))
         .child(slider!({
             .value(spread.clone())
-            .label("spread".to_string())
+            .label("spread")
         }))
         .child(slider!({
             .value(twist.clone())
-            .label("twist".to_string())
+            .label("twist")
         }))
         .child(slider!({
             .value(glow.clone())
-            .label("glow".to_string())
+            .label("glow")
         }))
         .child(switch!({
             .checked_signal(stacked.signal())
-            .label("fan out".to_string())
+            .label("fan out")
             .on_change(clone!(stacked => move |v| stacked.set(v)))
         }))
     })

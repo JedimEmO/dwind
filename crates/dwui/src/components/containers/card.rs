@@ -1,7 +1,7 @@
 use crate::theme::prelude::*;
 use dominator::{html, Dom};
 use dwind::prelude::*;
-use futures_signals::signal::{option, SignalExt};
+use futures_signals::signal::SignalExt;
 use futures_signals_component_macro::component;
 
 /// Dictates the color scheme of the component
@@ -23,6 +23,7 @@ pub enum CardPadding {
 #[component(render_fn = card)]
 struct Card {
     #[signal]
+    #[required]
     content: Dom,
 
     #[signal]
@@ -56,6 +57,6 @@ pub fn card(props: CardProps) -> Dom {
         .dwclass_signal!("p-4", padding.signal().map(|v| v == CardPadding::Medium))
         .dwclass_signal!("p-6", padding.signal().map(|v| v == CardPadding::Large))
         .apply_if(apply.is_some(), |b| b.apply(apply.unwrap()))
-        .child_signal(option(content))
+        .child_signal(content.map(Some))
     })
 }

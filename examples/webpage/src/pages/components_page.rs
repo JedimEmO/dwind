@@ -45,7 +45,7 @@ pub fn components_page() -> Dom {
             .dwclass!("flex align-items-center gap-4 m-t-6 m-b-4")
             .child(switch!({
                 .checked_signal(is_light.signal())
-                .label("Light theme preview".to_string())
+                .label("Light theme preview")
                 .on_change(clone!(is_light => move |checked| {
                     is_light.set(checked);
                 }))
@@ -127,8 +127,8 @@ fn section_card(title: &str, description: &str, demo: Dom, source: Dom) -> Dom {
         .scheme(ColorScheme::Void)
         .padding(CardPadding::Large)
         .apply(crate::fx::spotlight)
-        .apply(move |b| {
-            dwclass!(b, "flex flex-col gap-4")
+        .content(html!("div", {
+            .dwclass!("flex flex-col gap-4")
             .child(heading!({
                 .content(text(&title))
                 .text_size(TextSize::Large)
@@ -140,7 +140,7 @@ fn section_card(title: &str, description: &str, demo: Dom, source: Dom) -> Dom {
             }))
             .child(demo)
             .child(source)
-        })
+        }))
     })
 }
 
@@ -150,15 +150,15 @@ fn buttons_demo() -> Dom {
         .dwclass!("flex flex-col gap-4")
         .children([
             button!({
-                .content(Some(text("Primary Flat")))
+                .content(text("Primary Flat"))
             }),
             button!({
                 .button_type(ButtonType::Border)
-                .content(Some(text("Primary Border")))
+                .content(text("Primary Border"))
             }),
             button!({
                 .button_type(ButtonType::Text)
-                .content(Some(text("Text Button")))
+                .content(text("Text Button"))
             }),
             html!("div", {
                 .dwclass!("flex flex-row gap-4 align-items-center")
@@ -166,20 +166,20 @@ fn buttons_demo() -> Dom {
                     .dwclass!("grow")
                     .child(button!({
                         .size(ButtonSize::Small)
-                        .content(Some(text("Small")))
+                        .content(text("Small"))
                     }))
                 }))
                 .child(html!("div", {
                     .dwclass!("grow")
                     .child(button!({
                         .size(ButtonSize::Large)
-                        .content(Some(text("Large")))
+                        .content(text("Large"))
                     }))
                 }))
             }),
             button!({
                 .disabled(true)
-                .content(Some(text("Disabled")))
+                .content(text("Disabled"))
             }),
         ])
     })
@@ -191,23 +191,23 @@ fn badges_demo() -> Dom {
         .dwclass!("flex flex-row flex-wrap gap-4 align-items-center")
         .children([
             badge!({
-                .content(Some(text("Primary")))
+                .content(text("Primary"))
                 .variant(BadgeVariant::Primary)
             }),
             badge!({
-                .content(Some(text("Error")))
+                .content(text("Error"))
                 .variant(BadgeVariant::Error)
             }),
             badge!({
-                .content(Some(text("Void")))
+                .content(text("Void"))
                 .variant(BadgeVariant::Void)
             }),
             badge!({
-                .content(Some(text("Outline")))
+                .content(text("Outline"))
                 .variant(BadgeVariant::Outline)
             }),
             badge!({
-                .content(Some(text("99+")))
+                .content(text("99+"))
                 .variant(BadgeVariant::Error)
             }),
         ])
@@ -221,22 +221,22 @@ fn alerts_demo() -> Dom {
         .children([
             alert!({
                 .variant(AlertVariant::Info)
-                .title("Heads up".to_string())
-                .content(Some(text("A new version of dwui is available.")))
+                .title("Heads up")
+                .content(text("A new version of dwui is available."))
             }),
             alert!({
                 .variant(AlertVariant::Success)
-                .title("Deployed".to_string())
-                .content(Some(text("Build #214 went live without warnings.")))
+                .title("Deployed")
+                .content(text("Build #214 went live without warnings."))
             }),
             alert!({
                 .variant(AlertVariant::Warning)
-                .title("Heavy load".to_string())
+                .title("Heavy load")
             }),
             alert!({
                 .variant(AlertVariant::Error)
-                .title("Build failed".to_string())
-                .content(Some(text("Use the dismiss button to close this alert.")))
+                .title("Build failed")
+                .content(text("Use the dismiss button to close this alert."))
                 .dismissible(true)
             }),
         ])
@@ -252,11 +252,11 @@ fn inputs_demo() -> Dom {
         .children([
             text_input!({
                 .value(value.clone())
-                .label("Your name".to_string())
+                .label("Your name")
             }),
             text_input!({
                 .input_type(TextInputType::Password)
-                .label("Password".to_string())
+                .label("Password")
             }),
             text_input!({
                 .value(value.clone())
@@ -267,12 +267,12 @@ fn inputs_demo() -> Dom {
                         ValidationResult::Invalid { message: "Give me bananas!".to_string() }
                     }
                 }))
-                .label("Accepts bananas".to_string())
+                .label("Accepts bananas")
             }),
             text_input!({
                 .value(Mutable::new("Read only".to_string()))
                 .disabled(true)
-                .label("Disabled".to_string())
+                .label("Disabled")
             }),
         ])
     })
@@ -288,14 +288,14 @@ fn text_area_number_demo() -> Dom {
         .children([
             text_area!({
                 .value(bio.clone())
-                .label("Short bio".to_string())
+                .label("Short bio")
                 .rows(3u32)
             }),
             number_input!({
                 .value(amount.clone())
-                .label("Quantity".to_string())
-                .min(Some(0.0))
-                .max(Some(10.0))
+                .label("Quantity")
+                .min(0.0)
+                .max(10.0)
                 .step(1.0)
             }),
         ])
@@ -310,7 +310,7 @@ fn radio_group_demo() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col gap-6")
         .child(radio_group!({
-            .label("Flavor".to_string())
+            .label("Flavor")
             .value_signal(flavor.signal_cloned())
             .options(vec![
                 ("almond".to_string(), "Almond".to_string()),
@@ -320,7 +320,7 @@ fn radio_group_demo() -> Dom {
             .on_change(clone!(flavor => move |key| flavor.set(key)))
         }))
         .child(radio_group!({
-            .label("Release channel".to_string())
+            .label("Release channel")
             .direction(RadioGroupDirection::Horizontal)
             .value_signal(channel.signal_cloned())
             .options(vec![
@@ -340,7 +340,7 @@ fn dropdown_menu_demo() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col gap-4 align-items-start")
         .child(dropdown_menu!({
-            .label("Actions".to_string())
+            .label("Actions")
             .items(vec![
                 ("copy".to_string(), "Copy link".to_string(), false),
                 ("rename".to_string(), "Rename".to_string(), false),
@@ -395,7 +395,7 @@ fn toasts_demo() -> Dom {
         .child(button!({
             .button_type(ButtonType::Border)
             .size(ButtonSize::Small)
-            .content(Some(text("Success toast")))
+            .content(text("Success toast"))
             .on_click(clone!(toaster => move |_| {
                 toaster.success("Saved to workspace");
             }))
@@ -403,7 +403,7 @@ fn toasts_demo() -> Dom {
         .child(button!({
             .button_type(ButtonType::Border)
             .size(ButtonSize::Small)
-            .content(Some(text("Sticky error")))
+            .content(text("Sticky error"))
             .on_click(clone!(toaster => move |_| {
                 toaster.push(ToastOptions {
                     title: "Build failed".to_string(),
@@ -482,7 +482,7 @@ fn drawer_demo() -> Dom {
         .dwclass!("flex flex-row gap-4")
         .child(button!({
             .button_type(ButtonType::Border)
-            .content(Some(text("Open right drawer")))
+            .content(text("Open right drawer"))
             .on_click(clone!(open, side => move |_| {
                 side.set(DrawerSide::Right);
                 open.set(true);
@@ -490,7 +490,7 @@ fn drawer_demo() -> Dom {
         }))
         .child(button!({
             .button_type(ButtonType::Border)
-            .content(Some(text("Open left drawer")))
+            .content(text("Open left drawer"))
             .on_click(clone!(open, side => move |_| {
                 side.set(DrawerSide::Left);
                 open.set(true);
@@ -499,9 +499,9 @@ fn drawer_demo() -> Dom {
         .child(drawer!({
             .open_signal(open.signal())
             .side_signal(side.signal())
-            .aria_label("Demo drawer".to_string())
+            .aria_label("Demo drawer")
             .on_close(clone!(open => move || open.set(false)))
-            .content(Some(html!("div", {
+            .content(html!("div", {
                 .dwclass!("flex flex-col gap-3 m-t-8")
                 .child(heading!({
                     .content(text("Drawer"))
@@ -512,7 +512,7 @@ fn drawer_demo() -> Dom {
                     .dwclass!("text-sm m-0")
                     .text("Escape closes it, Tab stays trapped inside, and the scrim click dismisses.")
                 }))
-            })))
+            }))
         }))
     })
 }
@@ -526,7 +526,7 @@ fn select_slider_demo() -> Dom {
         .dwclass!("flex flex-col gap-4")
         .children([
             select!({
-                .label("Favourite option".to_string())
+                .label("Favourite option")
                 .value(selected.clone())
                 .options(vec![
                     ("a".to_string(), "Option A".to_string()),
@@ -536,7 +536,7 @@ fn select_slider_demo() -> Dom {
             }),
             slider!({
                 .value(amount.clone())
-                .label("Amount".to_string())
+                .label("Amount")
             }),
         ])
     })
@@ -553,22 +553,22 @@ fn toggles_demo() -> Dom {
         .children([
             switch!({
                 .checked_signal(notifications.signal())
-                .label("Enable notifications".to_string())
+                .label("Enable notifications")
                 .on_change(clone!(notifications => move |v| notifications.set(v)))
             }),
             switch!({
                 .checked(false)
                 .disabled(true)
-                .label("Disabled switch".to_string())
+                .label("Disabled switch")
             }),
             checkbox!({
                 .checked_signal(newsletter.signal())
-                .label("Subscribe to newsletter".to_string())
+                .label("Subscribe to newsletter")
                 .on_change(clone!(newsletter => move |v| newsletter.set(v)))
             }),
             checkbox!({
                 .checked_signal(terms.signal())
-                .label("Accept the terms".to_string())
+                .label("Accept the terms")
                 .on_change(clone!(terms => move |v| terms.set(v)))
             }),
         ])
@@ -584,15 +584,15 @@ fn progress_demo() -> Dom {
         .children([
             progress!({
                 .value_signal(value.signal().map(|v| v as f64))
-                .label("Demo progress".to_string())
+                .label("Demo progress")
             }),
             progress!({
                 .indeterminate(true)
-                .label("Indeterminate progress".to_string())
+                .label("Indeterminate progress")
             }),
             slider!({
                 .value(value.clone())
-                .label("Drag to set progress".to_string())
+                .label("Drag to set progress")
             }),
             html!("div", {
                 .dwclass!("flex flex-row gap-4 align-items-center")
@@ -617,14 +617,14 @@ fn avatar_skeleton_demo() -> Dom {
         .child(html!("div", {
             .dwclass!("flex flex-row gap-3 align-items-center")
             .child(avatar!({
-                .name("Ada Lovelace".to_string())
+                .name("Ada Lovelace")
                 .size(AvatarSize::Small)
             }))
             .child(avatar!({
-                .name("Grace Hopper".to_string())
+                .name("Grace Hopper")
             }))
             .child(avatar!({
-                .name("Alan Turing".to_string())
+                .name("Alan Turing")
                 .size(AvatarSize::Large)
             }))
         }))
@@ -657,32 +657,32 @@ fn tooltip_divider_demo() -> Dom {
         .child(html!("div", {
             .dwclass!("flex flex-row gap-4 justify-center")
             .child(tooltip!({
-                .text("Tooltips appear on hover and focus".to_string())
+                .text("Tooltips appear on hover and focus")
                 .position(TooltipPosition::Top)
-                .anchor(Some(html!("div", {
+                .anchor(html!("div", {
                     .dwclass!("w-32")
                     .child(button!({
                         .button_type(ButtonType::Border)
                         .size(ButtonSize::Small)
-                        .content(Some(text("Hover me")))
+                        .content(text("Hover me"))
                     }))
-                })))
+                }))
             }))
             .child(tooltip!({
-                .text("This one sits below".to_string())
+                .text("This one sits below")
                 .position(TooltipPosition::Bottom)
-                .anchor(Some(html!("div", {
+                .anchor(html!("div", {
                     .dwclass!("w-32")
                     .child(button!({
                         .button_type(ButtonType::Border)
                         .size(ButtonSize::Small)
-                        .content(Some(text("Or me")))
+                        .content(text("Or me"))
                     }))
-                })))
+                }))
             }))
         }))
         .child(divider!({
-            .label("or".to_string())
+            .label("or")
         }))
         .child(divider!({}))
     })
@@ -718,7 +718,7 @@ fn tabs_demo() -> Dom {
         .dwclass!("flex flex-col gap-4")
         .child(tab_list!({
             .selected_signal(selected.signal_cloned())
-            .aria_label("Tabs demo".to_string())
+            .aria_label("Tabs demo")
             .tabs(vec![
                 ("overview".to_string(), "Overview".to_string()),
                 ("features".to_string(), "Features".to_string()),
@@ -746,7 +746,7 @@ fn tabs_demo() -> Dom {
 #[example_html(themes = ["base16-ocean.dark"])]
 fn accordion_demo() -> Dom {
     accordion!({
-        .initial_open(Some(0))
+        .initial_open(0)
         .items(vec![
             (
                 "What is dwui?".to_string(),
@@ -858,7 +858,7 @@ fn virtual_scroll_demo() -> Dom {
         .item_count_signal(count.signal())
         .item_height(36.0)
         .height(320.0)
-        .aria_label("Virtual scroll demo".to_string())
+        .aria_label("Virtual scroll demo")
         .loading_signal(loading.signal())
         .render_item(Box::new(|index: usize| {
             html!("div", {
@@ -899,14 +899,14 @@ fn date_picker_demo() -> Dom {
     html!("div", {
         .dwclass!("flex flex-col gap-4")
         .child(date_picker!({
-            .label("Start date".to_string())
+            .label("Start date")
             .value_signal(start.signal())
             .on_change(clone!(start => move |date| {
                 start.set(Some(date));
             }))
         }))
         .child(date_picker!({
-            .label("End date".to_string())
+            .label("End date")
             .value_signal(end.signal())
             .on_change(clone!(end => move |date| {
                 end.set(Some(date));

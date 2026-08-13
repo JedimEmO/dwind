@@ -72,6 +72,7 @@ struct Pagination {
 
     #[signal]
     #[default("Pagination".to_string())]
+    #[into]
     aria_label: String,
 }
 

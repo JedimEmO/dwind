@@ -23,6 +23,7 @@ struct Checkbox {
 
     #[signal]
     #[default("".to_string())]
+    #[into]
     label: String,
 
     #[default(Box::new(|_| {}))]
