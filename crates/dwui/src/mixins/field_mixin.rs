@@ -2,9 +2,9 @@ use crate::prelude::ValidationResult;
 use crate::theme::prelude::*;
 use dominator::{html, Dom, DomBuilder};
 use dwind::prelude::*;
-use futures_signals::signal::not;
 use futures_signals::signal::Signal;
 use futures_signals::signal::SignalExt;
+use futures_signals::signal::not;
 use web_sys::HtmlElement;
 
 /// Styles a field surface and draws its floating label.
@@ -37,10 +37,7 @@ pub fn field_surface_mixin(
             .signal_ref(|validation| validation.is_valid())
             .broadcast();
 
-        let b = dwclass!(
-            b,
-            "dwui-field-surface relative w-full rounded-md overflow-hidden"
-        );
+        let b = dwclass!(b, "dwui-field-surface relative w-full rounded-md overflow-hidden");
         let b = dwclass!(b, "dwui-bg-void-900 is(.light *):dwui-bg-void-200");
         let b = dwclass!(b, "border-b-2 transition-colors");
         let b = dwclass_signal!(
