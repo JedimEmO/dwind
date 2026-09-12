@@ -182,12 +182,9 @@ async fn legend_toggles_series_and_survivors_keep_colors() {
     );
     let bars = query_all(&host, "path.dviz-bar");
     assert_eq!(bars.len(), 2, "only y's bars remain");
-    assert!(
-        bars[0]
-            .get_attribute("style")
-            .unwrap()
-            .contains("--dviz-series-2")
-    );
+    let slots = SeriesSlots::new();
+    let y_color = slots.color_for("y");
+    assert!(bars[0].get_attribute("style").unwrap().contains(&y_color));
     items[0].dyn_ref::<HtmlElement>().unwrap().click();
     TimeoutFuture::new(20).await;
     assert_eq!(query_all(&host, "path.dviz-bar").len(), 4);

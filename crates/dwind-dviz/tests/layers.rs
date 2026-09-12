@@ -133,21 +133,20 @@ async fn legend_shares_slots_with_the_chart() {
     )
     .await;
     let swatches = query_all(&host, ".dviz-legend-swatch");
+    let slots = SeriesSlots::new();
+    let b_color = slots.color_for("b");
     assert!(
         swatches[1]
             .get_attribute("style")
             .unwrap()
-            .contains("--dviz-series-2")
+            .contains(&b_color)
     );
     data.set(vec![cat("b", &[2.0, 1.0])]);
     TimeoutFuture::new(400).await;
     let paths = query_all(&host, "path.dviz-line");
     assert_eq!(paths.len(), 1);
     assert!(
-        paths[0]
-            .get_attribute("style")
-            .unwrap()
-            .contains("--dviz-series-2"),
+        paths[0].get_attribute("style").unwrap().contains(&b_color),
         "survivor keeps its slot"
     );
     assert!(
