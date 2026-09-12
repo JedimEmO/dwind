@@ -1,9 +1,10 @@
 //! Interaction: hover, keyboard, legend toggling, and brush-to-zoom.
 
-use dominator::{html, Dom};
+use dominator::{clone, events, html, Dom};
 use dwind::prelude::*;
 use dwind_dviz::prelude::*;
 use dwind_macros::dwclass;
+use futures_signals::signal::Mutable;
 use jiff::{Timestamp, ToSpan};
 
 use super::example;
@@ -56,5 +57,53 @@ pub fn page() -> Dom {
                 )])
             }),
         ))
+        .child(example(
+            "Reactive interaction data",
+            "Interaction state and data state are independent: the crosshair, keyboard focus, legend, and brush continue to work while the series signal changes.",
+            reactive_interaction(),
+        ))
     })
+}
+
+fn reactive_interaction() -> Dom {
+    let phase = Mutable::new(0u32);
+    let series = phase.signal_ref(|phase| {
+        let p = *phase as f64;
+        vec![
+            mk_series("api", "API", 120.0, 40.0, 30.0, p),
+            mk_series("web", "Web", 80.0, 25.0, 22.0, p + 1.0),
+        ]
+    });
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-3")
+        .child(html!("button", {
+            .class("dviz-zoom-reset")
+            .attr("type", "button")
+            .text("append a new sample")
+            .event(clone!(phase => move |_: events::Click| {
+                phase.set(phase.get().wrapping_add(1));
+            }))
+        }))
+        .child(dwind_dviz::line_chart!({
+            .label("Reactive requests per second".to_string())
+            .x(XKind::time_utc())
+            .series_signal(series)
+        }))
+    })
+}
+
+fn mk_series(id: &str, label: &str, base: f64, amp: f64, period: f64, phase: f64) -> Series {
+    let start: Timestamp = "2026-09-11T00:00:00Z".parse().unwrap();
+    Series::new(
+        id,
+        label,
+        (0..=48)
+            .map(|i| {
+                let t = start.checked_add((i * 30).minutes()).unwrap();
+                let x = i as f64;
+                TimePoint::new(t, base + amp * ((x + phase) / period).sin()).to_point()
+            })
+            .collect(),
+    )
 }

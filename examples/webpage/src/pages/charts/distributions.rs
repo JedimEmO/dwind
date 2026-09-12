@@ -1,10 +1,10 @@
 //! Scatter, heatmap, and donut.
 
-use dominator::{html, Dom};
+use dominator::{clone, events, html, Dom};
 use dwind::prelude::*;
 use dwind_dviz::prelude::*;
 use dwind_macros::dwclass;
-use futures_signals::signal::always;
+use futures_signals::signal::{always, Mutable};
 
 use super::example;
 
@@ -80,5 +80,47 @@ pub fn page() -> Dom {
                 )).collect::<Vec<_>>())
             }),
         ))
+        .child(example(
+            "Reactive distribution",
+            "The same chart API accepts a signal of complete series snapshots, so a filter, query, or stream can replace the data without rebuilding the page.",
+            reactive_scatter(),
+        ))
+    })
+}
+
+fn reactive_scatter() -> Dom {
+    let seed = Mutable::new(0u32);
+    let series = seed.signal_ref(|seed| {
+        (0..2)
+            .map(|s| {
+                Series::new(
+                    format!("segment{s}"),
+                    format!("Segment {}", s + 1),
+                    (0..28)
+                        .map(|i| {
+                            let k = *seed * 97 + s * 100 + i;
+                            let x = 10.0 + noise(k) * 80.0;
+                            Point::new(x, x * (0.5 + s as f64 * 0.25) + noise(k + 13) * 20.0)
+                        })
+                        .collect(),
+                )
+            })
+            .collect::<Vec<_>>()
+    });
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-3")
+        .child(html!("button", {
+            .class("dviz-zoom-reset")
+            .attr("type", "button")
+            .text("resample points")
+            .event(clone!(seed => move |_: events::Click| {
+                seed.set(seed.get().wrapping_add(1));
+            }))
+        }))
+        .child(dwind_dviz::scatter_chart!({
+            .label("Reactive spend versus return".to_string())
+            .series_signal(series)
+        }))
     })
 }

@@ -1,10 +1,10 @@
 //! Lines and areas: presets, annotations, and small multiples.
 
-use dominator::{html, Dom};
+use dominator::{clone, events, html, Dom};
 use dwind::prelude::*;
 use dwind_dviz::prelude::*;
 use dwind_macros::dwclass;
-use futures_signals::signal::always;
+use futures_signals::signal::{always, Mutable};
 use jiff::{Timestamp, ToSpan};
 
 use super::example;
@@ -65,6 +65,38 @@ pub fn page() -> Dom {
                 SmallMultiplesOptions::default(),
             ),
         ))
+        .child(example(
+            "Reactive line data",
+            "A signal can replace every series at once while the chart preserves identity, scales, labels, and transitions.",
+            reactive_lines(),
+        ))
+    })
+}
+
+fn reactive_lines() -> Dom {
+    let phase = Mutable::new(0u32);
+    let series = phase.signal_ref(|phase| {
+        let p = *phase as f64;
+        vec![
+            wave("revenue", "Revenue", 24, 40.0 + p * 2.0, 30.0, 4.0, 1.5),
+            wave("cost", "Cost", 24, 30.0 + p, 10.0, 3.0, 0.8),
+        ]
+    });
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-3")
+        .child(html!("button", {
+            .class("dviz-zoom-reset")
+            .attr("type", "button")
+            .text("advance quarter")
+            .event(clone!(phase => move |_: events::Click| {
+                phase.set(phase.get().wrapping_add(1));
+            }))
+        }))
+        .child(dwind_dviz::line_chart!({
+            .label("Reactive revenue and cost".to_string())
+            .series_signal(series)
+        }))
     })
 }
 

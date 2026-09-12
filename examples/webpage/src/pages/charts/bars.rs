@@ -1,9 +1,10 @@
 //! Bars: grouped, stacked, and 100% stacked.
 
-use dominator::{html, Dom};
+use dominator::{clone, events, html, Dom};
 use dwind::prelude::*;
 use dwind_dviz::prelude::*;
 use dwind_macros::dwclass;
+use futures_signals::signal::Mutable;
 
 use super::example;
 
@@ -73,5 +74,50 @@ pub fn page() -> Dom {
                 ])
             }),
         ))
+        .child(example(
+            "Reactive bars",
+            "The chart keeps its SVG nodes and patches the series signal when the sample changes. Static data is still the simplest option; signals make live dashboards just as direct.",
+            reactive_bars(),
+        ))
+    })
+}
+
+fn reactive_bars() -> Dom {
+    let phase = Mutable::new(0u32);
+    let series = phase.signal_ref(|phase| {
+        let p = *phase as f64;
+        vec![
+            cat(
+                "signups",
+                "Signups",
+                &(0..6)
+                    .map(|i| 1_400.0 + (i as f64 * 0.9 + p).sin() * 420.0 + i as f64 * 110.0)
+                    .collect::<Vec<_>>(),
+            ),
+            cat(
+                "activations",
+                "Activations",
+                &(0..6)
+                    .map(|i| 900.0 + (i as f64 * 0.7 + p * 1.2).cos() * 260.0 + i as f64 * 80.0)
+                    .collect::<Vec<_>>(),
+            ),
+        ]
+    });
+
+    html!("div", {
+        .dwclass!("flex flex-col gap-3")
+        .child(html!("button", {
+            .class("dviz-zoom-reset")
+            .attr("type", "button")
+            .text("refresh sample")
+            .event(clone!(phase => move |_: events::Click| {
+                phase.set(phase.get().wrapping_add(1));
+            }))
+        }))
+        .child(dwind_dviz::bar_chart!({
+            .label("Reactive signups and activations by month".to_string())
+            .categories(MONTHS.map(String::from).to_vec())
+            .series_signal(series)
+        }))
     })
 }
