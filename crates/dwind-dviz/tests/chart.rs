@@ -187,18 +187,11 @@ async fn lines_are_one_path_per_series_and_keep_their_slot() {
     let paths = query_all(&host, "path.dviz-line");
     assert_eq!(paths.len(), 2);
     assert_eq!(paths[0].get_attribute("data-series").as_deref(), Some("a"));
-    assert!(
-        paths[0]
-            .get_attribute("style")
-            .unwrap()
-            .contains("--dviz-series-1")
-    );
-    assert!(
-        paths[1]
-            .get_attribute("style")
-            .unwrap()
-            .contains("--dviz-series-2")
-    );
+    let slots = SeriesSlots::new();
+    let a_color = slots.color_for("a");
+    let b_color = slots.color_for("b");
+    assert!(paths[0].get_attribute("style").unwrap().contains(&a_color));
+    assert!(paths[1].get_attribute("style").unwrap().contains(&b_color));
     let d = paths[0].get_attribute("d").unwrap();
     assert!(d.starts_with('M') && d.matches('L').count() == 2, "{d}");
 
@@ -215,12 +208,7 @@ async fn lines_are_one_path_per_series_and_keep_their_slot() {
     let paths = query_all(&host, "path.dviz-line");
     assert_eq!(paths.len(), 1, "a is gone after the exit");
     assert_eq!(paths[0].get_attribute("data-series").as_deref(), Some("b"));
-    assert!(
-        paths[0]
-            .get_attribute("style")
-            .unwrap()
-            .contains("--dviz-series-2")
-    );
+    assert!(paths[0].get_attribute("style").unwrap().contains(&b_color));
 
     // Updating data patches the `d` attribute of the existing node.
     let before = paths[0].get_attribute("d").unwrap();
