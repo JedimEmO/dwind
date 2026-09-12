@@ -1,0 +1,57 @@
+[package]
+name = "dwind-dviz"
+version = "0.1.0"
+description = "Reactive, accessible SVG data visualization components for dwind / dwui / dominator"
+readme = "README.md"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+futures = { workspace = true }
+dwind-dviz-core = { workspace = true }
+dwind-dviz-data = { workspace = true }
+dominator = { workspace = true }
+dwind = { path = "../dwind", version = "0.8.0" }
+dwind-macros = { path = "../dwind-macros", version = "0.5.0" }
+dwui = { path = "../dwui", version = "0.10.0" }
+futures-signals = { workspace = true }
+futures-signals-component-macro = { workspace = true }
+gloo-timers = { workspace = true }
+js-sys = { workspace = true }
+wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+web-sys = { workspace = true, features = [
+    "DomRect",
+    "DomRectReadOnly",
+    "HtmlElement",
+    "HtmlHeadElement",
+    "MediaQueryList",
+    "Node",
+    "Performance",
+    "ResizeObserver",
+    "ResizeObserverEntry",
+    "SvgElement",
+] }
+
+[dev-dependencies]
+gloo-timers = { workspace = true }
+wasm-bindgen-test = { workspace = true }
+web-sys = { workspace = true, features = [
+    "CssStyleDeclaration",
+    "DomTokenList",
+    "KeyboardEvent",
+    "KeyboardEventInit",
+    "NodeList",
+    "Performance",
+    "console",
+    "PointerEvent",
+    "PointerEventInit",
+    "StyleSheet",
+    "StyleSheetList",
+    "SvgsvgElement",
+] }

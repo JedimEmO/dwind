@@ -17,11 +17,14 @@ const_format = { workspace = true }
 dominator = { workspace = true }
 dwind = { path = "../../crates/dwind", version = "0.8.0" }
 dwind-macros = { path = "../../crates/dwind-macros", version = "0.5.0" }
+dwind-dviz = { workspace = true }
+dwind-dviz-core = { workspace = true }
 dwui = { path = "../../crates/dwui", version = "0.10.0" }
 example-html-highlight-macro = { path = "../../crates/example-html-macro", version = "0.1.1" }
 futures = { workspace = true }
 futures-signals = { workspace = true }
 gloo-timers = { workspace = true, features = ["futures"] }
+jiff = { workspace = true }
 log = { workspace = true }
 matchit = { workspace = true }
 once_cell = { workspace = true }
@@ -33,4 +36,5 @@ web-sys = { workspace = true, features = [
     "IntersectionObserver",
     "IntersectionObserverEntry",
     "IntersectionObserverInit",
+    "Location",
 ] }

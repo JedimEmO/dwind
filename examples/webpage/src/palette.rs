@@ -67,6 +67,11 @@ fn commands() -> Vec<Command> {
             group: "go".into(),
             target: Target::Route("#/examples"),
         },
+        Command {
+            label: "Chart gallery".into(),
+            group: "go".into(),
+            target: Target::Route("#/charts"),
+        },
     ];
 
     for section in doc_sections() {

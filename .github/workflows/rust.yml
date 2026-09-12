@@ -51,6 +51,6 @@ jobs:
       - name: Run firefox tests
         run: RUST_BACKTRACE=1 GECKODRIVER=$GECKOWEBDRIVER/geckodriver cargo test --target wasm32-unknown-unknown
       - name: clippy checks
-        run: cargo clippy
+        run: cargo clippy -p dwind-dviz-core -p dwind-dviz-data -p dwind-dviz --all-targets --no-deps -- -D warnings
       - name: Run unit tests
         run: cargo test

@@ -1,5 +1,29 @@
 # dwind changelog
 
+## Unreleased
+
+### dwind-dviz joins the workspace
+
+The chart library that grew up as its own repository now lives here as three
+crates, so it versions, tests and publishes with the rest of the stack:
+
+- `dwind-dviz-core`: DOM-free primitives — scales, ticks, geometry, number
+  and time formatting, and the palette validator (categorical, sequential
+  and diverging ramps checked for contrast and colour-vision deficiency in
+  both modes).
+- `dwind-dviz-data`: signal-backed sources — static, mutable, windowed and
+  downsampled — for live charts.
+- `dwind-dviz`: the renderer. Persistent keyed SVG marks driven by signals,
+  a layered `chart!` builder plus line, area, bar, scatter, donut, stat-tile,
+  sparkline and small-multiples presets, crosshair and tooltips, keyboard
+  navigation, legend toggling and brush-to-zoom.
+
+The chrome neutrals are the woodsmoke steps, and three host tokens
+(`--dviz-accent`, `--dviz-font-display`, `--dviz-font-mono`) let an app pull
+charts into its own look without touching data colours. The example site
+sets them on its root and gains a **Charts** page (`#/charts`) with every
+preset, live data, and a light-surface preview switch.
+
 ## dwui 0.10.0 - 2026-07-26
 
 A visual and accessibility overhaul of the whole component suite, plus eight

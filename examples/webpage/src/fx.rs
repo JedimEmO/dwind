@@ -352,7 +352,22 @@ pub fn spy_rail(
             let id = *id;
 
             html!("a", {
-                .attr("href", &format!("#{id}"))
+                // Keep the browser fallback on the canonical page route. The
+                // click handler below provides the in-page navigation.
+                .attr("href", "#/charts")
+                // These are in-page anchors, not application routes. Letting
+                // the hash reach the app router would turn `#live` into an
+                // unmatched route and render the landing page.
+                .event(move |event: events::Click| {
+                    event.prevent_default();
+                    event.stop_propagation();
+                    if let Some(element) = web_sys::window()
+                        .and_then(|window| window.document())
+                        .and_then(|document| document.get_element_by_id(id))
+                    {
+                        element.scroll_into_view();
+                    }
+                })
                 .dwclass!("flex flex-row align-items-center gap-2 text-sm cursor-pointer transition-colors")
                 .dwclass!("text-woodsmoke-500 hover:text-candlelight-300 p-t-1 p-b-1")
                 .dwclass!("no-underline")

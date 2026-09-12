@@ -16,6 +16,7 @@ extern crate dwui;
 
 use crate::fx::magnetic;
 use crate::keyframes::*;
+use crate::pages::charts::charts_page;
 use crate::pages::components_page::components_page;
 use crate::pages::docs::doc_main::doc_main_view;
 use crate::pages::docs::doc_sidebar::doc_sidebar;
@@ -50,6 +51,7 @@ fn main_view() -> Dom {
         &DWIND_COLORS["woodsmoke"],
         &DWIND_COLORS["red"],
     )));
+    dwind_dviz::theme::apply_style_sheet();
 
     let palette = palette::global();
     let page = make_app_router().signal().broadcast();
@@ -63,6 +65,10 @@ fn main_view() -> Dom {
         .dwclass!("text-woodsmoke-100 bg-woodsmoke-950")
         .dwclass!("h-full overflow-y-auto overflow-x-hidden")
         .dwclass!("relative")
+        // Charts pick up the site's accent and faces through these tokens.
+        .style("--dviz-accent", "#D5B65F")
+        .style("--dviz-font-display", "'Bricolage Grotesque', 'IBM Plex Sans', sans-serif")
+        .style("--dviz-font-mono", "'JetBrains Mono', monospace")
         .apply(palette.shortcuts())
         .with_node!(element => {
             .event(clone!(scrolled => move |_: events::Scroll| {
@@ -84,6 +90,7 @@ fn main_view() -> Dom {
                         DocPage::Home => home_page(),
                         DocPage::DwuiExamples => components_page(),
                         DocPage::Examples => dwind_examples_page(),
+                        DocPage::Charts => charts_page(),
                         other => docs_shell(other),
                     })
                 }))
@@ -238,9 +245,10 @@ fn top_nav(
                 .dwclass!("flex align-items-center @sm:gap-6 @<sm:gap-3 @sm:text-sm @<sm:text-xs")
                 .child(nav_link("components", "#/components", page.signal().map(|p| p == DocPage::DwuiExamples)))
                 .child(nav_link("docs", "#/docs/getting-started", page.signal().map(|p| {
-                    !matches!(p, DocPage::Home | DocPage::DwuiExamples | DocPage::Examples)
+                    !matches!(p, DocPage::Home | DocPage::DwuiExamples | DocPage::Examples | DocPage::Charts)
                 })))
                 .child(nav_link("examples", "#/examples", page.signal().map(|p| p == DocPage::Examples)))
+                .child(nav_link("charts", "#/charts", page.signal().map(|p| p == DocPage::Charts)))
                 .child(nav_external("github", "https://github.com/JedimEmO/dwind"))
                 .child(palette_trigger(&palette))
             }))
@@ -359,6 +367,7 @@ fn footer() -> Dom {
                     ("components", "#/components"),
                     ("docs", "#/docs/getting-started"),
                     ("examples", "#/examples"),
+                    ("charts", "#/charts"),
                 ]))
                 .child(footer_column("project", vec![
                     ("github", "https://github.com/JedimEmO/dwind"),

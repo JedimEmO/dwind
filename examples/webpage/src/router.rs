@@ -89,6 +89,26 @@ pub fn make_app_router() -> AppRouter<DocPage> {
         .unwrap_throw();
 
     router
+        .insert("#/charts", Box::new(|_| Ok(DocPage::Charts)))
+        .unwrap_throw();
+
+    // Older chart-rail links used application-looking hashes such as
+    // `#/lines`. Keep those URLs on the chart page instead of treating them
+    // as unknown routes and silently falling back to the landing page.
+    for section in [
+        "live",
+        "interaction",
+        "tiles",
+        "lines",
+        "bars",
+        "distributions",
+    ] {
+        router
+            .insert(&format!("#/{section}"), Box::new(|_| Ok(DocPage::Charts)))
+            .unwrap_throw();
+    }
+
+    router
         .insert("#/", Box::new(|_| Ok(DocPage::Home)))
         .unwrap_throw();
 
