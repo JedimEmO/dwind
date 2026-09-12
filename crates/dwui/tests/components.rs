@@ -423,7 +423,10 @@ async fn modal_has_dialog_semantics_and_closes() {
 
     handle.discard();
     wait_frame().await;
-    assert!(doc_query("[role=dialog]").is_none(), "the portal should clean up");
+    assert!(
+        doc_query("[role=dialog]").is_none(),
+        "the portal should clean up"
+    );
 }
 
 #[wasm_bindgen_test]
@@ -1093,11 +1096,15 @@ fn stylesheet_selectors() -> Vec<String> {
     let mut out = vec![];
 
     for i in 0..sheets.length() {
-        let Some(sheet) = sheets.item(i) else { continue };
+        let Some(sheet) = sheets.item(i) else {
+            continue;
+        };
         let Ok(sheet) = sheet.dyn_into::<web_sys::CssStyleSheet>() else {
             continue;
         };
-        let Ok(rules) = sheet.css_rules() else { continue };
+        let Ok(rules) = sheet.css_rules() else {
+            continue;
+        };
 
         for r in 0..rules.length() {
             let Some(rule) = rules.item(r) else { continue };
@@ -1260,8 +1267,7 @@ async fn text_area_syncs_value_and_reports_invalid() {
     );
     wait_frames(2).await;
 
-    let textarea: web_sys::HtmlTextAreaElement =
-        tc.query("textarea").unwrap().dyn_into().unwrap();
+    let textarea: web_sys::HtmlTextAreaElement = tc.query("textarea").unwrap().dyn_into().unwrap();
 
     assert_eq!(textarea.value(), "hello");
     assert_eq!(textarea.get_attribute("rows").as_deref(), Some("6"));
@@ -1377,13 +1383,19 @@ async fn radio_group_selection_and_roving_tabindex() {
     // Roving tabindex: only the checked option is a tab stop
     assert_eq!(radio(0).get_attribute("tabindex").as_deref(), Some("-1"));
     assert_eq!(radio(1).get_attribute("tabindex").as_deref(), Some("0"));
-    assert_eq!(radio(1).get_attribute("aria-checked").as_deref(), Some("true"));
+    assert_eq!(
+        radio(1).get_attribute("aria-checked").as_deref(),
+        Some("true")
+    );
 
     click(&radio(2));
     wait_frames(2).await;
 
     assert_eq!(value.get_cloned(), "c");
-    assert_eq!(radio(2).get_attribute("aria-checked").as_deref(), Some("true"));
+    assert_eq!(
+        radio(2).get_attribute("aria-checked").as_deref(),
+        Some("true")
+    );
     assert_eq!(radio(2).get_attribute("tabindex").as_deref(), Some("0"));
     assert_eq!(radio(1).get_attribute("tabindex").as_deref(), Some("-1"));
 
@@ -1399,7 +1411,11 @@ async fn radio_group_selection_and_roving_tabindex() {
     radio(2).dispatch_event(&event).unwrap();
     wait_frames(2).await;
 
-    assert_eq!(value.get_cloned(), "a", "ArrowDown should wrap to the first option");
+    assert_eq!(
+        value.get_cloned(),
+        "a",
+        "ArrowDown should wrap to the first option"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -1496,7 +1512,11 @@ async fn heading_renders_without_a_wrapper() {
     // The heading is the component's root element, not nested in a div.
     let h3 = tc.query("h3").unwrap();
     assert_eq!(
-        h3.parent_element().unwrap().get_attribute("style").as_deref().map(|s| s.contains("width:800px")),
+        h3.parent_element()
+            .unwrap()
+            .get_attribute("style")
+            .as_deref()
+            .map(|s| s.contains("width:800px")),
         Some(true),
         "expected the heading to be a direct child of the test container"
     );
@@ -1545,10 +1565,7 @@ async fn modal_traps_tab_focus() {
     wait_frames(2).await;
 
     let dialog = doc_query("[role=dialog]").unwrap();
-    let inner: web_sys::HtmlElement = doc_query("[id=trap-inner]")
-        .unwrap()
-        .dyn_into()
-        .unwrap();
+    let inner: web_sys::HtmlElement = doc_query("[id=trap-inner]").unwrap().dyn_into().unwrap();
 
     // Focus the last focusable element (the inner button), then Tab: the trap
     // must wrap focus around to the dialog's first focusable (the close
@@ -1669,24 +1686,39 @@ async fn dropdown_menu_opens_selects_and_closes() {
     wait_frames(2).await;
 
     let trigger = tc.query("button[aria-haspopup=menu]").unwrap();
-    assert_eq!(trigger.get_attribute("aria-expanded").as_deref(), Some("false"));
+    assert_eq!(
+        trigger.get_attribute("aria-expanded").as_deref(),
+        Some("false")
+    );
 
     let menu = tc.query("[role=menu]").unwrap();
 
     click(&trigger);
     wait_frames(2).await;
 
-    assert_eq!(trigger.get_attribute("aria-expanded").as_deref(), Some("true"));
+    assert_eq!(
+        trigger.get_attribute("aria-expanded").as_deref(),
+        Some("true")
+    );
     assert_eq!(tc.query_all("[role=menuitem]").length(), 3);
 
     let disabled_item = tc.query("[role=menuitem][aria-disabled=true]").unwrap();
     assert_eq!(disabled_item.text_content().unwrap(), "Paste");
 
-    click(&tc.query(&format!("[id='{}-item-delete']", menu.get_attribute("id").unwrap())).unwrap());
+    click(
+        &tc.query(&format!(
+            "[id='{}-item-delete']",
+            menu.get_attribute("id").unwrap()
+        ))
+        .unwrap(),
+    );
     wait_frames(2).await;
 
     assert_eq!(selected.get_cloned().as_deref(), Some("delete"));
-    assert_eq!(trigger.get_attribute("aria-expanded").as_deref(), Some("false"));
+    assert_eq!(
+        trigger.get_attribute("aria-expanded").as_deref(),
+        Some("false")
+    );
 }
 
 #[wasm_bindgen_test]
@@ -1756,11 +1788,17 @@ async fn drawer_opens_from_a_side_and_closes() {
     wait_frames(2).await;
 
     let dialog = doc_query("[role=dialog]").unwrap();
-    assert_eq!(dialog.get_attribute("aria-label").as_deref(), Some("Settings"));
+    assert_eq!(
+        dialog.get_attribute("aria-label").as_deref(),
+        Some("Settings")
+    );
     assert_eq!(dialog.get_attribute("aria-modal").as_deref(), Some("true"));
 
     let style = dialog.get_attribute("style").unwrap_or_default();
-    assert!(style.contains("left: 0"), "left drawer should pin to the left edge, got {style:?}");
+    assert!(
+        style.contains("left: 0"),
+        "left drawer should pin to the left edge, got {style:?}"
+    );
 
     click(&doc_query("button[aria-label='Close drawer']").unwrap());
     wait_frames(2).await;
@@ -1810,13 +1848,25 @@ async fn toaster_pushes_auto_dismisses_and_manually_dismisses() {
 
     wait_frame().await;
     assert_eq!(host.child_element_count(), 2);
-    assert!(doc_query("[role=alert]").is_some(), "error toasts announce assertively");
+    assert!(
+        doc_query("[role=alert]").is_some(),
+        "error toasts announce assertively"
+    );
 
     gloo_timers::future::TimeoutFuture::new(300).await;
-    assert_eq!(host.child_element_count(), 1, "the timed toast should have auto-dismissed");
+    assert_eq!(
+        host.child_element_count(),
+        1,
+        "the timed toast should have auto-dismissed"
+    );
 
     // Dismiss the sticky one via its button
-    click(&host.query_selector("button[aria-label=Dismiss]").unwrap().unwrap());
+    click(
+        &host
+            .query_selector("button[aria-label=Dismiss]")
+            .unwrap()
+            .unwrap(),
+    );
     wait_frame().await;
     assert_eq!(host.child_element_count(), 0);
 

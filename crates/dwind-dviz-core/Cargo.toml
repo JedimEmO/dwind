@@ -1,0 +1,15 @@
+[package]
+name = "dwind-dviz-core"
+version = "0.1.0"
+description = "DOM-free data visualization primitives (scales, ticks, geometry, palettes) for dwind-dviz"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+jiff = { workspace = true }
+thiserror = { workspace = true }

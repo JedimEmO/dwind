@@ -6,6 +6,9 @@ members = [
     "crates/dwind-base",
     "crates/dwind-build",
     "crates/dwind-macros",
+    "crates/dwind-dviz",
+    "crates/dwind-dviz-core",
+    "crates/dwind-dviz-data",
     "crates/dwui",
     "crates/example-html-macro",
     "crates/modern-normalize-cssys",
@@ -13,8 +16,24 @@ members = [
     "examples/webpage",
 ]
 
+# Shared package metadata for the crates that opt in with `.workspace = true`
+# (the dwind-dviz family). The older crates keep their own fields.
+[workspace.package]
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+repository = "https://github.com/JedimEmO/dwind"
+homepage = "https://jedimemo.github.io/dwind/examples"
+keywords = ["web", "wasm", "chart", "visualization", "dominator"]
+categories = ["visualization", "wasm", "web-programming"]
+
 [workspace.dependencies]
 case = "1.0"
+dwind-dviz = { path = "crates/dwind-dviz", version = "0.1.0" }
+dwind-dviz-core = { path = "crates/dwind-dviz-core", version = "0.1.0" }
+dwind-dviz-data = { path = "crates/dwind-dviz-data", version = "0.1.0" }
+jiff = { version = "0.2", features = ["js"] }
+js-sys = "0.3"
 const_format = "0.2"
 cssparser = "0.34"
 dominator = "0.5"

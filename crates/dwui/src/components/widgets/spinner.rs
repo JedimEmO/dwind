@@ -11,7 +11,6 @@ pub enum SpinnerSize {
     Large,
 }
 
-
 /// A loading spinner exposed to assistive technology as `role="status"`.
 #[component(render_fn = spinner)]
 struct Spinner {

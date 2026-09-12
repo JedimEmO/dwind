@@ -1,0 +1,19 @@
+[package]
+name = "dwind-dviz-data"
+version = "0.1.0"
+description = "Signal-backed data sources (static, mutable, windowed/realtime, downsampled) for dwind-dviz"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+dwind-dviz-core = { workspace = true }
+futures = { workspace = true }
+futures-signals = { workspace = true }
+
+[dev-dependencies]
+futures = { workspace = true, features = ["executor"] }

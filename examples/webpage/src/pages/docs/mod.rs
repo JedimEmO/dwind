@@ -40,6 +40,7 @@ pub enum DocPage {
     // Showcases
     Examples,
     DwuiExamples,
+    Charts,
 }
 
 impl DocPage {
@@ -63,6 +64,7 @@ impl DocPage {
             DocPage::Pseudoclasses => go_to_url("#/docs/pseudoclasses"),
             DocPage::Examples => go_to_url("#/examples"),
             DocPage::DwuiExamples => go_to_url("#/components"),
+            DocPage::Charts => go_to_url("#/charts"),
             &DocPage::Animation => go_to_url("#/docs/animation"),
         }
     }
@@ -94,6 +96,7 @@ impl Display for DocPage {
             DocPage::Pseudoclasses => write!(f, "Pseudoclasses"),
             DocPage::Examples => write!(f, "Examples"),
             DocPage::DwuiExamples => write!(f, "Components"),
+            DocPage::Charts => write!(f, "Charts"),
             DocPage::Animation => write!(f, "Animation"),
         }
     }

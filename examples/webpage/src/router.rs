@@ -89,6 +89,10 @@ pub fn make_app_router() -> AppRouter<DocPage> {
         .unwrap_throw();
 
     router
+        .insert("#/charts", Box::new(|_| Ok(DocPage::Charts)))
+        .unwrap_throw();
+
+    router
         .insert("#/", Box::new(|_| Ok(DocPage::Home)))
         .unwrap_throw();
 

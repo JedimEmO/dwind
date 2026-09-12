@@ -223,15 +223,7 @@ mod test {
     fn middle_pages_get_ellipses_on_both_sides() {
         assert_eq!(
             pages(&page_window(5, 10, 1)),
-            vec![
-                Some(1),
-                None,
-                Some(4),
-                Some(5),
-                Some(6),
-                None,
-                Some(10)
-            ]
+            vec![Some(1), None, Some(4), Some(5), Some(6), None, Some(10)]
         );
     }
 
@@ -246,7 +238,10 @@ mod test {
 
     #[test]
     fn out_of_range_input_is_clamped() {
-        assert_eq!(pages(&page_window(99, 3, 1)), vec![Some(1), Some(2), Some(3)]);
+        assert_eq!(
+            pages(&page_window(99, 3, 1)),
+            vec![Some(1), Some(2), Some(3)]
+        );
         assert_eq!(pages(&page_window(1, 0, 1)), vec![Some(1)]);
     }
 }

@@ -27,9 +27,8 @@ pub(crate) fn trap_focus(container: &web_sys::HtmlElement, e: &events::KeyDown) 
         return;
     }
 
-    let element_at = |index: u32| -> Option<web_sys::HtmlElement> {
-        focusables.item(index)?.dyn_into().ok()
-    };
+    let element_at =
+        |index: u32| -> Option<web_sys::HtmlElement> { focusables.item(index)?.dyn_into().ok() };
 
     let Some(first) = element_at(0) else { return };
     let Some(last) = element_at(count - 1) else {
