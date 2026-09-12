@@ -26,6 +26,7 @@ struct DonutChart {
     #[default(vec![])]
     series: Vec<Series>,
 
+    #[signal]
     #[default(String::new())]
     label: String,
 
@@ -33,8 +34,8 @@ struct DonutChart {
     size: f64,
 
     /// Label under the centre total.
-    #[default("Total")]
-    center_label: &'static str,
+    #[default("Total".to_string())]
+    center_label: String,
 
     #[default(None)]
     slots: Option<Rc<SeriesSlots>>,
@@ -81,7 +82,7 @@ pub fn donut_chart(props: DonutChartProps) -> Dom {
             .style("width", format!("{size}px"))
             .style("flex", "none")
             .child(chart(ChartProps::new()
-                .label(label)
+                .label_signal(label)
                 .height(size)
                 .margins(Some(Margins::uniform(4.0)))
                 .slots(Some(slots.clone()))

@@ -18,6 +18,7 @@ struct Sparkline {
     #[default(vec![])]
     values: Vec<f64>,
 
+    #[signal]
     #[default(String::new())]
     label: String,
 
@@ -25,6 +26,7 @@ struct Sparkline {
     height: f64,
 
     /// Fix the y domain, otherwise the data extent.
+    #[signal]
     #[default(None)]
     y: Option<Extent<f64>>,
 }
@@ -41,14 +43,15 @@ pub fn sparkline(props: SparklineProps) -> Dom {
     let values = values.broadcast();
     let x_domain =
         values.signal_ref(|v| XDomain::Linear(Extent::new(0.0, (v.len().max(2) - 1) as f64)));
-    let y_domain = values.signal_ref(move |v| {
-        YDomain::Linear(
+    let y_domain = map_ref! {
+        let v = values.signal_cloned(),
+        let y = y => YDomain::Linear(
             y.unwrap_or_else(|| stats::extent(v.iter().copied()).unwrap_or(Extent::UNIT)),
         )
-    });
+    };
 
     chart(ChartProps::new()
-        .label(label)
+        .label_signal(label)
         .height(height)
         .nice_y(false)
         .margins(Some(Margins::uniform(4.0)))

@@ -4,6 +4,22 @@
 //! elsewhere; this module only describes *what* is plotted.
 
 use jiff::Timestamp;
+use thiserror::Error;
+
+/// Validation failures for data handed to a chart.
+#[derive(Debug, Clone, PartialEq, Error)]
+pub enum DataError {
+    #[error("series id must not be empty")]
+    EmptySeriesId,
+    #[error("series id is duplicated: {0}")]
+    DuplicateSeriesId(String),
+    #[error("series {series:?} contains a non-finite x value at point {index}")]
+    NonFiniteX { series: String, index: usize },
+    #[error("series {series:?} contains an infinite y value at point {index}")]
+    InfiniteY { series: String, index: usize },
+    #[error("category is not present in the domain: {0}")]
+    UnknownCategory(String),
+}
 
 /// A closed interval `[min, max]`. The building block of every continuous
 /// domain.
@@ -68,6 +84,7 @@ impl Extent<f64> {
     /// Pads both ends by `fraction` of the span. A degenerate extent is
     /// padded by `fraction` of `|min|` (or by `1.0` at zero) so it opens up.
     pub fn pad(&self, fraction: f64) -> Self {
+        let fraction = fraction.max(0.0);
         if self.is_degenerate() {
             let amount = if self.min == 0.0 {
                 1.0
@@ -182,6 +199,15 @@ impl CategoryPoint {
             value,
         }
     }
+
+    /// Resolves this category against a declared band domain.
+    pub fn to_point(&self, domain: &[String]) -> Result<Point, DataError> {
+        let index = domain
+            .iter()
+            .position(|category| category == &self.category)
+            .ok_or_else(|| DataError::UnknownCategory(self.category.clone()))?;
+        Ok(Point::new(index as f64, self.value))
+    }
 }
 
 /// A named sequence of observations.
@@ -215,6 +241,39 @@ impl<P> Series<P> {
 }
 
 impl Series<Point> {
+    /// Constructs a validated numeric series. NaN y values are retained as
+    /// intentional line gaps; infinite coordinates are rejected.
+    pub fn try_new(
+        id: impl Into<String>,
+        label: impl Into<String>,
+        points: Vec<Point>,
+    ) -> Result<Self, DataError> {
+        let series = Self::new(id, label, points);
+        series.validate()?;
+        Ok(series)
+    }
+
+    pub fn validate(&self) -> Result<(), DataError> {
+        if self.id.is_empty() {
+            return Err(DataError::EmptySeriesId);
+        }
+        for (index, point) in self.points.iter().enumerate() {
+            if !point.x.is_finite() {
+                return Err(DataError::NonFiniteX {
+                    series: self.id.clone(),
+                    index,
+                });
+            }
+            if point.y.is_infinite() {
+                return Err(DataError::InfiniteY {
+                    series: self.id.clone(),
+                    index,
+                });
+            }
+        }
+        Ok(())
+    }
+
     /// Extents of the defined points, or `None` when there are none.
     pub fn x_extent(&self) -> Option<Extent<f64>> {
         crate::stats::extent(self.points.iter().filter(|p| p.is_defined()).map(|p| p.x))
@@ -223,6 +282,31 @@ impl Series<Point> {
     pub fn y_extent(&self) -> Option<Extent<f64>> {
         crate::stats::extent(self.points.iter().filter(|p| p.is_defined()).map(|p| p.y))
     }
+}
+
+impl Series<CategoryPoint> {
+    /// Converts typed category/value observations into the numeric point
+    /// representation consumed by the SVG renderer.
+    pub fn into_numeric(self, domain: &[String]) -> Result<Series<Point>, DataError> {
+        let points = self
+            .points
+            .iter()
+            .map(|point| point.to_point(domain))
+            .collect::<Result<Vec<_>, _>>()?;
+        Series::<Point>::try_new(self.id, self.label, points)
+    }
+}
+
+/// Validates identities and numeric coordinates for a collection of series.
+pub fn validate_series(series: &[Series]) -> Result<(), DataError> {
+    let mut ids = std::collections::HashSet::with_capacity(series.len());
+    for item in series {
+        item.validate()?;
+        if !ids.insert(item.id.clone()) {
+            return Err(DataError::DuplicateSeriesId(item.id.clone()));
+        }
+    }
+    Ok(())
 }
 
 /// Union of the y-extents of several series.
@@ -274,6 +358,7 @@ mod tests {
         assert!(!p.is_degenerate());
         assert_eq!(Extent::new(0.0, 0.0).pad(0.1), Extent::new(-1.0, 1.0));
         assert_eq!(e.normalize(5.0), 0.5);
+        assert_eq!(Extent::new(10.0, 20.0).pad(-1.0), Extent::new(10.0, 20.0));
     }
 
     #[test]
@@ -291,6 +376,63 @@ mod tests {
         assert_eq!(s.x_extent(), Some(Extent::new(0.0, 2.0)));
         let empty: Series = Series::new("e", "E", vec![]);
         assert_eq!(empty.y_extent(), None);
+    }
+
+    #[test]
+    fn validated_series_rejects_bad_identity_and_coordinates() {
+        assert_eq!(
+            Series::try_new("", "Empty", vec![]),
+            Err(DataError::EmptySeriesId)
+        );
+        assert_eq!(
+            Series::try_new("a", "A", vec![Point::new(f64::INFINITY, 1.0)]),
+            Err(DataError::NonFiniteX {
+                series: "a".into(),
+                index: 0,
+            })
+        );
+        assert_eq!(
+            Series::try_new("a", "A", vec![Point::new(0.0, f64::INFINITY)]),
+            Err(DataError::InfiniteY {
+                series: "a".into(),
+                index: 0,
+            })
+        );
+        assert!(Series::try_new("gap", "Gap", vec![Point::new(0.0, f64::NAN)]).is_ok());
+    }
+
+    #[test]
+    fn validation_rejects_duplicate_series_ids() {
+        let series = vec![
+            Series::new("same", "A", vec![]),
+            Series::new("same", "B", vec![]),
+        ];
+        assert_eq!(
+            validate_series(&series),
+            Err(DataError::DuplicateSeriesId("same".into()))
+        );
+    }
+
+    #[test]
+    fn category_points_require_a_declared_domain() {
+        let domain = vec!["low".into(), "high".into()];
+        let typed = Series::new(
+            "priority",
+            "Priority",
+            vec![CategoryPoint::new("high", 3.0)],
+        );
+        let numeric = typed.into_numeric(&domain).unwrap();
+        assert_eq!(numeric.points, vec![Point::new(1.0, 3.0)]);
+
+        let unknown = Series::new(
+            "priority",
+            "Priority",
+            vec![CategoryPoint::new("urgent", 5.0)],
+        );
+        assert_eq!(
+            unknown.into_numeric(&domain),
+            Err(DataError::UnknownCategory("urgent".into()))
+        );
     }
 
     #[test]

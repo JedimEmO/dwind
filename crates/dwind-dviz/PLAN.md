@@ -133,8 +133,10 @@ These are enforced by API shape or documented as defaults, not left to users:
 
 - **One y-axis per chart.** No dual-axis API. The docs point to small
   multiples or indexing to a common base.
-- **Categorical hue order is fixed by series id**, not by position. Filtering
-  out a series never repaints the survivors. A 9th series folds into "Other".
+- **Categorical hue assignment is fixed by series id**, not by position.
+  Filtering or reordering series never repaints the survivors. The theme ships
+  eight categorical slots; deterministic hash collisions share a slot, while
+  legends and direct labels preserve series identity independently of color.
 - **Sequential = one hue, light to dark; diverging = two hues + neutral gray
   midpoint.** No rainbow ramps in the crate.
 - **Marks are thin**, bars have 4px rounded data-ends anchored to the
@@ -187,16 +189,21 @@ core/data, Chrome + Firefox wasm tests for the renderer, like dwind's
   keyboard navigation over marks, legend toggling, brush-to-zoom on time axes.
 - Gallery: interaction page.
 
-### Phase 5 — Realtime — done 2026-09-11
+### Phase 5 — Realtime — foundation complete 2026-09-11
 - `dwind-dviz-data`: `WindowedSource`, `StreamSource`, `Downsampled`, follow/pause.
 - rAF coalescing in the renderer; live indicator; fixed-domain guidance.
 - Gallery: a live page fed by an in-browser generator (and a WebSocket demo
   if a small server example is worth it).
-- Benchmark: 8 series × 10k points at 60fps in Chrome; record numbers in the
-  README.
+- Benchmark fixture: 8 series × 10k points; the current test records the
+  synchronous commit and signal-patch cost. A paint-inclusive, reproducible
+  performance gate remains outstanding.
 
-### Phase 6 — Accessibility, docs, release
-- `table_view`, textures for forced-colors, aria audit of every preset.
+### Phase 6 — Hardening, accessibility, docs, release
+- Validate or fail closed on duplicate series ids, malformed stacked data,
+  invalid domains, and non-monotone interpolation input.
+- Add property tests and browser coverage for empty, sparse, reordered, and
+  high-volume data.
+- `table_view`, forced-colors treatment, and an aria audit of every preset.
 - rustdoc with an example per component; gallery deployed to GH pages.
 - Publish `dwind-dviz-core`, `dwind-dviz-data`, `dwind-dviz` 0.1.0.
 
@@ -240,3 +247,41 @@ candlestick / OHLC, box plot, streamgraph, export to PNG/SVG, an
    convert at the boundary with `timestamp_millis()`; that is a one-liner and
    not our problem to maintain.
 5. **SVG only for 1.0.** Canvas is deferred until a real workload exceeds SVG.
+
+## 5. API hardening status (started 2026-09-12)
+
+The public API hardening pass is now an explicit release gate for `0.1.0`.
+
+Completed in the first slice:
+
+- `LogScale::try_new` and `try_with_base` report invalid user input through
+  typed `ScaleError` values.
+- `BandScale::try_new` rejects duplicate categories, while the ergonomic
+  constructor performs stable de-duplication.
+- `Series::try_new`, `Series::validate`, and `validate_series` provide typed
+  validation for empty identities, duplicate ids, and non-finite coordinates
+  (NaN y values remain valid gaps).
+- `StaticSource::try_new`, `MutableSource::try_new`, and `MutableSource::try_set`
+  validate complete snapshots before publishing them.
+- Series color slots are deterministic by series id and no longer depend on
+  first-render order.
+- Donut center labels are owned `String` values instead of `&'static str`.
+- Preset labels and fixed y-domains are signal-capable consistently across
+  line, area, bar, scatter, donut, sparkline, and stat-tile APIs.
+- `CategoryPoint` and `Series<CategoryPoint>::into_numeric` provide a checked
+  category-to-band conversion that rejects unknown categories.
+- `CustomScale`/`CustomScaleHandle` allow external x/y scales to participate in
+  mapping, inversion, ticks, descriptions, and responsive range updates.
+- `DomainSource` exposes optional reactive x-extents for static, mutable, and
+  windowed sources.
+- `CrosshairOptions::hover` exposes snapped hover state to application code.
+- `CrosshairOptions::select` exposes click selection of the current snapped
+  point, and `point_table_view` provides an exact observation-level fallback
+  distinct from the summary `table_view`.
+
+Remaining release-gate work:
+
+1. Reconcile `DataSource` with the roadmap's domain/error/update contract.
+2. Add public API compile tests and browser interaction coverage once the
+   workspace's wasm-bindgen CLI/dependency versions are aligned.
+3. Add a paint-inclusive performance gate and complete the release checklist.

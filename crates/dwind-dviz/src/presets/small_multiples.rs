@@ -4,6 +4,7 @@ use dominator::{Dom, html};
 use dwind_dviz_core::data::{Extent, Series};
 use dwind_dviz_core::geom::Curve;
 use futures_signals::signal::{Signal, SignalExt};
+use futures_signals::signal_vec::SignalVecExt;
 
 use super::line_chart::{LineChartProps, line_chart};
 use crate::chart::SeriesSlots;
@@ -40,44 +41,79 @@ pub fn small_multiples<S>(series: S, opts: SmallMultiplesOptions) -> Dom
 where
     S: Signal<Item = Vec<Series>> + 'static,
 {
+    let series = series.broadcast();
     let slots = SeriesSlots::new();
+    let (panels, driver) = crate::keyed::diffed(
+        series.signal_ref(|all| all.iter().map(|s| s.id.clone()).collect::<Vec<_>>()),
+    );
     html!("div", {
         .class("dviz-multiples")
         .style("grid-template-columns", format!("repeat({}, minmax(0, 1fr))", opts.columns.max(1)))
-        .children_signal_vec(series.map(move |all| {
-            let shared = opts.shared_y.then(|| match y_domain_for(&all, false, 0.05) {
-                YDomain::Linear(e) => e,
-                _ => Extent::UNIT,
-            });
-            all.into_iter()
-                .map(|s| panel(s, shared, &opts, slots.clone()))
-                .collect::<Vec<_>>()
-        }).to_signal_vec())
+        .future(driver)
+        .children_signal_vec(panels.signal_vec_cloned().map(move |id| {
+            let series = series.clone();
+            let opts = opts.clone();
+            let slots = slots.clone();
+            panel_signal(id, series.signal_cloned(), opts, slots)
+        }))
     })
 }
 
-fn panel(
-    s: Series,
-    shared: Option<Extent<f64>>,
-    opts: &SmallMultiplesOptions,
+fn panel_signal<S>(
+    id: String,
+    series: S,
+    opts: SmallMultiplesOptions,
     slots: Rc<SeriesSlots>,
-) -> Dom {
-    let title = s.label.clone();
+) -> Dom
+where
+    S: Signal<Item = Vec<Series>> + 'static,
+{
+    let series = series.broadcast();
+    let title = series
+        .signal_ref({
+            let id = id.clone();
+            move |all| {
+                all.iter()
+                    .find(|s| s.id == id)
+                    .map(|s| s.label.clone())
+                    .unwrap_or_default()
+            }
+        })
+        .broadcast();
+    let one = series
+        .signal_ref(move |all| {
+            all.iter()
+                .find(|s| s.id == id)
+                .cloned()
+                .into_iter()
+                .collect::<Vec<_>>()
+        })
+        .boxed_local();
+    let shared_y = if opts.shared_y {
+        series
+            .signal_ref(|all| match y_domain_for(all, false, 0.05) {
+                YDomain::Linear(e) => Some(e),
+                _ => Some(Extent::UNIT),
+            })
+            .boxed_local()
+    } else {
+        futures_signals::signal::always(None).boxed_local()
+    };
     html!("div", {
         .class("dviz-multiple")
         .child(html!("div", {
             .class("dviz-multiple-title")
-            .text(&title)
+            .text_signal(title.signal_cloned())
         }))
         .child(line_chart(LineChartProps::new()
-            .label(title.clone())
+            .label_signal(title.signal_cloned())
             .height(opts.height)
-            .x(opts.x.clone())
+            .x(opts.x)
             .curve(opts.curve)
-            .y(shared)
+            .y_signal(shared_y)
             .legend(false)
             .end_labels(false)
             .slots(Some(slots))
-            .series(vec![s])))
+            .series_signal(one)))
     })
 }

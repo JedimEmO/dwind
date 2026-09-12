@@ -21,6 +21,7 @@ use super::sparkline::{SparklineProps, sparkline};
 #[component(render_fn = stat_tile)]
 struct StatTile {
     /// Sentence case, no trailing colon.
+    #[signal]
     #[default(String::new())]
     label: String,
 
@@ -97,7 +98,7 @@ pub fn stat_tile(props: StatTileProps) -> Dom {
         .class("dviz-stat")
         .child(html!("div", {
             .class("dviz-stat-label")
-            .text(&label)
+            .text_signal(label)
         }))
         .future(count_up)
         .child(html!("div", {

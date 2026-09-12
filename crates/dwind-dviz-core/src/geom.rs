@@ -182,6 +182,15 @@ fn monotone(path: &mut Path, run: &[Point]) {
     if n < 2 {
         return;
     }
+    // Monotone interpolation is only defined for strictly increasing x.
+    // Duplicate or reordered samples are valid input for a general line, so
+    // degrade to honest straight segments instead of emitting NaN controls.
+    if run.windows(2).any(|w| w[1].x <= w[0].x) {
+        for p in &run[1..] {
+            path.line_to(p.x, p.y);
+        }
+        return;
+    }
     if n == 2 {
         path.line_to(run[1].x, run[1].y);
         return;
@@ -416,10 +425,13 @@ pub struct Stacked {
 /// Stacks `series[s][i]` (series-major, all the same length) into lower and
 /// upper edges in data units. NaN values contribute zero height.
 pub fn stack(series: &[Vec<f64>], offset: StackOffset) -> Vec<Vec<Stacked>> {
-    let n = series.first().map_or(0, Vec::len);
+    // A live feed can temporarily have different lengths per series.  Stack
+    // the union of all columns and treat a missing value like a gap instead
+    // of indexing through the first series' length.
+    let n = series.iter().map(Vec::len).max().unwrap_or(0);
     let mut out: Vec<Vec<Stacked>> = series
         .iter()
-        .map(|s| vec![Stacked { y0: 0.0, y1: 0.0 }; s.len().min(n)])
+        .map(|_| vec![Stacked { y0: 0.0, y1: 0.0 }; n])
         .collect();
     for i in 0..n {
         let mut pos = 0.0;
@@ -505,6 +517,13 @@ mod tests {
             line(&pts(&[(0.0, 0.0), (1.0, 1.0)]), Curve::MonotoneX),
             "M0,0L1,1"
         );
+        assert_eq!(
+            line(
+                &pts(&[(0.0, 0.0), (0.0, 1.0), (1.0, 2.0)]),
+                Curve::MonotoneX
+            ),
+            "M0,0L0,1L1,2"
+        );
     }
 
     #[test]
@@ -580,5 +599,13 @@ mod tests {
         let d = stack(&[vec![2.0], vec![-3.0], vec![1.0]], StackOffset::Diverging);
         assert_eq!(d[1][0], Stacked { y0: 0.0, y1: -3.0 });
         assert_eq!(d[2][0], Stacked { y0: 2.0, y1: 3.0 });
+    }
+
+    #[test]
+    fn stacks_uneven_series_without_panicking() {
+        let s = stack(&[vec![1.0, 2.0], vec![3.0]], StackOffset::Diverging);
+        assert_eq!(s[0].len(), 2);
+        assert_eq!(s[1][0], Stacked { y0: 1.0, y1: 4.0 });
+        assert_eq!(s[1][1], Stacked { y0: 2.0, y1: 2.0 });
     }
 }

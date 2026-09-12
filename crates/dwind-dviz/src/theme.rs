@@ -68,7 +68,8 @@ const AT_RULES: &str = "\
 @keyframes dviz-pop { from { transform: scale(0.001); } to { transform: scale(1); } }\
 @keyframes dviz-halo { 0% { r: 4px; opacity: 0.55; } 100% { r: 14px; opacity: 0; } }\
 @keyframes dviz-rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }\
-@media (prefers-reduced-motion: reduce) { .dviz-chart *, .dviz-live-dot, .dviz-tooltip, .dviz-stat-value { animation: none !important; transition: none !important; } }";
+@media (prefers-reduced-motion: reduce) { .dviz-chart *, .dviz-live-dot, .dviz-tooltip, .dviz-stat-value { animation: none !important; transition: none !important; } }\
+@media (forced-colors: active) { .dviz-chart .dviz-bar, .dviz-chart .dviz-cell, .dviz-chart .dviz-arc { fill: CanvasText !important; stroke: Canvas !important; stroke-width: 1px; } .dviz-chart .dviz-line { stroke: CanvasText !important; filter: none !important; } .dviz-chart .dviz-end-marker, .dviz-chart .dviz-point { fill: CanvasText !important; stroke: Canvas !important; } .dviz-chart .dviz-grid line { stroke: GrayText !important; } }";
 
 fn inject_at_rules() {
     let Some(document) = web_sys::window().and_then(|w| w.document()) else {

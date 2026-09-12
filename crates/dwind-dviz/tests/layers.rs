@@ -269,3 +269,25 @@ async fn stat_tile_shows_value_delta_and_trend() {
     assert_eq!(query_all(&host, "circle.dviz-sparkline-end").len(), 1);
     host.remove();
 }
+
+#[wasm_bindgen_test]
+async fn table_view_exposes_exact_series_values() {
+    let host = mount(
+        "table-view",
+        500.0,
+        table_view(always(vec![Series::new(
+            "latency",
+            "Latency",
+            vec![Point::new(0.0, 10.0), Point::new(1.0, 25.0)],
+        )])),
+    )
+    .await;
+    let rows = query_all(&host, "tbody tr");
+    assert_eq!(rows.len(), 1);
+    let cells: Vec<String> = query_all(&rows[0], "td")
+        .iter()
+        .map(|cell| cell.text_content().unwrap())
+        .collect();
+    assert_eq!(cells, vec!["Latency", "25", "10", "25", "2"]);
+    host.remove();
+}

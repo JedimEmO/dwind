@@ -11,6 +11,18 @@ use crate::palette::{Color, Ramp};
 use crate::ticks;
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
+use thiserror::Error;
+
+/// Errors returned when a scale cannot represent the requested domain.
+#[derive(Debug, Clone, PartialEq, Error)]
+pub enum ScaleError {
+    #[error("log scale domain must be finite and strictly positive")]
+    InvalidLogDomain,
+    #[error("log scale base must be finite and greater than one")]
+    InvalidLogBase,
+    #[error("band scale categories must be unique")]
+    DuplicateBandCategory(String),
+}
 
 /// A scale from a continuous input to a pixel position.
 pub trait ContinuousScale {
@@ -101,23 +113,36 @@ pub struct LogScale {
 }
 
 impl LogScale {
-    /// Panics if the domain touches zero or is negative.
-    pub fn new(domain: Extent<f64>, range: (f64, f64)) -> Self {
-        assert!(
-            domain.min > 0.0 && domain.max > 0.0,
-            "log scale domain must be positive"
-        );
-        Self {
+    /// Builds a logarithmic scale after validating its domain.
+    pub fn try_new(domain: Extent<f64>, range: (f64, f64)) -> Result<Self, ScaleError> {
+        if !domain.min.is_finite()
+            || !domain.max.is_finite()
+            || domain.min <= 0.0
+            || domain.max <= 0.0
+        {
+            return Err(ScaleError::InvalidLogDomain);
+        }
+        Ok(Self {
             domain,
             range,
             base: 10.0,
             clamp: false,
-        }
+        })
     }
 
     pub fn with_base(mut self, base: f64) -> Self {
-        self.base = base;
+        if base.is_finite() && base > 1.0 {
+            self.base = base;
+        }
         self
+    }
+
+    pub fn try_with_base(mut self, base: f64) -> Result<Self, ScaleError> {
+        if !base.is_finite() || base <= 1.0 {
+            return Err(ScaleError::InvalidLogBase);
+        }
+        self.base = base;
+        Ok(self)
     }
 
     pub fn clamped(mut self) -> Self {
@@ -318,14 +343,35 @@ pub struct BandScale {
 }
 
 impl BandScale {
-    pub fn new(categories: impl IntoIterator<Item = impl Into<String>>, range: (f64, f64)) -> Self {
-        Self {
-            categories: categories.into_iter().map(Into::into).collect(),
+    /// Builds a band scale after rejecting duplicate categories.
+    pub fn try_new(
+        categories: impl IntoIterator<Item = impl Into<String>>,
+        range: (f64, f64),
+    ) -> Result<Self, ScaleError> {
+        let categories: Vec<String> = categories.into_iter().map(Into::into).collect();
+        let mut seen = std::collections::HashSet::with_capacity(categories.len());
+        for category in &categories {
+            if !seen.insert(category.clone()) {
+                return Err(ScaleError::DuplicateBandCategory(category.clone()));
+            }
+        }
+        Ok(Self {
+            categories,
             range,
             padding_inner: 0.2,
             padding_outer: 0.1,
             align: 0.5,
+        })
+    }
+
+    pub fn new(categories: impl IntoIterator<Item = impl Into<String>>, range: (f64, f64)) -> Self {
+        let mut unique = Vec::new();
+        for category in categories.into_iter().map(Into::into) {
+            if !unique.iter().any(|existing| existing == &category) {
+                unique.push(category);
+            }
         }
+        Self::try_new(unique, range).expect("deduplicated band categories are valid")
     }
 
     /// A point scale: zero bandwidth, categories at evenly spaced positions
@@ -349,6 +395,11 @@ impl BandScale {
 
     pub fn categories(&self) -> &[String] {
         &self.categories
+    }
+
+    /// Returns the stable index for a category, if it is in the domain.
+    pub fn index_of(&self, category: &str) -> Option<usize> {
+        self.categories.iter().position(|item| item == category)
     }
 
     pub fn len(&self) -> usize {
@@ -405,10 +456,6 @@ impl BandScale {
     /// Centre of the band for `category`; the position for a point scale.
     pub fn center(&self, category: &str) -> Option<f64> {
         self.map(category).map(|x| x + self.bandwidth() / 2.0)
-    }
-
-    pub fn index_of(&self, category: &str) -> Option<usize> {
-        self.categories.iter().position(|c| c == category)
     }
 
     /// The category whose band (or nearest step) contains `px`, for hover.
@@ -547,17 +594,30 @@ mod tests {
 
     #[test]
     fn log_scale() {
-        let s = LogScale::new(Extent::new(1.0, 1000.0), (0.0, 300.0));
+        let s = LogScale::try_new(Extent::new(1.0, 1000.0), (0.0, 300.0)).unwrap();
         assert_eq!(s.map(1.0), 0.0);
         assert!((s.map(10.0) - 100.0).abs() < 1e-9);
         assert!((s.invert(200.0) - 100.0).abs() < 1e-9);
         assert_eq!(
-            LogScale::new(Extent::new(3.0, 800.0), (0.0, 1.0))
+            LogScale::try_new(Extent::new(3.0, 800.0), (0.0, 1.0))
+                .unwrap()
                 .nice()
                 .domain,
             Extent::new(1.0, 1000.0)
         );
         assert_eq!(s.ticks(3), vec![1.0, 10.0, 100.0, 1000.0]);
+        assert_eq!(s.with_base(1.0).base, 10.0);
+        assert_eq!(s.with_base(f64::NAN).base, 10.0);
+    }
+
+    #[test]
+    fn invalid_log_inputs_are_reported() {
+        assert_eq!(
+            LogScale::try_new(Extent::new(-1.0, 10.0), (0.0, 1.0)),
+            Err(ScaleError::InvalidLogDomain)
+        );
+        let scale = LogScale::try_new(Extent::new(1.0, 10.0), (0.0, 1.0)).unwrap();
+        assert_eq!(scale.try_with_base(1.0), Err(ScaleError::InvalidLogBase));
     }
 
     #[test]
@@ -595,6 +655,18 @@ mod tests {
         assert_eq!(padded.bandwidth(), 25.0);
         assert_eq!(padded.map("a"), Some(12.5));
         assert_eq!(padded.center("b"), Some(75.0));
+    }
+
+    #[test]
+    fn duplicate_band_categories_are_rejected_or_deduplicated() {
+        assert_eq!(
+            BandScale::try_new(["a", "a"], (0.0, 1.0)),
+            Err(ScaleError::DuplicateBandCategory("a".into()))
+        );
+        assert_eq!(
+            BandScale::new(["a", "a", "b"], (0.0, 1.0)).categories(),
+            &["a", "b"]
+        );
     }
 
     #[test]

@@ -4,6 +4,20 @@ Reactive, accessible data visualization for the [dwind](https://github.com/Jedim
 / dwui / [DOMINATOR](https://github.com/Pauan/rust-dominator) ecosystem.
 Renders pre-prepared data and live streams through the same API.
 
+For exact values and screen-reader users, pair a chart with `table_view`:
+
+```rust
+html!("section", {
+    .child(line_chart!({ .label("Latency").series_signal(source.series_signal()) }))
+    .child(table_view(source.series_signal()))
+})
+```
+
+Use `point_table_view` when every plotted observation must be exposed rather
+than a latest/minimum/maximum summary. Custom x/y scales implement
+`CustomScale`, and live sources that expose reactive extents implement
+`DomainSource`.
+
 | Crate | What it is |
 |---|---|
 | `dwind-dviz-core` | DOM-free math: scales, ticks, formatting, SVG geometry, layout, stats, validated palettes. Tested natively. |
@@ -14,7 +28,7 @@ The gallery lives in the dwind example site: `examples/webpage`, route `#/charts
 deployed at https://jedimemo.github.io/dwind/examples/#/charts. It shows every
 chart, static and live, on the dark surface and the light one.
 
-Status: **Phase 5 (realtime) complete; Phase 6 (accessibility, docs, release) next**. See [PLAN.md](PLAN.md) for the architecture,
+Status: **Core, renderer, interaction, realtime, and API hardening foundations are implemented; release verification is next**. See [PLAN.md](PLAN.md) for the architecture,
 the dataviz rules the crate enforces, and the phase roadmap.
 
 ## Realtime

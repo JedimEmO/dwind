@@ -19,7 +19,7 @@ use super::{MarkInput, hoverable, keyed_marks, px};
 use crate::chart::{ChartContext, Frame, Layer, Tooltip, TooltipRow, layer};
 use crate::motion::tween;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ArcOptions {
     /// Inner radius as a fraction of the outer; the ring is the rest.
     pub inner_ratio: f64,
@@ -31,7 +31,7 @@ pub struct ArcOptions {
     /// share while hovering. Replaces the tooltip.
     pub center: bool,
     /// Label under the centre figure when nothing is hovered.
-    pub center_label: &'static str,
+    pub center_label: String,
 }
 
 impl Default for ArcOptions {
@@ -41,7 +41,7 @@ impl Default for ArcOptions {
             gap: 3.0,
             rounded: true,
             center: true,
-            center_label: "Total",
+            center_label: "Total".into(),
         }
     }
 }
@@ -80,7 +80,7 @@ impl ArcMark {
     /// The centreline path, shortened at both ends by the gap and, when
     /// rounded, by the cap radius so caps never overlap a neighbour. A
     /// segment too short for that becomes a dot.
-    pub fn path(&self, opts: ArcOptions) -> String {
+    pub fn path(&self, opts: &ArcOptions) -> String {
         if self.r <= 0.0 {
             return String::new();
         }
@@ -107,7 +107,7 @@ impl ArcMark {
 }
 
 /// The segment for series `si` among `all`, from each series' first value.
-pub fn arc_geometry(f: &Frame, all: &[Series], si: usize, opts: ArcOptions) -> ArcMark {
+pub fn arc_geometry(f: &Frame, all: &[Series], si: usize, opts: &ArcOptions) -> ArcMark {
     let (cx, cy) = f.plot.center();
     let outer = (f.plot.width.min(f.plot.height) / 2.0).max(0.0);
     let inner = outer * opts.inner_ratio.clamp(0.0, 0.95);
@@ -139,22 +139,25 @@ where
     layer(move |ctx| {
         let hovered: Mutable<Option<String>> = Mutable::new(None);
         let series = series.broadcast();
+        let geometry_opts = opts.clone();
+        let segment_opts = opts.clone();
+        let center_opts = opts.clone();
         let ring = keyed_marks(
             ctx,
             series.signal_cloned(),
             "dviz-arcs",
             false,
-            move |frame, all, si| vec![((), arc_geometry(frame, all, si, opts))],
+            move |frame, all, si| vec![((), arc_geometry(frame, all, si, &geometry_opts))],
             {
                 let hovered = hovered.clone();
                 move |ctx: &Rc<ChartContext>, _: &(), input: MarkInput<ArcMark>| {
-                    segment(ctx, input, opts, &hovered)
+                    segment(ctx, input, segment_opts.clone(), &hovered)
                 }
             },
         );
         let center = opts
             .center
-            .then(|| center_figure(ctx, series.signal_cloned(), hovered.clone(), opts));
+            .then(|| center_figure(ctx, series.signal_cloned(), hovered.clone(), center_opts));
         svg!("g", {
             .child(ring)
             .apply_if(center.is_some(), |b| b.child(center.unwrap()))
@@ -218,6 +221,8 @@ fn segment(
         }
     });
     let tooltip = ctx.tooltip().clone();
+    let path_opts = opts.clone();
+    let center = opts.center;
     let is_hovered = hovered
         .signal_ref(clone!(id => move |h| h.as_deref() == Some(id.as_str())))
         .dedupe();
@@ -230,14 +235,14 @@ fn segment(
         .apply_if(opts.rounded, |b| b.attr("stroke-linecap", "round"))
         .attr("style", &format!("stroke: {color}; color: {color}"))
         .attr_signal("stroke-width", shown.signal_ref(|m| m.as_ref().map_or("0".into(), |m| px(m.thickness))))
-        .attr_signal("d", shown.signal_ref(move |m| m.as_ref().map_or(String::new(), |m| m.path(opts))))
+        .attr_signal("d", shown.signal_ref(move |m| m.as_ref().map_or(String::new(), |m| m.path(&path_opts))))
         .attr_signal("data-hovered", is_hovered.map(|h| if h { "true" } else { "false" }))
         .attr_signal("transform-origin", shown.signal_ref(|m| m.as_ref().map_or("0 0".into(), |m| format!("{} {}", px(m.cx), px(m.cy)))))
         .event(clone!(hovered, id => move |_: events::PointerEnter| hovered.set_neq(Some(id.clone()))))
         .event(clone!(hovered => move |_: events::PointerLeave| hovered.set_neq(None)))
         .event(clone!(hovered, id => move |_: events::Focus| hovered.set_neq(Some(id.clone()))))
         .event(clone!(hovered => move |_: events::Blur| hovered.set_neq(None)))
-        .apply_if(!opts.center, |b| hoverable(b, tooltip, tip))
+        .apply_if(!center, |b| hoverable(b, tooltip, tip))
     })
 }
 
@@ -313,17 +318,17 @@ mod tests {
             share: 0.01,
             label: "x".into(),
         };
-        let d = m.path(ArcOptions::default());
+        let d = m.path(&ArcOptions::default());
         assert!(d.starts_with('M') && d.contains('A'), "{d}");
         let wide = ArcMark {
             a1: 4.0,
             ..m.clone()
         };
         assert!(
-            wide.path(ArcOptions::default()).contains(" 0 1 1 "),
+            wide.path(&ArcOptions::default()).contains(" 0 1 1 "),
             "large arc flag past half a turn"
         );
         let none = ArcMark { r: 0.0, ..m };
-        assert!(none.path(ArcOptions::default()).is_empty());
+        assert!(none.path(&ArcOptions::default()).is_empty());
     }
 }

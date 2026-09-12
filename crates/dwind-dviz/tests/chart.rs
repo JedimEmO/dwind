@@ -89,11 +89,38 @@ async fn chart_is_an_accessible_image_sized_to_its_host() {
         Some("Test chart")
     );
     assert_eq!(
+        svg.query_selector("desc")
+            .unwrap()
+            .unwrap()
+            .text_content()
+            .as_deref(),
+        Some("Interactive data visualization. Use the keyboard to inspect available marks.")
+    );
+    assert_eq!(
         svg.get_attribute("viewBox").as_deref(),
         Some("0 0 400 200"),
         "viewBox follows the host size"
     );
     unmount(&host);
+}
+
+#[wasm_bindgen_test]
+async fn chart_without_a_label_has_a_nonempty_accessible_name() {
+    let host = mount(
+        "fallback-label",
+        320.0,
+        dwind_dviz::chart!({
+            .height(160.0)
+            .layers(vec![])
+        }),
+    )
+    .await;
+    let svg = host.query_selector("svg").unwrap().unwrap();
+    assert_eq!(
+        svg.get_attribute("aria-label").as_deref(),
+        Some("Data visualization")
+    );
+    host.remove();
 }
 
 #[wasm_bindgen_test]

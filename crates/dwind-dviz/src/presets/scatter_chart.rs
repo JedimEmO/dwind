@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dominator::Dom;
 use dwind_dviz_core::data::{Extent, Series};
+use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals_component_macro::component;
 
@@ -21,6 +22,7 @@ struct ScatterChart {
     #[default(vec![])]
     series: Vec<Series>,
 
+    #[signal]
     #[default(String::new())]
     label: String,
 
@@ -30,6 +32,7 @@ struct ScatterChart {
     #[default(XKind::Linear)]
     x: XKind,
 
+    #[signal]
     #[default(None)]
     y: Option<Extent<f64>>,
 
@@ -69,14 +72,17 @@ pub fn scatter_chart(props: ScatterChartProps) -> Dom {
         let x = x.clone();
         series.signal_ref(move |s| x.domain_for(s, 0.05))
     };
-    let y_domain = series.signal_ref(move |s| match y {
-        Some(e) => YDomain::Linear(e),
-        None => y_domain_for(s, false, 0.05),
-    });
+    let y_domain = map_ref! {
+        let s = series.signal_cloned(),
+        let y = y => match *y {
+            Some(e) => YDomain::Linear(e),
+            None => y_domain_for(s, false, 0.05),
+        }
+    };
 
     let chart = chart(
         ChartProps::new()
-            .label(label)
+            .label_signal(label)
             .height(height)
             .slots(Some(slots.clone()))
             .x_domain_signal(x_domain)

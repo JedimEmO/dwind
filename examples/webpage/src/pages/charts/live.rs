@@ -145,6 +145,17 @@ pub fn page() -> Dom {
                     .height(300.0)
                     .series_signal(source.series_signal())
                 }))
+                .child(html!("details", {
+                    .dwclass!("m-t-2")
+                    .child(html!("summary", {
+                        .dwclass!("cursor-pointer text-sm text-woodsmoke-400 is(.light *):text-woodsmoke-600")
+                        .text("Show exact values")
+                    }))
+                    .child(html!("div", {
+                        .dwclass!("m-t-3")
+                        .child(table_view(source.series_signal()))
+                    }))
+                }))
             }),
         ))
     })

@@ -24,6 +24,7 @@ struct AreaChart {
     #[default(vec![])]
     series: Vec<Series>,
 
+    #[signal]
     #[default(String::new())]
     label: String,
 
@@ -33,6 +34,7 @@ struct AreaChart {
     #[default(XKind::Linear)]
     x: XKind,
 
+    #[signal]
     #[default(None)]
     y: Option<Extent<f64>>,
 
@@ -90,11 +92,14 @@ pub fn area_chart(props: AreaChartProps) -> Dom {
             let z = zoom.signal() => zoom_domain(x.domain_for(s, 0.0), *z)
         }
     };
-    let y_domain = series.signal_ref(move |s| match y {
-        Some(e) => YDomain::Linear(e),
-        None if stacked => y_domain_for_stacked(s),
-        None => y_domain_for(s, true, 0.0),
-    });
+    let y_domain = map_ref! {
+        let s = series.signal_cloned(),
+        let y = y => match *y {
+            Some(e) => YDomain::Linear(e),
+            None if stacked => y_domain_for_stacked(s),
+            None => y_domain_for(s, true, 0.0),
+        }
+    };
     let opts = AreaOptions {
         curve,
         ..if stacked {
@@ -106,7 +111,7 @@ pub fn area_chart(props: AreaChartProps) -> Dom {
 
     let chart = chart(
         ChartProps::new()
-            .label(label)
+            .label_signal(label)
             .height(height)
             .slots(Some(slots.clone()))
             .x_domain_signal(x_domain)

@@ -6,6 +6,7 @@
 //! frame from. Layers never measure the DOM themselves.
 
 use std::cell::{Cell, RefCell};
+use std::fmt;
 use std::rc::Rc;
 
 use dominator::{Dom, clone, html, svg};
@@ -27,6 +28,42 @@ use web_sys::{HtmlElement, ResizeObserver, ResizeObserverEntry};
 /// Axis label font size in px; margins are reserved from it.
 pub const AXIS_FONT_SIZE: f64 = 11.0;
 
+/// Extension point for user-defined continuous chart scales.
+pub trait CustomScale: 'static {
+    fn map(&self, value: f64) -> f64;
+    fn invert(&self, pixel: f64) -> f64;
+    fn ticks(&self, count: usize) -> Vec<f64>;
+    fn describe(&self, value: f64) -> String;
+    fn domain(&self) -> Option<Extent<f64>> {
+        None
+    }
+    fn with_range(&self, range: (f64, f64)) -> Rc<dyn CustomScale>;
+}
+
+#[derive(Clone)]
+pub struct CustomScaleHandle(Rc<dyn CustomScale>);
+
+impl CustomScaleHandle {
+    pub fn new(scale: impl CustomScale) -> Self {
+        Self(Rc::new(scale))
+    }
+    fn with_range(&self, range: (f64, f64)) -> Self {
+        Self(self.0.with_range(range))
+    }
+}
+
+impl fmt::Debug for CustomScaleHandle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("CustomScaleHandle(..)")
+    }
+}
+
+impl PartialEq for CustomScaleHandle {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
 /// What the x axis measures. Resolved to an [`XScale`] once a size is known.
 #[derive(Debug, Clone, PartialEq)]
 pub enum XDomain {
@@ -39,6 +76,7 @@ pub enum XDomain {
     /// Categories in display order. Points on a band axis carry the
     /// category *index* as their x.
     Band(Vec<String>),
+    Custom(CustomScaleHandle),
 }
 
 impl XDomain {
@@ -52,6 +90,10 @@ impl XDomain {
     pub fn band(categories: impl IntoIterator<Item = impl Into<String>>) -> Self {
         Self::Band(categories.into_iter().map(Into::into).collect())
     }
+
+    pub fn custom(scale: impl CustomScale) -> Self {
+        Self::Custom(CustomScaleHandle::new(scale))
+    }
 }
 
 /// What the y axis measures.
@@ -62,11 +104,16 @@ pub enum YDomain {
     Log(Extent<f64>),
     /// Categories top to bottom, for heatmaps. Values carry the index.
     Band(Vec<String>),
+    Custom(CustomScaleHandle),
 }
 
 impl YDomain {
     pub fn band(categories: impl IntoIterator<Item = impl Into<String>>) -> Self {
         Self::Band(categories.into_iter().map(Into::into).collect())
+    }
+
+    pub fn custom(scale: impl CustomScale) -> Self {
+        Self::Custom(CustomScaleHandle::new(scale))
     }
 }
 
@@ -83,6 +130,7 @@ pub enum XScale {
     Linear(LinearScale),
     Time(TimeScale),
     Band(BandScale),
+    Custom(CustomScaleHandle),
 }
 
 impl XScale {
@@ -99,6 +147,7 @@ impl XScale {
                 .map_index(x.round() as usize)
                 .map(|p| p + s.bandwidth() / 2.0)
                 .unwrap_or(f64::NAN),
+            XScale::Custom(s) => s.0.map(x),
         }
     }
 
@@ -112,6 +161,7 @@ impl XScale {
                 .invert(px)
                 .and_then(|c| s.index_of(c))
                 .map_or(f64::NAN, |i| i as f64),
+            XScale::Custom(s) => s.0.invert(px),
         }
     }
 
@@ -128,6 +178,7 @@ impl XScale {
                 .get(x.round() as usize)
                 .cloned()
                 .unwrap_or_default(),
+            XScale::Custom(s) => s.0.describe(x),
         }
     }
 
@@ -169,6 +220,15 @@ impl XScale {
                     })
                     .collect()
             }
+            XScale::Custom(s) => {
+                s.0.ticks(count)
+                    .into_iter()
+                    .map(|value| Tick {
+                        position: s.0.map(value),
+                        label: s.0.describe(value),
+                    })
+                    .collect()
+            }
         }
     }
 }
@@ -179,6 +239,7 @@ pub enum YScale {
     Linear(LinearScale),
     Log(LogScale),
     Band(BandScale),
+    Custom(CustomScaleHandle),
 }
 
 impl YScale {
@@ -201,6 +262,7 @@ impl YScale {
                 .map_index(y.round() as usize)
                 .map(|p| p + s.bandwidth() / 2.0)
                 .unwrap_or(f64::NAN),
+            YScale::Custom(s) => s.0.map(y),
         }
     }
 
@@ -212,6 +274,7 @@ impl YScale {
                 .invert(px)
                 .and_then(|c| s.index_of(c))
                 .map_or(f64::NAN, |i| i as f64),
+            YScale::Custom(s) => s.0.invert(px),
         }
     }
 
@@ -220,6 +283,7 @@ impl YScale {
             YScale::Linear(s) => s.domain,
             YScale::Log(s) => s.domain,
             YScale::Band(s) => Extent::new(0.0, s.len().saturating_sub(1) as f64),
+            YScale::Custom(s) => s.0.domain().unwrap_or(Extent::UNIT),
         }
     }
 
@@ -260,6 +324,15 @@ impl YScale {
                     label: c.clone(),
                 })
                 .collect(),
+            YScale::Custom(s) => {
+                s.0.ticks(count)
+                    .into_iter()
+                    .map(|value| Tick {
+                        position: s.0.map(value),
+                        label: s.0.describe(value),
+                    })
+                    .collect()
+            }
         }
     }
 
@@ -270,6 +343,7 @@ impl YScale {
             YScale::Linear(s) => s.clamped().map(0.0),
             YScale::Log(s) => s.range.0,
             YScale::Band(s) => s.range.1,
+            YScale::Custom(s) => s.0.map(0.0),
         }
     }
 }
@@ -373,9 +447,11 @@ fn resolve_y(y: &YDomain, range: (f64, f64), nice: bool) -> YScale {
             } else {
                 e
             };
-            let s = LogScale::new(e, range);
+            let s = LogScale::try_new(e, range)
+                .expect("resolve_y sanitizes logarithmic domains before construction");
             YScale::Log(if nice { s.nice() } else { s })
         }
+        YDomain::Custom(scale) => YScale::Custom(scale.with_range(range)),
     }
 }
 
@@ -384,6 +460,7 @@ fn set_y_range(y: &mut YScale, range: (f64, f64)) {
         YScale::Linear(s) => s.range = range,
         YScale::Log(s) => s.range = range,
         YScale::Band(s) => s.range = (range.1, range.0),
+        YScale::Custom(_) => {}
     }
 }
 
@@ -401,6 +478,7 @@ fn resolve_x_range(x: XScale, range: (f64, f64)) -> XScale {
             s.range = range;
             XScale::Band(s)
         }
+        XScale::Custom(s) => XScale::Custom(s.with_range(range)),
     }
 }
 
@@ -425,18 +503,20 @@ fn resolve_x(x: &XDomain, range: (f64, f64)) -> XScale {
         XDomain::Band(categories) => {
             XScale::Band(BandScale::new(categories.iter().cloned(), range))
         }
+        XDomain::Custom(scale) => XScale::Custom(scale.with_range(range)),
     }
 }
 
 /// Categorical slot assignment by series id.
 ///
-/// Slots are handed out on first sight and never reassigned: color follows
-/// the entity, so filtering out a series does not repaint the survivors.
+/// Slots are derived from the id, rather than handed out by encounter order.
+/// This keeps a series' color stable when a dashboard filters, reorders, or
+/// lazily mounts its data. Hash collisions intentionally share a color; the
+/// legend and direct labels preserve identity independently of color.
 /// Share one `SeriesSlots` between a chart and its legend, or between the
 /// charts of a dashboard, so the same id is the same color everywhere.
 #[derive(Default)]
 pub struct SeriesSlots {
-    ids: RefCell<Vec<String>>,
     highlight: Mutable<Option<String>>,
 }
 
@@ -463,16 +543,16 @@ impl SeriesSlots {
         })
     }
 
-    /// The slot for `id`, assigning the next free one if it is new. The
-    /// ninth and later ids get [`crate::theme::SERIES_SLOTS`] and draw as
-    /// "Other".
+    /// The deterministic color slot for `id`.
     pub fn slot_for(&self, id: &str) -> usize {
-        let mut ids = self.ids.borrow_mut();
-        if let Some(i) = ids.iter().position(|s| s == id) {
-            return i;
+        // FNV-1a is deterministic across processes and independent of
+        // insertion order, unlike Rust's randomized default hasher.
+        let mut hash = 0xcbf29ce484222325_u64;
+        for byte in id.as_bytes() {
+            hash ^= u64::from(*byte);
+            hash = hash.wrapping_mul(0x100000001b3);
         }
-        ids.push(id.to_string());
-        ids.len() - 1
+        (hash as usize) % crate::theme::SERIES_SLOTS
     }
 
     /// The CSS color for a series id: `var(--dviz-series-N)`.
@@ -623,8 +703,9 @@ pub fn layer(f: impl FnOnce(&Rc<ChartContext>) -> Dom + 'static) -> Layer {
 /// Renders a block `div.dviz-chart` of the given height and full width,
 /// with an `svg[role=img]` inside sized to it. `x_domain` and `y_domain`
 /// are signals so a live chart re-ranges as its data grows. `label` is the
-/// accessible name and is required for a chart to be meaningful to a screen
-/// reader; put the series names and what the axes measure in it.
+/// accessible name; provide the series names and what the axes measure in it
+/// for the most useful screen-reader announcement. An omitted label gets a
+/// safe generic fallback rather than an empty accessible name.
 #[component(render_fn = chart)]
 struct Chart {
     #[signal]
@@ -707,6 +788,15 @@ pub fn chart(props: ChartProps) -> Dom {
     }
     let size = Mutable::new((0.0f64, height));
     let label = label.broadcast();
+    let accessible_label = label
+        .signal_ref(|value| {
+            if value.trim().is_empty() {
+                "Data visualization".to_string()
+            } else {
+                value.clone()
+            }
+        })
+        .broadcast();
 
     let frames = map_ref! {
         let size = size.signal(),
@@ -764,8 +854,11 @@ pub fn chart(props: ChartProps) -> Dom {
             .attr("height", "100%")
             .attr("role", "img")
             .attr_signal("viewBox", view_box)
-            .attr_signal("aria-label", label.signal_cloned())
-            .child(svg!("title", { .text_signal(label.signal_cloned()) }))
+            .attr_signal("aria-label", accessible_label.signal_cloned())
+            .child(svg!("title", { .text_signal(accessible_label.signal_cloned()) }))
+            .child(svg!("desc", {
+                .text("Interactive data visualization. Use the keyboard to inspect available marks.")
+            }))
             .child(svg!("defs", {
                 .child(svg!("clipPath", {
                     .attr("id", ctx.clip_id())
@@ -938,15 +1031,22 @@ mod tests {
 
     #[test]
     fn slots_follow_identity() {
-        let ctx = ChartContext::new();
-        assert_eq!(ctx.slot_for("a"), 0);
-        assert_eq!(ctx.slot_for("b"), 1);
-        assert_eq!(ctx.slot_for("a"), 0, "re-asking never reassigns");
-        assert_eq!(ctx.color_for("b"), "var(--dviz-series-2)");
-        for i in 0..7 {
-            ctx.slot_for(&format!("s{i}"));
-        }
-        assert_eq!(ctx.color_for("ninth"), "var(--dviz-ink-muted)");
+        let first = ChartContext::new();
+        let second = ChartContext::new();
+        let a = first.slot_for("a");
+        let b = first.slot_for("b");
+        assert_eq!(a, first.slot_for("a"), "re-asking never reassigns");
+        assert_eq!(
+            a,
+            second.slot_for("a"),
+            "assignment is independent of order"
+        );
+        assert_eq!(
+            b,
+            second.slot_for("b"),
+            "assignment is independent of order"
+        );
+        assert!(first.color_for("b").starts_with("var(--dviz-series-"));
     }
 
     #[test]
@@ -972,6 +1072,52 @@ mod tests {
                 .iter()
                 .all(|t| t.position >= f.plot.y && t.position <= f.plot.bottom())
         );
+    }
+
+    #[derive(Clone)]
+    struct DoubleScale {
+        range: (f64, f64),
+    }
+
+    impl CustomScale for DoubleScale {
+        fn map(&self, value: f64) -> f64 {
+            self.range.0 + value * (self.range.1 - self.range.0)
+        }
+
+        fn invert(&self, pixel: f64) -> f64 {
+            (pixel - self.range.0) / (self.range.1 - self.range.0)
+        }
+
+        fn ticks(&self, count: usize) -> Vec<f64> {
+            vec![0.0, 1.0].into_iter().take(count.max(1)).collect()
+        }
+
+        fn describe(&self, value: f64) -> String {
+            format!("custom:{value}")
+        }
+
+        fn domain(&self) -> Option<Extent<f64>> {
+            Some(Extent::UNIT)
+        }
+
+        fn with_range(&self, range: (f64, f64)) -> Rc<dyn CustomScale> {
+            Rc::new(Self { range })
+        }
+    }
+
+    #[test]
+    fn custom_scales_participate_in_frame_mapping_and_tooltips() {
+        let frame = Frame::compute(
+            Rect::from_size(400.0, 200.0),
+            &XDomain::custom(DoubleScale { range: (0.0, 1.0) }),
+            &YDomain::custom(DoubleScale { range: (0.0, 1.0) }),
+            false,
+            Some(Margins::uniform(0.0)),
+        );
+        assert_eq!(frame.x.describe(0.5), "custom:0.5");
+        assert!((frame.x.map(0.5) - 200.0).abs() < 1e-9);
+        assert!((frame.y.invert(frame.y.map(0.25)) - 0.25).abs() < 1e-9);
+        assert_eq!(frame.y.domain(), Extent::UNIT);
     }
 
     #[test]

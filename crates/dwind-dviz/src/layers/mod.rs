@@ -230,7 +230,16 @@ fn schedule(ms: u32, f: impl FnOnce() + 'static) {
 
 /// The ids of `series`, in order.
 fn ids_of(series: &[Series]) -> Vec<String> {
-    series.iter().map(|s| s.id.clone()).collect()
+    // DOM keys must be unique.  Duplicate ids are invalid data, but dropping
+    // the later duplicate here prevents duplicate keyed nodes and makes the
+    // renderer fail closed instead of corrupting its diff state.
+    let mut ids = Vec::with_capacity(series.len());
+    for id in series.iter().map(|s| &s.id) {
+        if !ids.iter().any(|seen| seen == id) {
+            ids.push(id.clone());
+        }
+    }
+    ids
 }
 
 /// One `<g data-series=id>` per series, keyed by id, with enter and leave

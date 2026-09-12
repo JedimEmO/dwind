@@ -66,6 +66,7 @@ struct LineChart {
     series: Vec<Series>,
 
     /// Accessible name: what is plotted and what the axes measure.
+    #[signal]
     #[default(String::new())]
     label: String,
 
@@ -76,6 +77,7 @@ struct LineChart {
     x: XKind,
 
     /// Fix the y domain (a live chart should, so the axis does not jitter).
+    #[signal]
     #[default(None)]
     y: Option<Extent<f64>>,
 
@@ -175,10 +177,13 @@ pub fn line_chart(props: LineChartProps) -> Dom {
             }
         }
     };
-    let y_domain = series.signal_ref(move |s| match y {
+    let y_domain = map_ref! {
+        let s = series.signal_cloned(),
+        let y = y => match *y {
         Some(e) => YDomain::Linear(e),
         None => y_domain_for(s, include_zero, 0.0),
-    });
+        }
+    };
     let labelled = series.signal_ref(|s| {
         if s.len() <= MAX_END_LABELLED {
             s.clone()
@@ -189,7 +194,7 @@ pub fn line_chart(props: LineChartProps) -> Dom {
 
     let chart = chart(
         ChartProps::new()
-            .label(label)
+            .label_signal(label)
             .height(height)
             .slots(Some(slots.clone()))
             .x_domain_signal(x_domain)

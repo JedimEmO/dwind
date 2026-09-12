@@ -17,6 +17,7 @@ pub mod legend;
 pub mod live;
 pub mod motion;
 pub mod presets;
+pub mod table;
 pub mod theme;
 pub mod visibility;
 
@@ -33,18 +34,27 @@ pub mod prelude {
     pub use crate::layers::bars::{BarMode, BarOptions, bars, bars_with};
     pub use crate::layers::cells::{Cell, CellOptions, CellScale, cells};
     pub use crate::layers::grid::grid;
-    pub use crate::layers::interaction::{CrosshairOptions, crosshair, crosshair_with};
+    pub use crate::layers::interaction::{
+        CrosshairOptions, HoverHandler, SelectionHandler, crosshair, crosshair_with,
+    };
     pub use crate::layers::labels::{bar_value_labels, line_end_labels};
     pub use crate::layers::line::{LineOptions, Wash, line, line_with};
     pub use crate::layers::points::{PointOptions, points, points_with};
     pub use crate::layers::width_tap::width_tap;
     pub use crate::legend::{legend, legend_with};
     pub use crate::live::{commit_on_frame, live_indicator};
+    pub use crate::presets::encode_category_series;
     pub use crate::presets::*;
+    pub use crate::table::{point_table_view, table_view};
     pub use crate::theme::{apply_style_sheet, set_mode};
     pub use crate::visibility::SeriesVisibility;
-    pub use dwind_dviz_core::data::{Extent, Point, Series, TimePoint};
+    pub use dwind_dviz_core::data::{
+        CategoryPoint, DataError, Extent, Point, Series, TimePoint, validate_series,
+    };
     pub use dwind_dviz_core::geom::Curve;
     pub use dwind_dviz_core::palette::Mode;
-    pub use dwind_dviz_data::{Retention, Strategy, WindowedSource, downsample, drive};
+    pub use dwind_dviz_core::scale::ScaleError;
+    pub use dwind_dviz_data::{
+        BoxedExtentSignal, DomainSource, Retention, Strategy, WindowedSource, downsample, drive,
+    };
 }

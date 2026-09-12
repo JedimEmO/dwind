@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use dwind_dviz_core::data::{Extent, Point, Series};
 use futures::stream::{Stream, StreamExt};
-use futures_signals::signal::{Mutable, Signal};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 
 /// How much history a series keeps.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -52,6 +52,10 @@ pub struct WindowedSource {
 
 impl WindowedSource {
     pub fn new(retention: Retention) -> Rc<Self> {
+        let retention = match retention {
+            Retention::Count(n) => Retention::Count(n),
+            Retention::Span(span) => Retention::Span(span.max(0.0)),
+        };
         Rc::new(Self {
             retention,
             inner: RefCell::new(Inner::default()),
@@ -84,8 +88,15 @@ impl WindowedSource {
         self.mark_dirty();
     }
 
-    /// Appends a sample. Points must arrive in x order per series.
+    /// Adds a sample, preserving x order within the series.
+    ///
+    /// Realtime callers normally append, which remains amortized O(1). Late
+    /// samples are inserted into the ordered buffer so span retention cannot
+    /// silently retain data outside the requested window.
     pub fn push(&self, id: &str, point: Point) {
+        if !point.x.is_finite() {
+            return;
+        }
         {
             let mut inner = self.inner.borrow_mut();
             let i = match inner.order.iter().position(|s| s == id) {
@@ -100,7 +111,16 @@ impl WindowedSource {
                 }
             };
             let buf = &mut inner.buffers[i];
-            buf.points.push_back(point);
+            if buf.points.back().is_none_or(|last| last.x <= point.x) {
+                buf.points.push_back(point);
+            } else {
+                let at = buf
+                    .points
+                    .iter()
+                    .position(|existing| existing.x > point.x)
+                    .unwrap_or(buf.points.len());
+                buf.points.insert(at, point);
+            }
             // Trim eagerly on count so a burst can't balloon memory.
             if let Retention::Count(n) = self.retention {
                 while buf.points.len() > n {
@@ -262,6 +282,12 @@ impl super::DataSource for WindowedSource {
     }
 }
 
+impl super::DomainSource for WindowedSource {
+    fn x_domain_signal(&self) -> super::BoxedExtentSignal {
+        Box::pin(self.window.signal().map(Some))
+    }
+}
+
 /// Feeds every `(series id, point)` from `stream` into `source` until the
 /// stream ends. Spawn it on your executor (`wasm_bindgen_futures::spawn_local`
 /// in the browser). A WebSocket, SSE, or polling loop becomes one stream.
@@ -365,5 +391,26 @@ mod tests {
         futures::executor::block_on(drive(s.clone(), stream));
         s.commit();
         assert_eq!(s.series()[0].points.len(), 5);
+    }
+
+    #[test]
+    fn late_points_are_ordered_before_span_retention() {
+        let s = WindowedSource::new(Retention::Span(10.0));
+        s.push("a", Point::new(20.0, 2.0));
+        s.push("a", Point::new(10.0, 1.0));
+        s.push("a", Point::new(15.0, 1.5));
+        s.commit();
+        let xs: Vec<f64> = s.series()[0].points.iter().map(|p| p.x).collect();
+        assert_eq!(xs, vec![10.0, 15.0, 20.0]);
+    }
+
+    #[test]
+    fn invalid_live_x_values_are_ignored() {
+        let s = WindowedSource::new(Retention::Span(-10.0));
+        s.push("a", Point::new(f64::NAN, 1.0));
+        s.push("a", Point::new(2.0, 3.0));
+        s.commit();
+        assert_eq!(s.series()[0].points.len(), 1);
+        assert_eq!(s.window(), Extent::new(2.0, 2.0));
     }
 }

@@ -1,7 +1,8 @@
 use std::rc::Rc;
 
 use dominator::Dom;
-use dwind_dviz_core::data::{Extent, Series};
+use dwind_dviz_core::data::{CategoryPoint, DataError, Extent, Series};
+use futures_signals::map_ref;
 use futures_signals::signal::SignalExt;
 use futures_signals_component_macro::component;
 
@@ -14,6 +15,19 @@ use crate::layers::grid::grid;
 use crate::layers::labels::bar_value_labels;
 use crate::visibility::SeriesVisibility;
 
+/// Converts typed category/value series into the numeric representation used
+/// by [`bar_chart`], rejecting observations whose category is absent from the
+/// supplied domain.
+pub fn encode_category_series(
+    categories: &[String],
+    series: Vec<Series<CategoryPoint>>,
+) -> Result<Vec<Series>, DataError> {
+    series
+        .into_iter()
+        .map(|series| series.into_numeric(categories))
+        .collect()
+}
+
 /// A column chart over categories. Bars grow from zero; a single series
 /// takes slot 1 for every bar (identity, not value, drives color).
 #[component(render_fn = bar_chart)]
@@ -22,11 +36,14 @@ struct BarChart {
     #[default(vec![])]
     series: Vec<Series>,
 
-    /// Category labels in display order; points carry the index.
+    /// Category labels in display order. Use
+    /// [`dwind_dviz_core::data::CategoryPoint::to_point`] or
+    /// [`Series::into_numeric`] to validate typed category data first.
     #[signal]
     #[default(vec![])]
     categories: Vec<String>,
 
+    #[signal]
     #[default(String::new())]
     label: String,
 
@@ -36,6 +53,7 @@ struct BarChart {
     #[default(BarMode::Grouped)]
     mode: BarMode,
 
+    #[signal]
     #[default(None)]
     y: Option<Extent<f64>>,
 
@@ -78,12 +96,15 @@ pub fn bar_chart(props: BarChartProps) -> Dom {
     .broadcast();
     let slots = slots.unwrap_or_else(SeriesSlots::new);
     let x_domain = categories.map(XDomain::Band);
-    let y_domain = series.signal_ref(move |s| match (y, mode) {
-        (Some(e), _) => YDomain::Linear(e),
-        (None, BarMode::Grouped) => y_domain_for(s, true, 0.0),
-        (None, BarMode::Stacked) => y_domain_for_stacked(s),
-        (None, BarMode::StackedExpand) => YDomain::Linear(Extent::UNIT),
-    });
+    let y_domain = map_ref! {
+        let s = series.signal_cloned(),
+        let y = y => match (*y, mode) {
+            (Some(e), _) => YDomain::Linear(e),
+            (None, BarMode::Grouped) => y_domain_for(s, true, 0.0),
+            (None, BarMode::Stacked) => y_domain_for_stacked(s),
+            (None, BarMode::StackedExpand) => YDomain::Linear(Extent::UNIT),
+        }
+    };
     let opts = BarOptions {
         mode,
         ..Default::default()
@@ -91,7 +112,7 @@ pub fn bar_chart(props: BarChartProps) -> Dom {
 
     let chart = chart(
         ChartProps::new()
-            .label(label)
+            .label_signal(label)
             .height(height)
             .slots(Some(slots.clone()))
             .x_domain_signal(x_domain)
@@ -114,4 +135,28 @@ pub fn bar_chart(props: BarChartProps) -> Dom {
             }),
     );
     with_legend(legend, all_series.signal_cloned(), slots, visibility, chart)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn typed_categories_are_checked_before_bar_rendering() {
+        let categories = vec!["low".to_string(), "high".to_string()];
+        let series = vec![Series::new(
+            "priority",
+            "Priority",
+            vec![CategoryPoint::new("high", 3.0)],
+        )];
+        let encoded = encode_category_series(&categories, series).unwrap();
+        assert_eq!(encoded[0].points[0].x, 1.0);
+
+        let invalid = vec![Series::new(
+            "priority",
+            "Priority",
+            vec![CategoryPoint::new("urgent", 5.0)],
+        )];
+        assert!(encode_category_series(&categories, invalid).is_err());
+    }
 }

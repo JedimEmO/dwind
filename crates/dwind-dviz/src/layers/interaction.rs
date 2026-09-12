@@ -22,6 +22,8 @@ use crate::chart::{ChartContext, Layer, Tooltip, TooltipRow, layer};
 
 /// Called with the brushed x range in data units when a drag ends.
 pub type BrushHandler = Rc<dyn Fn(Extent<f64>)>;
+pub type HoverHandler = Rc<dyn Fn(Option<Snap>)>;
+pub type SelectionHandler = Rc<dyn Fn(Snap)>;
 
 #[derive(Clone, Default)]
 pub struct CrosshairOptions {
@@ -29,6 +31,10 @@ pub struct CrosshairOptions {
     pub crosshair: bool,
     /// Report drags wider than a few pixels as an x range (zoom).
     pub on_brush: Option<BrushHandler>,
+    /// Receives the current snapped point, or `None` when hover clears.
+    pub on_hover: Option<HoverHandler>,
+    /// Receives the current snapped point when the plot is clicked.
+    pub on_select: Option<SelectionHandler>,
     /// Format a y value for the tooltip. Defaults to the compact figure.
     pub format_y: Option<Rc<dyn Fn(f64) -> String>>,
 }
@@ -38,7 +44,25 @@ impl CrosshairOptions {
         Self {
             crosshair: true,
             on_brush: Some(Rc::new(handler)),
+            on_hover: None,
+            on_select: None,
             format_y: None,
+        }
+    }
+
+    pub fn hover(handler: impl Fn(Option<Snap>) + 'static) -> Self {
+        Self {
+            crosshair: true,
+            on_hover: Some(Rc::new(handler)),
+            ..Default::default()
+        }
+    }
+
+    pub fn select(handler: impl Fn(Snap) + 'static) -> Self {
+        Self {
+            crosshair: true,
+            on_select: Some(Rc::new(handler)),
+            ..Default::default()
         }
     }
 }
@@ -124,6 +148,8 @@ where
             .format_y
             .clone()
             .unwrap_or_else(|| Rc::new(format::compact));
+        let on_hover = opts.on_hover.clone();
+        let on_select = opts.on_select.clone();
         // The current point index for keyboard stepping (into series 0).
         let key_index: Rc<RefCell<Option<usize>>> = Rc::new(RefCell::new(None));
 
@@ -133,6 +159,7 @@ where
             let series = series.clone();
             let snap_state = snap_state.clone();
             let format_y = format_y.clone();
+            let on_hover = on_hover.clone();
             Rc::new(move |x: f64| {
                 let f = ctx.frame().get_cloned();
                 let all = series.lock_ref();
@@ -140,6 +167,9 @@ where
                     snap_state.set(None);
                     ctx.hover_x().set(None);
                     ctx.tooltip().set(None);
+                    if let Some(handler) = on_hover.as_ref() {
+                        handler(None);
+                    }
                     return;
                 };
                 let px_x = f.x.map(sn.x);
@@ -147,6 +177,9 @@ where
                     snap_state.set(None);
                     ctx.hover_x().set(None);
                     ctx.tooltip().set(None);
+                    if let Some(handler) = on_hover.as_ref() {
+                        handler(None);
+                    }
                     return;
                 }
                 let rows: Vec<TooltipRow> = sn
@@ -175,16 +208,23 @@ where
                     rows,
                 }));
                 ctx.hover_x().set(Some(sn.x));
-                snap_state.set(Some(sn));
+                snap_state.set(Some(sn.clone()));
+                if let Some(handler) = on_hover.as_ref() {
+                    handler(Some(sn));
+                }
             })
         };
         let clear = {
             let ctx = ctx.clone();
             let snap_state = snap_state.clone();
+            let on_hover = on_hover.clone();
             Rc::new(move || {
                 snap_state.set(None);
                 ctx.hover_x().set(None);
                 ctx.tooltip().set(None);
+                if let Some(handler) = on_hover.as_ref() {
+                    handler(None);
+                }
             })
         };
 
@@ -264,6 +304,13 @@ where
                 .event(clone!(drag, clear => move |_: events::PointerCancel| {
                     drag.set(None);
                     clear();
+                }))
+                .event(clone!(snap_state, on_select => move |_: events::Click| {
+                    if let (Some(selection), Some(handler)) =
+                        (snap_state.get_cloned(), on_select.as_ref())
+                    {
+                        handler(selection);
+                    }
                 }))
                 .event(clone!(hover_at, series, key_index => move |_: events::Focus| {
                     let all = series.lock_ref();

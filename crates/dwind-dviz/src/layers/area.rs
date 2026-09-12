@@ -101,7 +101,10 @@ where
 pub fn area_paths(frame: &Frame, all: &[Series], si: usize, opts: AreaOptions) -> (String, String) {
     let series = &all[si];
     if opts.stacked {
-        let stacked = stack_series(all, StackOffset::None);
+        // Match stacked bars: positive and negative values need separate
+        // baselines, otherwise a negative band is drawn on the wrong side of
+        // zero while the axis domain still accounts for it correctly.
+        let stacked = stack_series(all, StackOffset::Diverging);
         let top: Vec<Point> = series
             .points
             .iter()
